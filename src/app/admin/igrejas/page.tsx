@@ -13,7 +13,7 @@ export default async function ChurchesPage() {
     .select(`
       *,
       cities (name, states(uf)),
-      pastors (full_name),
+      pastors!pastors_church_id_fkey (full_name),
       campaign_churches (
         campaigns (name, status)
       )

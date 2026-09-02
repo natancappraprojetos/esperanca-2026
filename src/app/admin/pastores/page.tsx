@@ -10,7 +10,7 @@ export default async function PastorsPage() {
     .from('pastors')
     .select(`
       *,
-      churches (name)
+      churches!pastors_church_id_fkey (name)
     `)
     .order('full_name')
 
