@@ -30,29 +30,6 @@ const navItems = [
       { href: '/admin/leads', label: 'Leads', icon: '📋', roles: ['super_admin', 'admin_general', 'church_admin'] },
       { href: '/admin/relatorios', label: 'Relatórios', icon: '📈', roles: ['super_admin', 'admin_general', 'church_admin'] },
     ]
-  },
-  {
-    section: 'Geografia',
-    items: [
-      { href: '/admin/cidades', label: 'Cidades', icon: '🏙️', roles: ['super_admin'] },
-      { href: '/admin/bairros', label: 'Bairros', icon: '📍', roles: ['super_admin', 'admin_general'] },
-    ]
-  },
-  {
-    section: 'Tracking',
-    items: [
-      { href: '/admin/pixels', label: 'Pixels & Analytics', icon: '📡', roles: ['super_admin'] },
-    ]
-  },
-  {
-    section: 'Sistema',
-    items: [
-      { href: '/admin/usuarios', label: 'Usuários', icon: '👥', roles: ['super_admin'] },
-      { href: '/admin/permissoes', label: 'Permissões', icon: '🔐', roles: ['super_admin'] },
-      { href: '/admin/logs', label: 'Audit Logs', icon: '📜', roles: ['super_admin'] },
-      { href: '/admin/configuracoes', label: 'Configurações', icon: '⚙️', roles: ['super_admin'] },
-    ]
-  }
 ]
 
 export default function AdminSidebar({ profile }: AdminSidebarProps) {

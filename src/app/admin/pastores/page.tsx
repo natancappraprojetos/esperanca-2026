@@ -57,7 +57,7 @@ export default async function PastorsPage() {
                   <td style={{ fontWeight: 500, color: 'var(--gray-900)' }}>
                     {pastor.full_name}
                   </td>
-                  <td style={{ color: 'var(--gray-600)' }}>{pastor.role_title}</td>
+                  <td style={{ color: 'var(--gray-600)' }}>Pastor(a)</td>
                   <td style={{ color: 'var(--gray-600)' }}>{pastor.churches?.name || '—'}</td>
                   <td style={{ color: 'var(--gray-600)' }}>{pastor.phone || '—'}</td>
                   <td>

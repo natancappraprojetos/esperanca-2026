@@ -104,7 +104,7 @@ export default function ChurchesClient({ churches }: ChurchesClientProps) {
                         {pastor ? (
                           <>
                             <div>{pastor.full_name}</div>
-                            <div className="text-caption" style={{ color: 'var(--gray-400)' }}>{pastor.role_title}</div>
+
                           </>
                         ) : (
                           <span style={{ color: 'var(--gray-400)' }}>—</span>
