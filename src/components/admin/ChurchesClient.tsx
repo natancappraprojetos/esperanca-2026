@@ -65,7 +65,9 @@ export default function ChurchesClient({ churches }: ChurchesClientProps) {
                 <th>Status</th>
                 <th>Igreja</th>
                 <th>Cidade</th>
-                <th>Pastor(a)</th>
+                <th>Região</th>
+                <th>Pregador</th>
+                <th>Pr. Distrital</th>
                 <th>Campanha Atual</th>
                 <th>Ações</th>
               </tr>
@@ -101,6 +103,9 @@ export default function ChurchesClient({ churches }: ChurchesClientProps) {
                         {church.cities?.name} / {church.cities?.states?.uf}
                       </td>
                       <td style={{ color: 'var(--gray-600)' }}>
+                        {church.region ? `Região ${church.region}` : <span style={{ color: 'var(--gray-400)' }}>—</span>}
+                      </td>
+                      <td style={{ color: 'var(--gray-600)' }}>
                         {pastor ? (
                           <>
                             <div>{pastor.full_name}</div>
@@ -109,6 +114,9 @@ export default function ChurchesClient({ churches }: ChurchesClientProps) {
                         ) : (
                           <span style={{ color: 'var(--gray-400)' }}>—</span>
                         )}
+                      </td>
+                      <td style={{ color: 'var(--gray-600)' }}>
+                        {church.district_pastor || <span style={{ color: 'var(--gray-400)' }}>—</span>}
                       </td>
                       <td style={{ color: 'var(--gray-600)' }}>
                         {activeCampaign ? activeCampaign.name : <span style={{ color: 'var(--gray-400)' }}>—</span>}
