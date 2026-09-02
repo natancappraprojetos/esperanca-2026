@@ -1,3 +1,6 @@
+-- Add missing column for pastor-church relationship
+ALTER TABLE pastors ADD COLUMN IF NOT EXISTS church_id UUID REFERENCES churches(id);
+
 -- ============================================================
 -- MIGRATION 008: Row Level Security (RLS) Policies
 -- ALL security enforced at database level
