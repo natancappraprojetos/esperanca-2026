@@ -89,8 +89,8 @@ BEGIN
 
   -- 1. Charles Britis - IASD Novo Hamburgo
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_nh, 'IASD Novo Hamburgo', 'iasd-novo-hamburgo', 'Rua José de Alencar, 301', 'Rio Branco', '93310-210', ST_SetSRID(ST_MakePoint(-51.135, -29.68), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_nh, 'IASD Novo Hamburgo', 'iasd-novo-hamburgo', 'Rua José de Alencar, 301', 'Rio Branco', '93310210', ST_SetSRID(ST_MakePoint(-51.135, -29.68), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Charles Britis', 'Pastor Convidado' FROM new_church RETURNING id
@@ -100,8 +100,8 @@ BEGIN
 
   -- 2. Harry Streithordt - IASD Sete de Setembro
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_taquara, 'IASD Sete de Setembro', 'iasd-sete-de-setembro', 'Rua Sete de Setembro, 930', 'Centro', '95603-172', ST_SetSRID(ST_MakePoint(-50.78, -29.65), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_taquara, 'IASD Sete de Setembro', 'iasd-sete-de-setembro', 'Rua Sete de Setembro, 930', 'Centro', '95603172', ST_SetSRID(ST_MakePoint(-50.78, -29.65), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Harry Streithordt', 'Pastor Convidado' FROM new_church RETURNING id
@@ -111,8 +111,8 @@ BEGIN
 
   -- 3. Régis Reis - IASD Parobé
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_parobe, 'IASD Parobé', 'iasd-parobe', 'Rua Guaraní, 150', 'Centro', '95630-000', ST_SetSRID(ST_MakePoint(-50.83, -29.63), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_parobe, 'IASD Parobé', 'iasd-parobe', 'Rua Guaraní, 150', 'Centro', '95630000', ST_SetSRID(ST_MakePoint(-50.83, -29.63), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Régis Reis', 'Pastor Convidado' FROM new_church RETURNING id
@@ -122,8 +122,8 @@ BEGIN
 
   -- 4. Marcelo Nascimento - IASD Alvorada
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_alvorada, 'IASD Alvorada', 'iasd-alvorada', 'Rua Icaraí, 109', 'Maringá', '94824-030', ST_SetSRID(ST_MakePoint(-51.08, -30.00), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_alvorada, 'IASD Alvorada', 'iasd-alvorada', 'Rua Icaraí, 109', 'Maringá', '94824030', ST_SetSRID(ST_MakePoint(-51.08, -30.00), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Marcelo Nascimento', 'Pastor Convidado' FROM new_church RETURNING id
@@ -133,8 +133,8 @@ BEGIN
 
   -- 5. Fábio Correa - IASD São Leopoldo
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_sl, 'IASD São Leopoldo', 'iasd-sao-leopoldo', 'Rua São Pedro, 621', 'Centro', '93010-260', ST_SetSRID(ST_MakePoint(-51.15, -29.76), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_sl, 'IASD São Leopoldo', 'iasd-sao-leopoldo', 'Rua São Pedro, 621', 'Centro', '93010260', ST_SetSRID(ST_MakePoint(-51.15, -29.76), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Fábio Correa', 'Pastor Convidado' FROM new_church RETURNING id
@@ -144,8 +144,8 @@ BEGIN
 
   -- 6. Fábio Motta - IASD Vila Tereza
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_sl, 'IASD Vila Tereza', 'iasd-vila-tereza', 'Rua Cruz Alta, 685', 'Campina', '93037-170', ST_SetSRID(ST_MakePoint(-51.13, -29.75), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_sl, 'IASD Vila Tereza', 'iasd-vila-tereza', 'Rua Cruz Alta, 685', 'Campina', '93037170', ST_SetSRID(ST_MakePoint(-51.13, -29.75), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Fábio Motta', 'Pastor Convidado' FROM new_church RETURNING id
@@ -155,8 +155,8 @@ BEGIN
 
   -- 7. Aryel Marques - IASD Sapucaia do Sul
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_sapucaia, 'IASD Sapucaia do Sul', 'iasd-sapucaia-do-sul', 'Rua Salgado Filho, 305', 'Centro', '93220-370', ST_SetSRID(ST_MakePoint(-51.14, -29.83), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_sapucaia, 'IASD Sapucaia do Sul', 'iasd-sapucaia-do-sul', 'Rua Salgado Filho, 305', 'Centro', '93220370', ST_SetSRID(ST_MakePoint(-51.14, -29.83), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Aryel Marques', 'Pastor Convidado' FROM new_church RETURNING id
@@ -166,8 +166,8 @@ BEGIN
 
   -- 8. Elieser Vargas - IASD Esteio
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_esteio, 'IASD Esteio', 'iasd-esteio', 'Rua Santo Amaro, 196', 'Centro', '93260-080', ST_SetSRID(ST_MakePoint(-51.18, -29.85), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_esteio, 'IASD Esteio', 'iasd-esteio', 'Rua Santo Amaro, 196', 'Centro', '93260080', ST_SetSRID(ST_MakePoint(-51.18, -29.85), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Elieser Vargas', 'Pastor Convidado' FROM new_church RETURNING id
@@ -177,8 +177,8 @@ BEGIN
 
   -- 9. Juan Vargas - IASD Canudos
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_nh, 'IASD Canudos', 'iasd-canudos', 'Rua Pedro Wickert, 80', 'Canudos', '93511-970', ST_SetSRID(ST_MakePoint(-51.10, -29.68), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_nh, 'IASD Canudos', 'iasd-canudos', 'Rua Pedro Wickert, 80', 'Canudos', '93511970', ST_SetSRID(ST_MakePoint(-51.10, -29.68), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Juan Vargas', 'Pastor Convidado' FROM new_church RETURNING id
@@ -188,8 +188,8 @@ BEGIN
 
   -- 10. Williams César - IASD Central Campo Bom
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_campobom, 'IASD Central Campo Bom', 'iasd-central-campo-bom', 'Rua Sete de Setembro, 219', 'Centro', '93700-000', ST_SetSRID(ST_MakePoint(-51.05, -29.67), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_campobom, 'IASD Central Campo Bom', 'iasd-central-campo-bom', 'Rua Sete de Setembro, 219', 'Centro', '93700000', ST_SetSRID(ST_MakePoint(-51.05, -29.67), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Williams César', 'Pastor Convidado' FROM new_church RETURNING id
@@ -199,8 +199,8 @@ BEGIN
 
   -- 11. Lucilene Britis - IASD Santo Afonso
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_nh, 'IASD Santo Afonso', 'iasd-santo-afonso', 'Rua Assuncion, 63', 'Santo Afonso', '93420-320', ST_SetSRID(ST_MakePoint(-51.15, -29.72), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_nh, 'IASD Santo Afonso', 'iasd-santo-afonso', 'Rua Assuncion, 63', 'Santo Afonso', '93420320', ST_SetSRID(ST_MakePoint(-51.15, -29.72), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Lucilene Britis', 'Convidada Especial' FROM new_church RETURNING id
@@ -210,8 +210,8 @@ BEGIN
 
   -- 12. Suzete Águas - IASD Vila Santo Antônio
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_nh, 'IASD Vila Santo Antônio', 'iasd-vila-santo-antonio', 'Rua Joaquim de Oliveira, 107', 'Santo Antônio', '93546-220', ST_SetSRID(ST_MakePoint(-51.12, -29.67), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_nh, 'IASD Vila Santo Antônio', 'iasd-vila-santo-antonio', 'Rua Joaquim de Oliveira, 107', 'Santo Antônio', '93546220', ST_SetSRID(ST_MakePoint(-51.12, -29.67), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Suzete Águas', 'Convidada Especial' FROM new_church RETURNING id
@@ -221,8 +221,8 @@ BEGIN
 
   -- 13. Gustavo Marques - IASD IACS
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_taquara, 'IASD IACS', 'iasd-iacs', 'Av. Sebastião Amoretti, 2130 A', 'IACS', '95601-440', ST_SetSRID(ST_MakePoint(-50.79, -29.66), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_taquara, 'IASD IACS', 'iasd-iacs', 'Av. Sebastião Amoretti, 2130 A', 'IACS', '95601440', ST_SetSRID(ST_MakePoint(-50.79, -29.66), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Gustavo Marques', 'Pastor Convidado' FROM new_church RETURNING id
@@ -232,8 +232,8 @@ BEGIN
 
   -- 14. Pablo Moleros - IASD Monte Belo
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_gravatai, 'IASD Monte Belo', 'iasd-monte-belo', 'Rua Irmã Vieira, 74', 'Monte Belo', '94055-040', ST_SetSRID(ST_MakePoint(-50.99, -29.93), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_gravatai, 'IASD Monte Belo', 'iasd-monte-belo', 'Rua Irmã Vieira, 74', 'Monte Belo', '94055040', ST_SetSRID(ST_MakePoint(-50.99, -29.93), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Pablo Moleros', 'Pastor Convidado' FROM new_church RETURNING id
@@ -243,8 +243,8 @@ BEGIN
 
   -- 15. Harryson Reis - IASD Vila Americana
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_alvorada, 'IASD Vila Americana', 'iasd-vila-americana', 'Rua João Barbosa, 93', 'Americana', '94820-180', ST_SetSRID(ST_MakePoint(-51.07, -29.99), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_alvorada, 'IASD Vila Americana', 'iasd-vila-americana', 'Rua João Barbosa, 93', 'Americana', '94820180', ST_SetSRID(ST_MakePoint(-51.07, -29.99), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Harryson Reis', 'Pastor Convidado' FROM new_church RETURNING id
@@ -254,8 +254,8 @@ BEGIN
 
   -- 16. Ismaile Barragan - Escola Adventista de Alvorada
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_alvorada, 'Escola Adventista de Alvorada', 'escola-adventista-de-alvorada', 'Rua Maringá, 1111', 'Jardim Algarve', '94858-520', ST_SetSRID(ST_MakePoint(-51.05, -30.01), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_alvorada, 'Escola Adventista de Alvorada', 'escola-adventista-de-alvorada', 'Rua Maringá, 1111', 'Jardim Algarve', '94858520', ST_SetSRID(ST_MakePoint(-51.05, -30.01), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Ismaile Barragan', 'Pastor Convidado' FROM new_church RETURNING id
@@ -265,8 +265,8 @@ BEGIN
 
   -- 17. Douglas Menslin - IASD Gravataí
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_gravatai, 'IASD Gravataí', 'iasd-gravatai', 'Rua João Alves de Souza, 47', 'Centro', '94020-011', ST_SetSRID(ST_MakePoint(-50.99, -29.94), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_gravatai, 'IASD Gravataí', 'iasd-gravatai', 'Rua João Alves de Souza, 47', 'Centro', '94020011', ST_SetSRID(ST_MakePoint(-50.99, -29.94), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Douglas Menslin', 'Pastor Convidado' FROM new_church RETURNING id
@@ -276,8 +276,8 @@ BEGIN
 
   -- 18. Otávio Barreto - IASD Igrejinha
   WITH new_church AS (
-    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_zip, location, status) 
-    VALUES (v_org_id, v_city_igrejinha, 'IASD Igrejinha', 'iasd-igrejinha', 'R. João Correa, 394', 'Centro', '95650-000', ST_SetSRID(ST_MakePoint(-50.79, -29.57), 4326), 'active') RETURNING id
+    INSERT INTO churches (organization_id, city_id, name, slug, address_street, address_neighborhood, address_cep, location, status) 
+    VALUES (v_org_id, v_city_igrejinha, 'IASD Igrejinha', 'iasd-igrejinha', 'R. João Correa, 394', 'Centro', '95650000', ST_SetSRID(ST_MakePoint(-50.79, -29.57), 4326), 'active') RETURNING id
   ), new_pastor AS (
     INSERT INTO pastors (organization_id, church_id, full_name, role_title)
     SELECT v_org_id, id, 'Otávio Barreto', 'Pastor Convidado' FROM new_church RETURNING id
