@@ -85,9 +85,7 @@ BEGIN
   -- Reusing this block for all 18 entries
   -- (We will just insert them sequentially to make it clear)
   
-  -- Clean up existing churches to avoid duplicates if re-running
-  DELETE FROM churches WHERE name LIKE 'IASD %' OR name = 'Escola Adventista de Alvorada';
-  DELETE FROM pastors;
+  -- No cleanup needed since DO block runs in transaction and we want to keep seed data
 
   -- 1. Charles Britis - IASD Novo Hamburgo
   WITH new_church AS (
