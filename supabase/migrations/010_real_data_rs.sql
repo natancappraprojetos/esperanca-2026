@@ -70,12 +70,12 @@ BEGIN
 
   -- 4. Create the Main Material (Livro Digital)
   INSERT INTO digital_materials (
-    organization_id, campaign_id, name, type, description, status, requires_lead
+    organization_id, campaign_id, name, slug, description, status, requires_lead
   ) VALUES (
     v_org_id,
     v_campaign_id,
     'Contagem Regressiva — O Amanhecer de um Novo Tempo',
-    'ebook',
+    'contagem-regressiva-2026',
     'Livro inspirador escrito por Alejandro Bullón.',
     'active',
     true
