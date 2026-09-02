@@ -6,7 +6,7 @@
 -- CONTACTS (unique per whatsapp — deduplication)
 -- ------------------------------------
 CREATE TABLE contacts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   whatsapp TEXT NOT NULL UNIQUE,      -- normalized: 55 + DDD + number
   whatsapp_raw TEXT,                   -- original input
   full_name TEXT,
@@ -21,7 +21,7 @@ CREATE INDEX idx_contacts_whatsapp ON contacts(whatsapp);
 -- LEADS (one per campaign per contact)
 -- ------------------------------------
 CREATE TABLE leads (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   contact_id UUID NOT NULL REFERENCES contacts(id),
   campaign_id UUID NOT NULL REFERENCES campaigns(id),
   church_id UUID REFERENCES churches(id),
@@ -68,7 +68,7 @@ CREATE INDEX idx_leads_utm ON leads(utm_source, utm_medium, utm_campaign);
 -- LEAD CONSENTS (LGPD — separated)
 -- ------------------------------------
 CREATE TABLE lead_consents (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   lead_id UUID NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
   contact_id UUID NOT NULL REFERENCES contacts(id),
   -- Main data consent (required for download)
@@ -94,7 +94,7 @@ CREATE INDEX idx_consents_reminder ON lead_consents(consent_reminder_whatsapp);
 -- PRIVACY POLICY VERSIONS
 -- ------------------------------------
 CREATE TABLE privacy_policy_versions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   version TEXT NOT NULL UNIQUE,
   content TEXT NOT NULL,
   effective_at TIMESTAMPTZ NOT NULL,

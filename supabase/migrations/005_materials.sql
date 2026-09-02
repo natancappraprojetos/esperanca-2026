@@ -6,7 +6,7 @@
 -- DIGITAL MATERIALS
 -- ------------------------------------
 CREATE TABLE digital_materials (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   campaign_id UUID REFERENCES campaigns(id),
   organization_id UUID REFERENCES organizations(id),
   name TEXT NOT NULL,
@@ -36,7 +36,7 @@ CREATE INDEX idx_materials_slug ON digital_materials(slug);
 -- MATERIAL DOWNLOADS (log)
 -- ------------------------------------
 CREATE TABLE material_downloads (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   material_id UUID NOT NULL REFERENCES digital_materials(id),
   lead_id UUID,             -- linked after lead creation
   campaign_id UUID REFERENCES campaigns(id),

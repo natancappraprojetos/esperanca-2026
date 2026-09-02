@@ -7,7 +7,7 @@
 -- ORGANIZATIONS (multi-tenant)
 -- ------------------------------------
 CREATE TABLE organizations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   description TEXT,
@@ -41,7 +41,7 @@ CREATE TABLE user_profiles (
 -- ROLES
 -- ------------------------------------
 CREATE TABLE roles (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL UNIQUE,
   display_name TEXT NOT NULL,
   description TEXT,
@@ -60,7 +60,7 @@ INSERT INTO roles (name, display_name, description, is_system) VALUES
 -- PERMISSIONS (granular)
 -- ------------------------------------
 CREATE TABLE permissions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL UNIQUE,
   display_name TEXT NOT NULL,
   description TEXT,

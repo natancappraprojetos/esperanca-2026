@@ -6,7 +6,7 @@
 -- PASTORS
 -- ------------------------------------
 CREATE TABLE pastors (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID REFERENCES organizations(id),
   user_id UUID REFERENCES auth.users(id),
   full_name TEXT NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE pastors (
 -- CHURCHES
 -- ------------------------------------
 CREATE TABLE churches (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES organizations(id),
   city_id UUID NOT NULL REFERENCES cities(id),
   pastor_id UUID REFERENCES pastors(id),
@@ -67,7 +67,7 @@ CREATE INDEX idx_churches_org ON churches(organization_id);
 -- CHURCH → NEIGHBORHOODS (N:N)
 -- ------------------------------------
 CREATE TABLE church_neighborhoods (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   church_id UUID NOT NULL REFERENCES churches(id) ON DELETE CASCADE,
   neighborhood_id UUID NOT NULL REFERENCES neighborhoods(id) ON DELETE CASCADE,
   assignment_type TEXT NOT NULL DEFAULT 'auto' CHECK (assignment_type IN ('manual', 'auto')),
@@ -84,7 +84,7 @@ CREATE INDEX idx_church_neighborhoods_neighborhood ON church_neighborhoods(neigh
 -- GEOGRAPHIC RULES (manual overrides)
 -- ------------------------------------
 CREATE TABLE geographic_rules (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   neighborhood_id UUID NOT NULL REFERENCES neighborhoods(id),
   church_id UUID NOT NULL REFERENCES churches(id),
   previous_church_id UUID REFERENCES churches(id),
@@ -182,7 +182,7 @@ $$ LANGUAGE plpgsql STABLE;
 -- CAMPAIGNS
 -- ------------------------------------
 CREATE TABLE campaigns (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES organizations(id),
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
@@ -240,7 +240,7 @@ CREATE TABLE campaign_churches (
 -- BANNERS
 -- ------------------------------------
 CREATE TABLE banners (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   church_id UUID REFERENCES churches(id) ON DELETE CASCADE,
   campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -261,7 +261,7 @@ CREATE INDEX idx_banners_campaign ON banners(campaign_id);
 -- LANDING PAGES (per campaign / city)
 -- ------------------------------------
 CREATE TABLE landing_pages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   campaign_id UUID NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
   city_id UUID REFERENCES cities(id),
   church_id UUID REFERENCES churches(id),
@@ -276,3 +276,5 @@ CREATE TABLE landing_pages (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(campaign_id, slug)
 );
+
+ALTER TABLE pastors ADD COLUMN IF NOT EXISTS church_id UUID REFERENCES churches(id);

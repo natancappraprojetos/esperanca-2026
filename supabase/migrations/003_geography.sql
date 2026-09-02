@@ -7,7 +7,7 @@
 -- STATES
 -- ------------------------------------
 CREATE TABLE states (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   uf CHAR(2) NOT NULL UNIQUE,
   ibge_code INTEGER UNIQUE,
@@ -35,7 +35,7 @@ INSERT INTO states (name, uf, ibge_code, region) VALUES
 -- CITIES
 -- ------------------------------------
 CREATE TABLE cities (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID REFERENCES organizations(id),
   state_id UUID NOT NULL REFERENCES states(id),
   name TEXT NOT NULL,
@@ -58,7 +58,7 @@ CREATE INDEX idx_cities_status ON cities(status);
 -- NEIGHBORHOODS
 -- ------------------------------------
 CREATE TABLE neighborhoods (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   city_id UUID NOT NULL REFERENCES cities(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   -- Normalized name for fuzzy search (lowercase, no accents, trimmed)
@@ -157,7 +157,7 @@ CREATE TRIGGER normalize_neighborhood_name_trigger
 -- IMPORT LOG (track data imports)
 -- ------------------------------------
 CREATE TABLE data_import_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   entity_type TEXT NOT NULL,
   source TEXT NOT NULL,
   source_version TEXT,

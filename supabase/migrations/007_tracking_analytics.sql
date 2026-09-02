@@ -6,7 +6,7 @@
 -- TRACKING PIXELS
 -- ------------------------------------
 CREATE TABLE tracking_pixels (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID REFERENCES organizations(id),
   -- Scope: campaign-wide, city-specific, or church-specific
   scope TEXT NOT NULL CHECK (scope IN ('global', 'campaign', 'city', 'church')),
@@ -33,7 +33,7 @@ CREATE INDEX idx_pixels_active ON tracking_pixels(is_active);
 -- ANALYTICS CONFIGS
 -- ------------------------------------
 CREATE TABLE analytics_configs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID REFERENCES organizations(id),
   campaign_id UUID REFERENCES campaigns(id),
   ga4_measurement_id TEXT,
@@ -49,7 +49,7 @@ CREATE TABLE analytics_configs (
 -- UTM SESSIONS
 -- ------------------------------------
 CREATE TABLE utm_sessions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   session_token TEXT UNIQUE NOT NULL,
   -- UTM parameters preserved from first touch
   utm_source TEXT,
@@ -79,7 +79,7 @@ CREATE INDEX idx_utm_sessions_campaign ON utm_sessions(campaign_id);
 -- FUNNEL EVENTS
 -- ------------------------------------
 CREATE TABLE funnel_events (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   session_token TEXT,
   lead_id UUID REFERENCES leads(id),
   campaign_id UUID REFERENCES campaigns(id),
@@ -129,7 +129,7 @@ CREATE INDEX idx_events_church ON funnel_events(church_id);
 -- AUDIT LOGS
 -- ------------------------------------
 CREATE TABLE audit_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id),
   user_name TEXT,
   action TEXT NOT NULL,
