@@ -30,25 +30,25 @@ BEGIN
 
   -- 1. Insert/Get the Cities
   INSERT INTO cities (name, slug, state_id, status) VALUES 
-    ('Novo Hamburgo', 'novo-hamburgo', v_rs_id, 'active') ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_nh;
+    ('Novo Hamburgo', 'novo-hamburgo', v_rs_id, 'active') ON CONFLICT (slug, state_id) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_nh;
   INSERT INTO cities (name, slug, state_id, status) VALUES 
-    ('Taquara', 'taquara', v_rs_id, 'active') ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_taquara;
+    ('Taquara', 'taquara', v_rs_id, 'active') ON CONFLICT (slug, state_id) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_taquara;
   INSERT INTO cities (name, slug, state_id, status) VALUES 
-    ('Parobé', 'parobe', v_rs_id, 'active') ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_parobe;
+    ('Parobé', 'parobe', v_rs_id, 'active') ON CONFLICT (slug, state_id) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_parobe;
   INSERT INTO cities (name, slug, state_id, status) VALUES 
-    ('Alvorada', 'alvorada', v_rs_id, 'active') ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_alvorada;
+    ('Alvorada', 'alvorada', v_rs_id, 'active') ON CONFLICT (slug, state_id) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_alvorada;
   INSERT INTO cities (name, slug, state_id, status) VALUES 
-    ('São Leopoldo', 'sao-leopoldo', v_rs_id, 'active') ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_sl;
+    ('São Leopoldo', 'sao-leopoldo', v_rs_id, 'active') ON CONFLICT (slug, state_id) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_sl;
   INSERT INTO cities (name, slug, state_id, status) VALUES 
-    ('Sapucaia do Sul', 'sapucaia-do-sul', v_rs_id, 'active') ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_sapucaia;
+    ('Sapucaia do Sul', 'sapucaia-do-sul', v_rs_id, 'active') ON CONFLICT (slug, state_id) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_sapucaia;
   INSERT INTO cities (name, slug, state_id, status) VALUES 
-    ('Esteio', 'esteio', v_rs_id, 'active') ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_esteio;
+    ('Esteio', 'esteio', v_rs_id, 'active') ON CONFLICT (slug, state_id) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_esteio;
   INSERT INTO cities (name, slug, state_id, status) VALUES 
-    ('Campo Bom', 'campo-bom', v_rs_id, 'active') ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_campobom;
+    ('Campo Bom', 'campo-bom', v_rs_id, 'active') ON CONFLICT (slug, state_id) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_campobom;
   INSERT INTO cities (name, slug, state_id, status) VALUES 
-    ('Gravataí', 'gravatai', v_rs_id, 'active') ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_gravatai;
+    ('Gravataí', 'gravatai', v_rs_id, 'active') ON CONFLICT (slug, state_id) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_gravatai;
   INSERT INTO cities (name, slug, state_id, status) VALUES 
-    ('Igrejinha', 'igrejinha', v_rs_id, 'active') ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_igrejinha;
+    ('Igrejinha', 'igrejinha', v_rs_id, 'active') ON CONFLICT (slug, state_id) DO UPDATE SET name = EXCLUDED.name RETURNING id INTO v_city_igrejinha;
 
   -- 2. Delete existing demo campaign/material to avoid conflict if running in fresh DB
   DELETE FROM campaigns WHERE slug = 'semana-esperanca-2026-rs';
