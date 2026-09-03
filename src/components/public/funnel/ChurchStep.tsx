@@ -131,6 +131,8 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
     setSharing(false)
   }
 
+
+  return (
     <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
       <div className="container-narrow flex flex-col gap-6 py-10">
         <motion.div
