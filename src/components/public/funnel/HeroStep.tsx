@@ -97,28 +97,7 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
             <div style={{ flex: 1, height: 1, backgroundColor: 'var(--gray-100)' }} />
           </motion.div>
 
-          {/* Trust indicators */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
-            className="flex flex-wrap justify-center gap-4 mt-8"
-          >
-            {[
-              { icon: '🏛️', text: 'Igrejas participantes' },
-              { icon: '📍', text: 'Encontre a mais próxima' },
-              { icon: '🤝', text: 'Entrada gratuita' },
-            ].map((item) => (
-              <div 
-                key={item.text}
-                className="flex items-center gap-2 text-caption"
-                style={{ color: 'var(--gray-500)' }}
-              >
-                <span>{item.icon}</span>
-                <span>{item.text}</span>
-              </div>
-            ))}
-          </motion.div>
+
         </motion.div>
       </div>
 

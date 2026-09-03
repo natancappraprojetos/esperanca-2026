@@ -143,14 +143,6 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
           <span className="text-overline" style={{ color: 'var(--green)' }}>
             ✓ Encontramos uma programação perto de você
           </span>
-          <h2 className="text-heading-2" style={{ color: 'var(--gray-900)' }}>
-            {church.name}
-          </h2>
-          {church.is_demo && (
-            <span className="badge badge-champagne text-xs">
-              Dados de demonstração
-            </span>
-          )}
         </motion.div>
 
         {/* Banner */}
@@ -224,74 +216,7 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
           )}
         </motion.div>
 
-        {/* Church details */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-          className="card p-5 flex flex-col gap-4"
-        >
-          {/* Schedule */}
-          {schedules.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <p className="text-overline" style={{ color: 'var(--gray-500)' }}>
-                Programação
-              </p>
-              <div className="flex flex-col gap-2">
-                {schedules.map((s, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div 
-                      className="flex-shrink-0 w-1 h-1 rounded-full"
-                      style={{ backgroundColor: 'var(--red)', width: 6, height: 6 }}
-                    />
-                    <span style={{ fontWeight: 600, color: 'var(--gray-800)' }}>
-                      {s.day}
-                    </span>
-                    <span style={{ color: 'var(--gray-500)' }}>
-                      {s.time}
-                    </span>
-                    {s.description && (
-                      <span className="text-small" style={{ color: 'var(--gray-400)' }}>
-                        — {s.description}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
-          {/* Address */}
-          {(church.address_street || church.address_neighborhood) && (
-            <div className="flex flex-col gap-1">
-              <p className="text-overline" style={{ color: 'var(--gray-500)' }}>
-                Endereço
-              </p>
-              <p style={{ color: 'var(--gray-700)' }}>
-                {[
-                  church.address_street,
-                  church.address_number,
-                  church.address_complement,
-                  church.address_neighborhood,
-                ].filter(Boolean).join(', ')}
-              </p>
-            </div>
-          )}
-
-          {/* How to get there */}
-          <a
-            href={mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary"
-            style={{ alignSelf: 'flex-start' }}
-          >
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-              <path d="M10 2C7.24 2 5 4.24 5 7c0 4.25 5 11 5 11s5-6.75 5-11c0-2.76-2.24-5-5-5z" stroke="currentColor" strokeWidth="2" fill="none"/>
-            </svg>
-            Como Chegar
-          </a>
-        </motion.div>
 
 
 

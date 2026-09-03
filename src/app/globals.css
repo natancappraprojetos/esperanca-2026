@@ -818,7 +818,7 @@ a:hover {
 
 .hero-section {
   min-height: 100svh;
-  background-color: var(--cream);
+  background-color: transparent;
   display: flex;
   flex-direction: column;
   position: relative;

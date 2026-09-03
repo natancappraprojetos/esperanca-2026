@@ -86,23 +86,16 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
 
   return (
     <div className="min-h-svh flex flex-col items-center" style={{ paddingTop: '5rem' }}>
-      <div className="w-full px-4 sm:px-6">
-        <div className="flex flex-col gap-8 bg-white/95 backdrop-blur-2xl border border-gray-100 p-6 sm:p-10 rounded-[32px] shadow-2xl max-w-xl mx-auto mt-4 md:mt-12 w-full">
+      <div className="container-narrow w-full flex flex-col gap-8 mt-4 md:mt-12 bg-white/95 backdrop-blur-2xl border border-gray-100 p-6 sm:p-10 rounded-[32px] shadow-2xl">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="flex flex-col gap-3"
+          className="flex flex-col gap-3 text-center"
         >
-          <span className="text-overline" style={{ color: 'var(--red)' }}>
-            Passo 1 de 3
-          </span>
           <h2 className="text-heading-2" style={{ color: 'var(--gray-900)' }}>
             Em qual cidade você está?
           </h2>
-          <p className="text-body" style={{ color: 'var(--gray-500)' }}>
-            Vamos encontrar uma igreja perto de você.
-          </p>
         </motion.div>
 
         <motion.div
@@ -196,15 +189,6 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
         </motion.div>
 
         {/* Suggestion note */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.4 }}
-          className="text-caption mt-6 text-center" style={{ color: 'var(--gray-400)' }}
-        >
-          Só estamos disponíveis em cidades participantes da campanha.
-        </motion.p>
-        </div>
       </div>
     </div>
   )
