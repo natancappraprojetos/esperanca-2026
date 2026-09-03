@@ -41,58 +41,18 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
           className="flex flex-col gap-8"
         >
-          {/* Campaign badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.5 }}
-          >
-            <span className="text-overline" style={{ color: 'var(--red)' }}>
-              {campaign.name}
-            </span>
-          </motion.div>
-
-          {/* Main headline */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="flex flex-col gap-4"
-          >
-            <h1 
-              className="text-display"
-              style={{ 
-                color: 'var(--gray-900)',
-                fontFamily: 'var(--font-serif)',
-              }}
-            >
-              {theme.split(',').map((part, i) => (
-                <span key={i}>
-                  {i > 0 && <span style={{ color: 'var(--red)' }}>,</span>}
-                  {i > 0 ? part : part}
-                  {i < theme.split(',').length - 1 ? '' : ''}
-                </span>
-              ))}
-            </h1>
-
-            <div className="divider" style={{ width: 64, height: 2, backgroundColor: 'var(--red)' }} />
-
-            <p 
-              className="text-body-lg"
-              style={{ color: 'var(--gray-600)', maxWidth: 480 }}
-            >
-              {tagline}
-            </p>
-
+          {/* Visually hidden text for SEO and Screen Readers (since it's baked into bg image) */}
+          <div className="sr-only">
+            <span>{campaign.name}</span>
+            <h1>{theme}</h1>
+            <p>{tagline}</p>
             {startDate && endDate && (
-              <p 
-                className="text-small"
-                style={{ color: 'var(--gray-400)', fontWeight: 500 }}
-              >
-                {startDate} a {endDate}
-              </p>
+              <p>{startDate} a {endDate}</p>
             )}
-          </motion.div>
+          </div>
+          
+          {/* Spacer to push content below the baked-in logo */}
+          <div className="h-[40vh] md:h-[50vh] w-full" aria-hidden="true" />
 
           {/* CTA Block */}
           <motion.div
@@ -104,9 +64,9 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
             <button
               onClick={onStart}
               className="btn btn-primary btn-lg"
-              style={{ alignSelf: 'flex-start' }}
+              style={{ alignSelf: 'center' }}
             >
-              <span>Encontrar uma Igreja</span>
+              <span>Ver programação mais próxima</span>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M4 10H16M11 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -142,7 +102,7 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.5 }}
-            className="flex flex-wrap gap-4"
+            className="flex flex-wrap justify-center gap-4 mt-8"
           >
             {[
               { icon: '🏛️', text: 'Igrejas participantes' },
