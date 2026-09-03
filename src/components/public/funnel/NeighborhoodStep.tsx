@@ -89,9 +89,8 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
 
     setLoading(true)
     try {
-      // Find church for this neighborhood
       const res = await fetch(
-        `/api/geo/find-church?neighborhood_id=${neighborhood.id}&campaign_id=${campaign.id}`
+        `/api/geo/find-church?neighborhood_id=${neighborhood.id}&city_id=${city.id}&campaign_id=${campaign.id}`
       )
       const json = await res.json()
       const church = json.church || null
@@ -272,22 +271,22 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
               className="flex flex-col gap-2 pt-2"
               style={{ borderTop: '1px solid var(--gray-100)' }}
             >
-              <p className="text-small" style={{ color: 'var(--gray-500)' }}>
-                Não encontrou seu bairro?
-              </p>
               <button
-                onClick={async () => {
-                  // Show all churches in the city as fallback
-                  const res = await fetch(`/api/churches?city_id=${city.id}&campaign_id=${campaign.id}&limit=5`)
-                  const json = await res.json()
-                  if (json.churches?.[0]) {
-                    onSelect({} as Neighborhood, json.churches[0], 'fallback')
-                  }
+                onClick={() => {
+                  handleSelect({
+                    id: 'custom-' + query,
+                    name: query,
+                    name_normalized: query,
+                    latitude: null,
+                    longitude: null,
+                    city_id: city.id,
+                    status: 'active'
+                  })
                 }}
-                className="btn btn-secondary"
+                className="btn btn-primary"
                 style={{ alignSelf: 'flex-start' }}
               >
-                Escolher uma Igreja Próxima
+                Usar bairro &ldquo;{query}&rdquo;
               </button>
             </div>
           </motion.div>

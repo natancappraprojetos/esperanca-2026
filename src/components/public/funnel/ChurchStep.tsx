@@ -178,6 +178,25 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
                   style={{ maxHeight: 400, borderRadius: 'var(--radius-xl)' }}
                 />
               </picture>
+              
+              {/* Overlay Download Button */}
+              <button
+                onClick={handleSave}
+                className="absolute top-4 right-4 bg-white/90 backdrop-blur shadow-lg p-3 rounded-full hover:scale-105 active:scale-95 transition-all text-gray-900 flex items-center justify-center"
+                aria-label="Baixar Imagem"
+                title="Baixar imagem"
+              >
+                {saved ? (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M16 5L7 14l-4-4" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 14l-5-5 1.4-1.4L9 11.2V2h2v9.2l2.6-2.6L15 9l-5 5z" fill="currentColor"/>
+                    <path d="M3 16h14v2H3z" fill="currentColor"/>
+                  </svg>
+                )}
+              </button>
             </div>
           ) : (
             /* Fallback visual when no banner */
@@ -274,51 +293,7 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
           </a>
         </motion.div>
 
-        {/* Save / Share invite */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-          className="card-soft p-5 flex flex-col gap-4"
-        >
-          <div className="flex flex-col gap-1">
-            <p style={{ fontWeight: 600, color: 'var(--gray-800)' }}>
-              Gostou da programação?
-            </p>
-            <p className="text-small" style={{ color: 'var(--gray-500)' }}>
-              Salve o convite para não esquecer.
-            </p>
-          </div>
-          <div className="flex gap-3 flex-wrap">
-            <button
-              onClick={handleSave}
-              className="btn btn-secondary flex items-center gap-2"
-              disabled={saved}
-            >
-              {saved ? (
-                <>✓ Salvo!</>
-              ) : (
-                <>
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-                    <path d="M10 14l-5-5 1.4-1.4L9 11.2V2h2v9.2l2.6-2.6L15 9l-5 5z" fill="currentColor"/>
-                    <path d="M3 16h14v2H3z" fill="currentColor"/>
-                  </svg>
-                  Salvar Convite
-                </>
-              )}
-            </button>
-            <button
-              onClick={handleShare}
-              className="btn btn-secondary flex items-center gap-2"
-              disabled={sharing}
-            >
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-                <path d="M15 8a3 3 0 100-6 3 3 0 000 6zm-10 4a3 3 0 100-6 3 3 0 000 6zm10 4a3 3 0 100-6 3 3 0 000 6zm-10-9l10 4m-10 1l10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              Compartilhar
-            </button>
-          </div>
-        </motion.div>
+
 
         {/* Continue CTA */}
         <motion.div
@@ -328,12 +303,13 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
         >
           <button
             onClick={onContinue}
-            className="btn btn-primary btn-lg btn-full"
+            className="btn btn-download w-full"
+            style={{ borderRadius: 'var(--radius-xl)' }}
           >
-            Continuar
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M4 10H16M11 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ marginRight: '0.5rem' }}>
+              <path d="M12 16L7 11L8.4 9.55L11 12.15V4H13V12.15L15.6 9.55L17 11L12 16ZM6 20C5.45 20 4.97917 19.8042 4.5875 19.4125C4.19583 19.0208 4 18.55 4 18V15H6V18H18V15H20V18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20H6Z" fill="currentColor"/>
             </svg>
+            Baixar Livro Digital
           </button>
         </motion.div>
       </div>

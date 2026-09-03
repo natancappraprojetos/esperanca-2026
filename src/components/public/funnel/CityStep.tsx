@@ -85,8 +85,9 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
   const showDropdown = focused && (results.length > 0 || (query.length >= 2 && !loading))
 
   return (
-    <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
-      <div className="container-narrow flex flex-col gap-8 py-12">
+    <div className="min-h-svh flex flex-col items-center" style={{ paddingTop: '5rem' }}>
+      <div className="w-full px-4 sm:px-6">
+        <div className="flex flex-col gap-8 bg-white/95 backdrop-blur-2xl border border-gray-100 p-6 sm:p-10 rounded-[32px] shadow-2xl max-w-xl mx-auto mt-4 md:mt-12 w-full">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -199,11 +200,11 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.4 }}
-          className="text-small"
-          style={{ color: 'var(--gray-400)' }}
+          className="text-caption mt-6 text-center" style={{ color: 'var(--gray-400)' }}
         >
           Só estamos disponíveis em cidades participantes da campanha.
         </motion.p>
+        </div>
       </div>
     </div>
   )

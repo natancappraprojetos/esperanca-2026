@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import HeroStep from '@/components/public/funnel/HeroStep'
 import CityStep from '@/components/public/funnel/CityStep'
 import NeighborhoodStep from '@/components/public/funnel/NeighborhoodStep'
@@ -130,7 +131,31 @@ export function FunnelPage({
   }
 
   return (
-    <div className="funnel-wrapper funnel-bg">
+    <div className="funnel-wrapper min-h-screen text-gray-900 relative overflow-x-hidden">
+      {/* Background Images */}
+      <div className="fixed inset-0 z-0 hidden md:block">
+        <Image
+          src="/images/bg-desktop-2.jpg"
+          alt="Background"
+          fill
+          priority
+          quality={85}
+          style={{ objectFit: 'cover', objectPosition: 'center top' }}
+        />
+      </div>
+      <div className="fixed inset-0 z-0 block md:hidden">
+        <Image
+          src="/images/bg-mobile-2.png"
+          alt="Background"
+          fill
+          priority
+          quality={85}
+          style={{ objectFit: 'cover', objectPosition: 'center top' }}
+        />
+      </div>
+      
+      {/* Content wrapper with z-index to sit above the fixed backgrounds */}
+      <div className="relative z-10 min-h-screen flex flex-col">
       {/* Step indicator (hidden on hero) */}
       {currentStep !== 'hero' && currentStep !== 'confirmation' && (
         <div className="fixed top-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-sm border-b border-gray-100">
@@ -225,6 +250,7 @@ export function FunnelPage({
           )}
         </motion.div>
       </AnimatePresence>
+      </div>
     </div>
   )
 }
