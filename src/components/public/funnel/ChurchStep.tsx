@@ -8,7 +8,7 @@ import type { Church, Campaign, Banner } from '@/types/database'
 import type { FunnelData } from '../FunnelPage'
 
 interface ChurchStepProps {
-  church: Church
+  church: Church | null
   campaign: Campaign
   onContinue: () => void
   data: FunnelData
@@ -33,6 +33,39 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
       .then(j => setBanner(j.banner || null))
       .catch(() => {})
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!church) {
+    return (
+      <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
+        <div className="container-narrow flex flex-col gap-6 py-10">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="w-full max-w-lg mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center"
+          >
+            <div className="w-16 h-16 bg-cream rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-serif font-bold text-gray-900 mb-2">
+              Igreja não encontrada
+            </h2>
+            <p className="text-gray-600 mb-8">
+              Ainda não temos uma igreja mapeada exatamente neste bairro para esta campanha. Mas não se preocupe, você ainda pode baixar o material digital!
+            </p>
+            <button
+              onClick={onContinue}
+              className="w-full h-14 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition-colors"
+            >
+              Baixar Material Digital
+            </button>
+          </motion.div>
+        </div>
+      </div>
+    )
+  }
 
   const schedules = Array.isArray(church.schedules) ? church.schedules as Array<{day: string, time: string, description?: string}> : []
   
@@ -98,36 +131,6 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
     setSharing(false)
   }
 
-  if (!church) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        className="w-full max-w-lg mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center"
-      >
-        <div className="w-16 h-16 bg-cream rounded-2xl flex items-center justify-center mx-auto mb-6">
-          <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-serif font-bold text-gray-900 mb-2">
-          Igreja não encontrada
-        </h2>
-        <p className="text-gray-600 mb-8">
-          Ainda não temos uma igreja mapeada exatamente neste bairro para esta campanha. Mas não se preocupe, você ainda pode baixar o material digital!
-        </p>
-        <button
-          onClick={onContinue}
-          className="w-full h-14 bg-gray-900 text-white font-medium rounded-xl hover:bg-gray-800 transition-colors"
-        >
-          Baixar Material Digital
-        </button>
-      </motion.div>
-    )
-  }
-
-  return (
     <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
       <div className="container-narrow flex flex-col gap-6 py-10">
         <motion.div
