@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     .from('churches')
     .select(`
       *,
-      pastors (id, full_name, photo_url)
+      pastors!pastors_church_id_fkey (id, full_name, photo_url)
     `)
     .eq('id', result.church_id)
     .single()
