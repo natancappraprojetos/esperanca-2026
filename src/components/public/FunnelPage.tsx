@@ -139,7 +139,8 @@ export function FunnelPage({
           alt="Background"
           fill
           priority
-          quality={85}
+          quality={100}
+          unoptimized
           style={{ objectFit: 'cover', objectPosition: 'center top' }}
         />
       </div>
@@ -149,7 +150,8 @@ export function FunnelPage({
           alt="Background"
           fill
           priority
-          quality={85}
+          quality={100}
+          unoptimized
           style={{ objectFit: 'cover', objectPosition: 'center top' }}
         />
       </div>

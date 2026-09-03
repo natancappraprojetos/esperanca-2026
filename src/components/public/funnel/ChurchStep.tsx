@@ -166,8 +166,8 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
                 <img
                   src={banner.image_desktop_url || banner.image_mobile_url || ''}
                   alt={`Banner da ${church.name}`}
-                  className="w-full object-cover"
-                  style={{ maxHeight: 400, borderRadius: 'var(--radius-xl)' }}
+                  className="w-full h-auto object-contain"
+                  style={{ borderRadius: 'var(--radius-xl)' }}
                 />
               </picture>
               
