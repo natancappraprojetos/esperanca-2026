@@ -28,8 +28,25 @@ export async function GET(request: NextRequest) {
 
   const { data: banners } = await query
 
+  let bannerToReturn = banners?.[0] || null
+
+  // Fallback for demonstration
+  if (!bannerToReturn) {
+    bannerToReturn = {
+      id: 'fallback',
+      church_id: churchId,
+      campaign_id: campaignId,
+      image_mobile_url: '/fallback-banner.png',
+      image_desktop_url: '/fallback-banner.png',
+      display_order: 1,
+      status: 'active',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+  }
+
   return NextResponse.json({ 
-    banner: banners?.[0] || null,
-    banners: banners || [],
+    banner: bannerToReturn,
+    banners: banners && banners.length > 0 ? banners : [bannerToReturn],
   })
 }

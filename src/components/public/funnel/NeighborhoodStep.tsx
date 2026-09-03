@@ -108,6 +108,12 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
         })
       }
 
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('track', 'Search', {
+          search_string: neighborhood.name
+        })
+      }
+
       onSelect(neighborhood, church, method)
     } catch {
       onSelect(neighborhood, null, 'error')

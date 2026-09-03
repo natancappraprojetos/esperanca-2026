@@ -130,7 +130,7 @@ export function FunnelPage({
   }
 
   return (
-    <div className="funnel-wrapper">
+    <div className="funnel-wrapper funnel-bg">
       {/* Step indicator (hidden on hero) */}
       {currentStep !== 'hero' && currentStep !== 'confirmation' && (
         <div className="fixed top-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-sm border-b border-gray-100">

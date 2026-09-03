@@ -120,6 +120,10 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
         })
       }
 
+      if (typeof window !== 'undefined' && window.fbq) {
+        window.fbq('track', 'Lead')
+      }
+
       onSubmit({
         leadName: values.name.trim(),
         leadWhatsapp: normalizedWhatsapp,

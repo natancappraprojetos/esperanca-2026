@@ -25,9 +25,13 @@ export default function MaterialStep({ material, onDownloadRequest, onSkip, data
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (!material) {
+      onSkip()
+    }
+  }, [material, onSkip])
+
   if (!material) {
-    // No material configured, skip to confirmation
-    onSkip()
     return null
   }
 

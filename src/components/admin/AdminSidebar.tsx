@@ -21,6 +21,7 @@ const navItems = [
       { href: '/admin/campanhas', label: 'Campanhas', icon: '🎯', roles: ['super_admin', 'admin_general'] },
       { href: '/admin/igrejas', label: 'Igrejas', icon: '🏛️', roles: ['super_admin', 'admin_general'] },
       { href: '/admin/pastores', label: 'Pastores', icon: '👤', roles: ['super_admin', 'admin_general'] },
+      { href: '/admin/cidades', label: 'Cidades', icon: '📍', roles: ['super_admin', 'admin_general'] },
       { href: '/admin/materiais', label: 'Materiais', icon: '📖', roles: ['super_admin', 'admin_general'] },
     ]
   },
