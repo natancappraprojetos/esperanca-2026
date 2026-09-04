@@ -51,10 +51,7 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
             )}
           </div>
           
-          {/* Spacer to push content below the baked-in logo */}
-          <div className="h-[40vh] md:h-[50vh] w-full" aria-hidden="true" />
-
-          {/* CTA Block */}
+          {/* CTA Block (Moved above the logo to be more harmonious) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -66,7 +63,7 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
               className="btn btn-primary btn-lg"
               style={{ alignSelf: 'center' }}
             >
-              <span>Ver programação mais próxima</span>
+              <span>Ver programação mais perto de você</span>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M4 10H16M11 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -75,13 +72,16 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
             {material && (
               <p 
                 className="text-small"
-                style={{ color: 'var(--gray-500)' }}
+                style={{ color: 'var(--gray-500)', textAlign: 'center' }}
               >
                 <span style={{ color: 'var(--green)', fontWeight: 600 }}>🎁 Presente:</span>{' '}
                 Receba gratuitamente o livro digital <em>{material.name}</em>
               </p>
             )}
           </motion.div>
+
+          {/* Spacer to keep the logo area clear */}
+          <div className="h-[40vh] md:h-[50vh] w-full" aria-hidden="true" />
 
           {/* Decorative divider */}
           <motion.div
