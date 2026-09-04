@@ -80,8 +80,10 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
       (error) => {
         console.error(error)
         setLocating(false)
-        if (error.code !== error.PERMISSION_DENIED) {
-          alert('Não foi possível obter sua localização.')
+        if (error.code === error.PERMISSION_DENIED) {
+          alert('Permissão de localização negada. Por favor, digite sua cidade abaixo.')
+        } else {
+          alert('Não foi possível obter sua localização. Por favor, tente digitar a cidade.')
         }
       },
       { timeout: 10000 }
@@ -127,7 +129,7 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
 
   return (
     <div className="min-h-svh flex flex-col items-center" style={{ paddingTop: '5rem' }}>
-      <div className="container-narrow w-full flex flex-col gap-10 mt-4 md:mt-12 bg-white/95 backdrop-blur-2xl border border-gray-100 pt-12 pb-16 px-6 sm:px-12 sm:pt-16 sm:pb-20 rounded-[32px] shadow-2xl">
+      <div className="container-narrow w-full flex flex-col gap-10 mt-4 md:mt-12 bg-white/95 backdrop-blur-2xl border border-gray-100 pt-20 pb-16 px-6 sm:px-12 sm:pt-24 sm:pb-20 rounded-[32px] shadow-2xl">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -154,7 +156,7 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
                 id="city-search"
                 ref={inputRef}
                 type="text"
-                className="form-input focus:!border-gray-400 focus:!shadow-none"
+                className="form-input"
                 placeholder="Digite o nome da sua cidade..."
                 value={query}
                 onChange={handleInput}
@@ -166,7 +168,12 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
                 aria-autocomplete="list"
                 aria-controls="city-results"
                 aria-expanded={showDropdown}
-                style={{ paddingLeft: '3rem', fontSize: '1.0625rem' }}
+                style={{ 
+                  paddingLeft: '3rem', 
+                  fontSize: '1.0625rem',
+                  borderColor: focused ? 'var(--gray-400)' : 'var(--gray-200)',
+                  boxShadow: 'none'
+                }}
               />
               {/* Search icon */}
               <div 
@@ -196,7 +203,12 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
               onClick={handleUseLocation}
               disabled={locating}
               className="btn btn-secondary w-full flex items-center justify-center gap-2"
-              style={{ padding: '0.875rem', fontSize: '0.9375rem', color: 'var(--gray-700)' }}
+              style={{ 
+                padding: '0.875rem', 
+                fontSize: '0.9375rem', 
+                color: 'var(--gray-700)',
+                borderRadius: 'var(--radius-md)' // Match the input border radius
+              }}
             >
               {locating ? (
                 <div className="spinner" style={{ width: 18, height: 18, borderTopColor: 'var(--gray-700)' }} />
