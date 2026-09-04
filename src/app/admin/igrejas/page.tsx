@@ -19,6 +19,11 @@ export default async function ChurchesPage() {
       )
     `)
     .order('name')
+    
+  const { data: pixels } = await supabase
+    .from('tracking_pixels')
+    .select('*')
+    .eq('scope', 'church')
 
-  return <ChurchesClient churches={churches || []} />
+  return <ChurchesClient churches={churches || []} pixels={pixels || []} />
 }

@@ -10,7 +10,7 @@ import ChurchStep from '@/components/public/funnel/ChurchStep'
 import MaterialStep from '@/components/public/funnel/MaterialStep'
 import LeadFormStep from '@/components/public/funnel/LeadFormStep'
 import ConfirmationStep from '@/components/public/funnel/ConfirmationStep'
-import { trackEvent } from '@/lib/tracking/events'
+import { trackEvent, initializePixels } from '@/lib/tracking/events'
 import type { City, Neighborhood, Church, Campaign, DigitalMaterial } from '@/types/database'
 
 export type FunnelData = {
@@ -26,6 +26,8 @@ export type FunnelData = {
   consentData: boolean
   consentReminder: boolean
   leadId: string | null
+  // Tracking
+  churchPixels?: any[]
   // UTM (preserved from URL)
   utmSource: string | null
   utmMedium: string | null
@@ -100,6 +102,13 @@ export function FunnelPage({
       session_token: sessionToken,
     })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update tracking pixels when church changes
+  useEffect(() => {
+    if (data.churchPixels && data.churchPixels.length > 0) {
+      initializePixels(data.churchPixels)
+    }
+  }, [data.churchPixels])
 
   function goTo(step: FunnelStep, updatedData?: Partial<FunnelData>) {
     const currentIndex = getStepIndex(currentStep)
@@ -216,8 +225,8 @@ export function FunnelPage({
             <NeighborhoodStep
               city={data.city!}
               campaign={campaign}
-              onSelect={(neighborhood, church, method) => 
-                goTo('church', { neighborhood, church, assignmentMethod: method })}
+              onSelect={(neighborhood, church, method, pixels) => 
+                goTo('church', { neighborhood, church, assignmentMethod: method, churchPixels: pixels })}
               data={data}
             />
           )}

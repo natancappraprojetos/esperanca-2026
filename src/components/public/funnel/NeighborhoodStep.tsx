@@ -9,7 +9,7 @@ import type { FunnelData } from '../FunnelPage'
 interface NeighborhoodStepProps {
   city: City
   campaign: Campaign
-  onSelect: (neighborhood: Neighborhood, church: Church | null, method: string) => void
+  onSelect: (neighborhood: Neighborhood, church: Church | null, method: string, pixels?: any[]) => void
   data: FunnelData
 }
 
@@ -95,6 +95,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
       const json = await res.json()
       const church = json.church || null
       const method = json.method || 'fallback'
+      const pixels = json.pixels || []
 
       if (church) {
         trackEvent('ChurchMatched', {
@@ -113,9 +114,9 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
         })
       }
 
-      onSelect(neighborhood, church, method)
+      onSelect(neighborhood, church, method, pixels)
     } catch {
-      onSelect(neighborhood, null, 'error')
+      onSelect(neighborhood, null, 'error', [])
     } finally {
       setLoading(false)
     }

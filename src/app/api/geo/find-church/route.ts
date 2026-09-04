@@ -65,8 +65,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ church: null, method: 'error' })
   }
 
+  // Fetch church-specific pixels
+  const { data: trackingPixels } = await supabase
+    .from('tracking_pixels')
+    .select('pixel_type, pixel_id, config')
+    .eq('scope', 'church')
+    .eq('church_id', result.church_id)
+    .eq('is_active', true)
+
   return NextResponse.json({ 
     church, 
+    pixels: trackingPixels || [],
     method: result.assignment_method,
     distance_meters: result.distance_meters,
   })
