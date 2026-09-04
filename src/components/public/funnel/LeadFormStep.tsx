@@ -87,7 +87,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
           campaign_id: campaign.id,
           church_id: data.church?.id || null,
           city_id: data.city?.id || null,
-          neighborhood_id: data.neighborhood?.id || null,
+          neighborhood_id: (data.neighborhood?.id && !data.neighborhood.id.startsWith('custom-')) ? data.neighborhood.id : null,
           material_id: data.material?.id || null,
           church_assignment_method: data.assignmentMethod,
           consent_data: values.consentData,

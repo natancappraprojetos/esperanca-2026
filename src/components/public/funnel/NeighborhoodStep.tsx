@@ -158,7 +158,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
             Passo 2 de 3
           </span>
           <h2 className="text-heading-2" style={{ color: 'var(--gray-900)' }}>
-            Qual é o seu bairro?
+            Qual é o seu bairro ou região?
           </h2>
           <p className="text-body" style={{ color: 'var(--gray-500)' }}>
             Encontraremos a programação mais próxima de você.
@@ -181,7 +181,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
                 ref={inputRef}
                 type="text"
                 className="form-input"
-                placeholder="Digite seu bairro..."
+                placeholder="Digite seu bairro, rua ou região..."
                 value={query}
                 onChange={handleInput}
                 onFocus={() => setFocused(true)}
