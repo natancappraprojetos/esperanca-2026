@@ -64,9 +64,10 @@ export async function POST(request: NextRequest) {
 
   const parsed = leadSchema.safeParse(body)
   if (!parsed.success) {
-    const errorMessages = parsed.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
+    const issues = parsed.error?.issues || parsed.error?.errors || []
+    const errorMessages = issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
     return NextResponse.json(
-      { error: `Dados inválidos: ${errorMessages}`, details: parsed.error.errors },
+      { error: `Dados inválidos: ${errorMessages}`, details: issues },
       { status: 400 }
     )
   }
