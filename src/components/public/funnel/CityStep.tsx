@@ -18,6 +18,7 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
   const [loading, setLoading] = useState(false)
   const [focused, setFocused] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -50,8 +51,9 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
   }, [campaign.id])
 
   async function handleUseLocation() {
+    setErrorMsg(null)
     if (!navigator.geolocation) {
-      alert('Seu navegador não suporta geolocalização.')
+      setErrorMsg('Seu navegador não suporta geolocalização.')
       return
     }
 
@@ -68,11 +70,11 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
             setQuery(cityName)
             searchCities(cityName)
           } else {
-            alert('Não foi possível identificar sua cidade automaticamente.')
+            setErrorMsg('Não foi possível identificar sua cidade automaticamente.')
           }
         } catch (error) {
           console.error(error)
-          alert('Erro ao buscar localização.')
+          setErrorMsg('Erro ao buscar localização.')
         } finally {
           setLocating(false)
         }
@@ -81,9 +83,9 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
         console.error(error)
         setLocating(false)
         if (error.code === error.PERMISSION_DENIED) {
-          alert('Permissão de localização negada. Por favor, digite sua cidade abaixo.')
+          setErrorMsg('Permissão de localização negada. Por favor, digite sua cidade acima.')
         } else {
-          alert('Não foi possível obter sua localização. Por favor, tente digitar a cidade.')
+          setErrorMsg('Não foi possível obter sua localização. Por favor, tente digitar a cidade.')
         }
       },
       { timeout: 10000 }
@@ -224,6 +226,19 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
               )}
               <span>{locating ? 'Buscando sua localização...' : 'Usar minha localização atual'}</span>
             </button>
+
+            {/* Error Message */}
+            {errorMsg && (
+              <motion.div 
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-3 text-sm text-center font-medium"
+                style={{ color: 'var(--red)' }}
+                role="alert"
+              >
+                {errorMsg}
+              </motion.div>
+            )}
 
             {/* Dropdown */}
             {showDropdown && (

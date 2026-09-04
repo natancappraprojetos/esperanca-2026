@@ -51,20 +51,23 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
             )}
           </div>
           
-          {/* CTA Block (Moved above the logo to be more harmonious) */}
+          {/* Spacer to keep the logo area clear (Background image has the logo) */}
+          <div className="h-[45vh] sm:h-[50vh] w-full" aria-hidden="true" />
+
+          {/* CTA Block (Must be below the logo) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-4 w-full"
           >
-            <div className="flex justify-center w-full">
+            <div className="flex justify-center w-full px-4 sm:px-0">
               <button
                 onClick={onStart}
-                className="btn btn-primary btn-lg"
+                className="btn btn-primary btn-lg flex items-center justify-center gap-2 w-full sm:w-auto text-center"
               >
                 <span>Veja a programação mais perto de você</span>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
                   <path d="M4 10H16M11 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
@@ -72,7 +75,7 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
 
             {material && (
               <p 
-                className="text-small"
+                className="text-small px-4"
                 style={{ color: 'var(--gray-500)', textAlign: 'center' }}
               >
                 <span style={{ color: 'var(--green)', fontWeight: 600 }}>🎁 Presente:</span>{' '}
@@ -80,9 +83,6 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
               </p>
             )}
           </motion.div>
-
-          {/* Spacer to keep the logo area clear */}
-          <div className="h-[40vh] md:h-[50vh] w-full" aria-hidden="true" />
 
           {/* Decorative divider */}
           <motion.div
