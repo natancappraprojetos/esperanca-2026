@@ -63,7 +63,7 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
               className="btn btn-primary btn-lg"
               style={{ alignSelf: 'center' }}
             >
-              <span>Ver programação mais perto de você</span>
+              <span>Veja a programação mais perto de você</span>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M4 10H16M11 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>

@@ -21,6 +21,8 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
+  const [locating, setLocating] = useState(false)
+
   useEffect(() => {
     trackEvent('LeadFormViewed', { 
       campaign_id: campaign.id,
@@ -46,6 +48,45 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
       setLoading(false)
     }
   }, [campaign.id])
+
+  async function handleUseLocation() {
+    if (!navigator.geolocation) {
+      alert('Seu navegador não suporta geolocalização.')
+      return
+    }
+
+    setLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`)
+          const data = await res.json()
+          
+          const cityName = data.address?.city || data.address?.town || data.address?.village || data.address?.municipality
+          if (cityName) {
+            setQuery(cityName)
+            searchCities(cityName)
+          } else {
+            alert('Não foi possível identificar sua cidade automaticamente.')
+          }
+        } catch (error) {
+          console.error(error)
+          alert('Erro ao buscar localização.')
+        } finally {
+          setLocating(false)
+        }
+      },
+      (error) => {
+        console.error(error)
+        setLocating(false)
+        if (error.code !== error.PERMISSION_DENIED) {
+          alert('Não foi possível obter sua localização.')
+        }
+      },
+      { timeout: 10000 }
+    )
+  }
 
   function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value
@@ -142,6 +183,31 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
                 )}
               </div>
             </div>
+
+            {/* Location Button */}
+            <div className="flex items-center gap-4 my-2">
+              <div style={{ flex: 1, height: 1, backgroundColor: 'var(--gray-200)' }} />
+              <span className="text-caption" style={{ color: 'var(--gray-400)', textTransform: 'uppercase' }}>ou</span>
+              <div style={{ flex: 1, height: 1, backgroundColor: 'var(--gray-200)' }} />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleUseLocation}
+              disabled={locating}
+              className="btn btn-secondary w-full flex items-center justify-center gap-2"
+              style={{ padding: '0.875rem', fontSize: '0.9375rem', color: 'var(--gray-700)' }}
+            >
+              {locating ? (
+                <div className="spinner" style={{ width: 18, height: 18, borderTopColor: 'var(--gray-700)' }} />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              )}
+              <span>{locating ? 'Buscando sua localização...' : 'Usar minha localização atual'}</span>
+            </button>
 
             {/* Dropdown */}
             {showDropdown && (
