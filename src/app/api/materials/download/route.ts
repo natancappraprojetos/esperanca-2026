@@ -3,8 +3,8 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
 const schema = z.object({
-  lead_id: z.string().uuid().optional().nullable(),
-  material_id: z.string().uuid(),
+  lead_id: z.string().length(36).optional().nullable(),
+  material_id: z.string().length(36),
 })
 
 export async function POST(request: NextRequest) {
