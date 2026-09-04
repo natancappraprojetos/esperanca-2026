@@ -130,8 +130,8 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
   return (
     <div className="min-h-svh flex flex-col items-center" style={{ paddingTop: '5rem' }}>
       <div 
-        className="container-narrow w-full flex flex-col gap-10 mt-4 md:mt-12 bg-white/95 backdrop-blur-2xl border border-gray-100 px-6 sm:px-12 rounded-[32px] shadow-2xl"
-        style={{ paddingTop: '5rem', paddingBottom: '5rem' }}
+        className="container-narrow w-full flex flex-col gap-8 md:gap-10 mt-4 md:mt-12 bg-white/95 backdrop-blur-2xl border border-gray-100 px-6 sm:px-12 rounded-[32px] shadow-2xl"
+        style={{ paddingTop: '2.5rem', paddingBottom: '2.5rem' }}
       >
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -175,7 +175,8 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
                   paddingLeft: '3rem', 
                   fontSize: '1.0625rem',
                   borderColor: focused ? 'var(--gray-400)' : 'var(--gray-200)',
-                  boxShadow: 'none'
+                  boxShadow: 'none',
+                  outline: 'none'
                 }}
               />
               {/* Search icon */}

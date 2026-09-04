@@ -342,8 +342,8 @@ a:hover {
 }
 
 .form-input:focus {
-  border-color: var(--red);
-  box-shadow: 0 0 0 3px var(--red-muted);
+  border-color: var(--gray-600);
+  box-shadow: 0 0 0 3px var(--gray-100);
 }
 
 .form-input::placeholder {
