@@ -142,7 +142,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
     <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
       <div className="container-narrow flex flex-col gap-8 py-12">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col gap-3"
         >
@@ -166,9 +166,9 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
+          transition={{ duration: 0 }}
           className="relative"
         >
           <div className="form-group">
@@ -239,7 +239,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
         {/* Not found state */}
         {notFound && (
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             className="card-soft p-5 flex flex-col gap-4"
           >

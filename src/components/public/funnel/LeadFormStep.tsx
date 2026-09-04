@@ -161,7 +161,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
     <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
       <div className="w-full max-w-md mx-auto px-4 py-8 sm:py-12">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col gap-8 bg-black/60 backdrop-blur-2xl border border-gray-700/50 p-6 sm:p-10 rounded-[24px] sm:rounded-[32px] shadow-2xl w-full"
         >

@@ -98,7 +98,7 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
 
         {/* Success header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col items-center text-center gap-4 pt-4"
         >
@@ -127,9 +127,9 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
         {/* Download CTA */}
         {data.material && (
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ duration: 0 }}
             className="material-offer"
           >
             <div className="relative z-10 flex flex-col gap-4">
@@ -174,9 +174,9 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
         {/* Reminder confirmation */}
         {data.consentReminder && (
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ duration: 0 }}
             className="flex items-start gap-3 p-4 rounded-xl"
             style={{ 
               background: 'rgba(26, 122, 74, 0.06)', 
@@ -194,9 +194,9 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
         {/* Church info */}
         {church && (
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
+            transition={{ duration: 0 }}
             className="card p-5 flex flex-col gap-4"
           >
             <div className="flex items-center gap-2">
@@ -234,9 +234,9 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
 
         {/* Action buttons */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
+          transition={{ duration: 0 }}
           className="flex flex-col gap-3"
         >
           {mapsUrl && (
@@ -286,9 +286,9 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
 
         {/* Footer message */}
         <motion.p
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
+          transition={{ duration: 0 }}
           className="text-center text-small"
           style={{ color: 'var(--gray-400)' }}
         >

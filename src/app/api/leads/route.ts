@@ -81,12 +81,12 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const supabase = await createAdminClient()
-  const userAgent = headersList.get('user-agent') || undefined
-  const deviceType = detectDeviceType(userAgent)
-  const normalizedWa = normalizeWhatsapp(data.whatsapp)
-
   try {
+    const supabase = await createAdminClient()
+    const userAgent = headersList.get('user-agent') || undefined
+    const deviceType = detectDeviceType(userAgent)
+    const normalizedWa = normalizeWhatsapp(data.whatsapp)
+
     // 1. Upsert contact (deduplication by normalized WhatsApp)
     const { data: contact, error: contactError } = await supabase
       .from('contacts')
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
 
     if (contactError || !contact) {
       console.error('Contact upsert error:', contactError)
-      return NextResponse.json({ error: 'Erro ao salvar contato' }, { status: 500 })
+      return NextResponse.json({ error: `Erro ao salvar contato: ${contactError?.message}` }, { status: 500 })
     }
 
     // 2. Create or update lead (unique per contact + campaign)
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
 
     if (leadError || !lead) {
       console.error('Lead upsert error:', leadError)
-      return NextResponse.json({ error: 'Erro ao registrar lead' }, { status: 500 })
+      return NextResponse.json({ error: `Erro ao registrar lead: ${leadError?.message}` }, { status: 500 })
     }
 
     // 3. Register LGPD consents
@@ -208,7 +208,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('Lead creation error:', err)
     return NextResponse.json(
-      { error: 'Erro interno. Tente novamente em alguns instantes.' },
+      { error: err instanceof Error ? err.message : 'Erro interno. Tente novamente em alguns instantes.' },
       { status: 500 }
     )
   }

@@ -39,7 +39,7 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
       <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
         <div className="container-narrow flex flex-col gap-6 py-10">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className="w-full max-w-lg mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center"
@@ -136,7 +136,7 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
     <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
       <div className="container-narrow flex flex-col gap-6 py-10">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col gap-2"
         >
@@ -147,9 +147,9 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
 
         {/* Banner */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.15 }}
+          transition={{ duration: 0 }}
           className="church-banner"
           style={{ 
             background: 'var(--gray-100)',
@@ -228,9 +228,9 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
 
         {/* Continue CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
+          transition={{ duration: 0 }}
         >
           <button
             onClick={onContinue}

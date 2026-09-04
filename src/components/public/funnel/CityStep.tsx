@@ -136,9 +136,9 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
         style={{ paddingTop: '2.5rem', paddingBottom: '2.5rem' }}
       >
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0 }}
           className="flex flex-col gap-3 text-center"
         >
           <h2 className="text-heading-2" style={{ color: 'var(--gray-900)' }}>
@@ -147,9 +147,9 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.4 }}
+          transition={{ duration: 0 }}
           className="relative"
         >
           <div className="form-group">

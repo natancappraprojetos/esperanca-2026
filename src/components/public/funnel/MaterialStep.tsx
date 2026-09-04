@@ -50,9 +50,9 @@ export default function MaterialStep({ material, onDownloadRequest, onSkip, data
         
         {/* Gift icon */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+          transition={{ duration: 0 }}
           className="flex justify-center"
         >
           <div 
@@ -73,9 +73,9 @@ export default function MaterialStep({ material, onDownloadRequest, onSkip, data
 
         {/* Material offer */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
+          transition={{ duration: 0 }}
           className="material-offer"
         >
           <div className="relative z-10 flex flex-col gap-5">
@@ -151,9 +151,9 @@ export default function MaterialStep({ material, onDownloadRequest, onSkip, data
 
         {/* Skip option */}
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
+          transition={{ duration: 0 }}
           className="text-center"
         >
           <button
