@@ -83,7 +83,7 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
         console.error(error)
         setLocating(false)
         if (error.code === error.PERMISSION_DENIED) {
-          setErrorMsg('Permissão de localização negada. Por favor, digite sua cidade acima.')
+          setErrorMsg('Localização bloqueada pelo navegador. Libere o acesso nas configurações ou digite acima.')
         } else {
           setErrorMsg('Não foi possível obter sua localização. Por favor, tente digitar a cidade.')
         }
@@ -156,7 +156,7 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
             <label htmlFor="city-search" className="form-label sr-only">
               Nome da cidade
             </label>
-            <div className="relative">
+            <div className="relative z-20">
               <input
                 id="city-search"
                 ref={inputRef}
@@ -195,10 +195,53 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
                   </svg>
                 )}
               </div>
+
+              {/* Dropdown */}
+              {showDropdown && (
+                <div 
+                  id="city-results"
+                  className="autocomplete-dropdown absolute left-0 right-0 top-full mt-1"
+                  role="listbox"
+                  aria-label="Cidades encontradas"
+                >
+                  {results.length > 0 ? (
+                    results.map((city, i) => (
+                      <button
+                        key={city.id}
+                        role="option"
+                        aria-selected={i === highlightedIndex}
+                        className={`autocomplete-item w-full text-left ${i === highlightedIndex ? 'highlighted' : ''}`}
+                        onMouseEnter={() => setHighlightedIndex(i)}
+                        onMouseDown={() => handleSelect(city)}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style={{ color: 'var(--gray-400)', flexShrink: 0 }}>
+                          <path d="M10 2C7.24 2 5 4.24 5 7c0 4.25 5 11 5 11s5-6.75 5-11c0-2.76-2.24-5-5-5zm0 6.5c-.83 0-1.5-.67-1.5-1.5S9.17 5.5 10 5.5s1.5.67 1.5 1.5S10.83 8.5 10 8.5z" fill="currentColor"/>
+                        </svg>
+                        <div className="flex flex-col">
+                          <span style={{ fontWeight: 500, color: 'var(--gray-900)' }}>{city.name}</span>
+                          <span className="text-caption" style={{ color: 'var(--gray-400)' }}>
+                            Rio Grande do Sul
+                          </span>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="autocomplete-item" style={{ cursor: 'default' }}>
+                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style={{ color: 'var(--gray-300)' }}>
+                        <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M10 7v3m0 3h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                      <span style={{ color: 'var(--gray-500)' }}>
+                        Nenhuma cidade encontrada para &ldquo;{query}&rdquo;
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Location Button */}
-            <div className="flex items-center gap-4 my-2">
+            <div className="flex items-center gap-4 my-2 relative z-10">
               <div style={{ flex: 1, height: 1, backgroundColor: 'var(--gray-200)' }} />
               <span className="text-caption" style={{ color: 'var(--gray-400)', textTransform: 'uppercase' }}>ou</span>
               <div style={{ flex: 1, height: 1, backgroundColor: 'var(--gray-200)' }} />
@@ -208,7 +251,7 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
               type="button"
               onClick={handleUseLocation}
               disabled={locating}
-              className="btn btn-secondary w-full flex items-center justify-center gap-2"
+              className="btn btn-secondary w-full flex items-center justify-center gap-2 relative z-10"
               style={{ 
                 padding: '0.875rem', 
                 fontSize: '0.9375rem', 
@@ -226,62 +269,6 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
               )}
               <span>{locating ? 'Buscando sua localização...' : 'Usar minha localização atual'}</span>
             </button>
-
-            {/* Error Message */}
-            {errorMsg && (
-              <motion.div 
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-3 text-sm text-center font-medium"
-                style={{ color: 'var(--red)' }}
-                role="alert"
-              >
-                {errorMsg}
-              </motion.div>
-            )}
-
-            {/* Dropdown */}
-            {showDropdown && (
-              <div 
-                id="city-results"
-                className="autocomplete-dropdown absolute left-0 right-0 top-full mt-1"
-                role="listbox"
-                aria-label="Cidades encontradas"
-              >
-                {results.length > 0 ? (
-                  results.map((city, i) => (
-                    <button
-                      key={city.id}
-                      role="option"
-                      aria-selected={i === highlightedIndex}
-                      className={`autocomplete-item w-full text-left ${i === highlightedIndex ? 'highlighted' : ''}`}
-                      onMouseEnter={() => setHighlightedIndex(i)}
-                      onMouseDown={() => handleSelect(city)}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style={{ color: 'var(--gray-400)', flexShrink: 0 }}>
-                        <path d="M10 2C7.24 2 5 4.24 5 7c0 4.25 5 11 5 11s5-6.75 5-11c0-2.76-2.24-5-5-5zm0 6.5c-.83 0-1.5-.67-1.5-1.5S9.17 5.5 10 5.5s1.5.67 1.5 1.5S10.83 8.5 10 8.5z" fill="currentColor"/>
-                      </svg>
-                      <div className="flex flex-col">
-                        <span style={{ fontWeight: 500, color: 'var(--gray-900)' }}>{city.name}</span>
-                        <span className="text-caption" style={{ color: 'var(--gray-400)' }}>
-                          Rio Grande do Sul
-                        </span>
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <div className="autocomplete-item" style={{ cursor: 'default' }}>
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style={{ color: 'var(--gray-300)' }}>
-                      <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2"/>
-                      <path d="M10 7v3m0 3h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                    <span style={{ color: 'var(--gray-500)' }}>
-                      Nenhuma cidade encontrada para &ldquo;{query}&rdquo;
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </motion.div>
 
