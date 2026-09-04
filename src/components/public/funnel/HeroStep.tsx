@@ -18,11 +18,11 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
   return (
     <div className="container-narrow flex flex-col h-svh w-full relative overflow-hidden">
       
-      {/* Flex spacer to push the CTA block below the center logo */}
-      <div className="flex-grow" />
+      {/* Spacer to position the CTA in the upper half of the screen */}
+      <div className="h-[25vh] md:h-[30vh]" />
 
       {/* CTA Block */}
-      <div className="flex flex-col gap-4 items-center w-full px-4 mb-[15vh] md:mb-[20vh] mx-auto max-w-sm relative z-10">
+      <div className="flex flex-col gap-4 items-center w-full px-4 mx-auto max-w-sm relative z-10">
         <button
           onClick={onStart}
           className="btn btn-primary btn-lg flex items-center justify-center gap-2 w-full"

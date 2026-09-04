@@ -97,9 +97,7 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
       <div className="container-narrow py-12 flex flex-col gap-8">
 
         {/* Success header */}
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
           className="flex flex-col items-center text-center gap-4 pt-4"
         >
           <div className="success-checkmark" role="img" aria-label="Sucesso">
@@ -122,14 +120,11 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
               Estamos orando por você. 🙏
             </p>
           </div>
-        </motion.div>
+        </div>
 
         {/* Download CTA */}
         {data.material && (
-          <motion.div
-            initial={{ opacity: 1, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0 }}
+          <div
             className="material-offer"
           >
             <div className="relative z-10 flex flex-col gap-4">
@@ -168,15 +163,12 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
                 )}
               </button>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Reminder confirmation */}
         {data.consentReminder && (
-          <motion.div
-            initial={{ opacity: 1, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0 }}
+          <div
             className="flex items-start gap-3 p-4 rounded-xl"
             style={{ 
               background: 'rgba(26, 122, 74, 0.06)', 
@@ -188,15 +180,12 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
               <strong>Ótimo!</strong> Vamos te lembrar da programação pelo WhatsApp. 
               Fique de olho nas próximas mensagens!
             </p>
-          </motion.div>
+          </div>
         )}
 
         {/* Church info */}
         {church && (
-          <motion.div
-            initial={{ opacity: 1, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0 }}
+          <div
             className="card p-5 flex flex-col gap-4"
           >
             <div className="flex items-center gap-2">
@@ -229,14 +218,11 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
                 📍 {[church.address_street, church.address_number, church.address_neighborhood].filter(Boolean).join(', ')}
               </p>
             )}
-          </motion.div>
+          </div>
         )}
 
         {/* Action buttons */}
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0 }}
+        <div
           className="flex flex-col gap-3"
         >
           {mapsUrl && (
@@ -282,7 +268,7 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
               Falar com a Igreja
             </a>
           )}
-        </motion.div>
+        </div>
 
         {/* Footer message */}
         <motion.p

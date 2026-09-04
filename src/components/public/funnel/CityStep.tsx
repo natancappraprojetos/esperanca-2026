@@ -135,21 +135,15 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
         className="container-narrow w-full flex flex-col gap-8 md:gap-10 mt-4 md:mt-12 bg-white/95 backdrop-blur-2xl border border-gray-100 px-6 sm:px-12 rounded-[32px] shadow-2xl"
         style={{ paddingTop: '2.5rem', paddingBottom: '2.5rem' }}
       >
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0 }}
+        <div
           className="flex flex-col gap-3 text-center"
         >
           <h2 className="text-heading-2" style={{ color: 'var(--gray-900)' }}>
             Em qual cidade você está?
           </h2>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0 }}
+        <div
           className="relative"
         >
           <div className="form-group">
@@ -270,7 +264,7 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
               <span>{locating ? 'Buscando sua localização...' : 'Usar minha localização atual'}</span>
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Suggestion note */}
       </div>

@@ -141,9 +141,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
   return (
     <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
       <div className="container-narrow flex flex-col gap-8 py-12">
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
           className="flex flex-col gap-3"
         >
           <div className="flex items-center gap-2">
@@ -163,12 +161,9 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
           <p className="text-body" style={{ color: 'var(--gray-500)' }}>
             Encontraremos a programação mais próxima de você.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0 }}
+        <div
           className="relative"
         >
           <div className="form-group">
@@ -234,13 +229,11 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
 
         {/* Not found state */}
         {notFound && (
-          <motion.div
-            initial={{ opacity: 1, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div
             className="card-soft p-5 flex flex-col gap-4"
           >
             <p style={{ color: 'var(--gray-700)', fontWeight: 500 }}>
@@ -290,7 +283,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
                 Usar bairro &ldquo;{query}&rdquo;
               </button>
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
     </div>

@@ -38,9 +38,7 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
     return (
       <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
         <div className="container-narrow flex flex-col gap-6 py-10">
-          <motion.div
-            initial={{ opacity: 1, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div
             exit={{ opacity: 0, y: -10 }}
             className="w-full max-w-lg mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-center"
           >
@@ -61,7 +59,7 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
             >
               Baixar Material Digital
             </button>
-          </motion.div>
+          </div>
         </div>
       </div>
     )
@@ -135,21 +133,16 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
   return (
     <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
       <div className="container-narrow flex flex-col gap-6 py-10">
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
+        <div
           className="flex flex-col gap-2"
         >
           <span className="text-overline" style={{ color: 'var(--green)' }}>
             ✓ Encontramos uma programação perto de você
           </span>
-        </motion.div>
+        </div>
 
         {/* Banner */}
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0 }}
+        <div
           className="church-banner"
           style={{ 
             background: 'var(--gray-100)',
@@ -220,17 +213,14 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
               <p style={{ color: 'var(--gray-400)' }}>{church.name}</p>
             </div>
           )}
-        </motion.div>
+        </div>
 
 
 
 
 
         {/* Continue CTA */}
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0 }}
+        <div
         >
           <button
             onClick={onContinue}
@@ -242,7 +232,7 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
             </svg>
             Baixar Livro Digital
           </button>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

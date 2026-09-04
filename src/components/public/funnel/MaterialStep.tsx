@@ -49,10 +49,7 @@ export default function MaterialStep({ material, onDownloadRequest, onSkip, data
       <div className="container-narrow py-12 flex flex-col gap-8">
         
         {/* Gift icon */}
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0 }}
+        <div
           className="flex justify-center"
         >
           <div 
@@ -69,13 +66,10 @@ export default function MaterialStep({ material, onDownloadRequest, onSkip, data
           >
             🎁
           </div>
-        </motion.div>
+        </div>
 
         {/* Material offer */}
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0 }}
+        <div
           className="material-offer"
         >
           <div className="relative z-10 flex flex-col gap-5">
@@ -147,13 +141,10 @@ export default function MaterialStep({ material, onDownloadRequest, onSkip, data
               Baixar Meu Livro Digital
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Skip option */}
-        <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0 }}
+        <div
           className="text-center"
         >
           <button
@@ -169,7 +160,7 @@ export default function MaterialStep({ material, onDownloadRequest, onSkip, data
           >
             Continuar sem o livro
           </button>
-        </motion.div>
+        </div>
       </div>
     </div>
   )
