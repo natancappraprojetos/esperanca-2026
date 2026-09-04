@@ -102,11 +102,22 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
       })
 
       if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Erro ao enviar seus dados. Tente novamente.')
+        let errMessage = 'Erro ao enviar seus dados. Tente novamente.'
+        try {
+          const err = await res.json()
+          errMessage = err.error || errMessage
+        } catch {
+          // JSON parse failed, keep default message
+        }
+        throw new Error(errMessage)
       }
 
-      const result = await res.json()
+      let result
+      try {
+        result = await res.json()
+      } catch {
+        result = { leadId: 'unknown' }
+      }
 
       trackEvent('LeadCompleted', {
         campaign_id: campaign.id,
@@ -148,30 +159,14 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
 
   return (
     <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
-      <div className="container-narrow py-12">
+      <div className="w-full max-w-md mx-auto px-4 py-8 sm:py-12">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col gap-8 bg-black/60 backdrop-blur-2xl border border-gray-700/50 p-8 sm:p-12 rounded-[32px] shadow-2xl max-w-md mx-auto"
+          className="flex flex-col gap-8 bg-black/60 backdrop-blur-2xl border border-gray-700/50 p-6 sm:p-10 rounded-[24px] sm:rounded-[32px] shadow-2xl w-full"
         >
           {/* Header */}
           <div className="flex flex-col gap-2 text-center">
-            <div 
-              className="flex items-center justify-center mx-auto"
-              style={{
-                width: 56,
-                height: 56,
-                background: 'linear-gradient(135deg, rgba(26, 122, 74, 0.2), rgba(34, 160, 91, 0.4))',
-                borderRadius: '50%',
-                fontSize: '1.5rem',
-                marginBottom: '0.5rem',
-                border: '1px solid rgba(34, 160, 91, 0.3)',
-                boxShadow: '0 4px 20px rgba(26, 122, 74, 0.2)'
-              }}
-              role="img" aria-label="Livro"
-            >
-              📖
-            </div>
             <h2 className="text-heading-2" style={{ color: 'var(--white)' }}>
               Seu livro está quase pronto.
             </h2>
@@ -244,8 +239,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
 
             {/* Reminder consent */}
             <div 
-              className="p-5 flex flex-col gap-4 rounded-2xl"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid var(--gray-700)' }}
+              className="flex flex-col gap-4 py-2"
               role="group"
               aria-labelledby="reminder-legend"
             >
@@ -287,7 +281,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
                   className="checkbox-input"
                   {...register('consentData')}
                 />
-                <span className="checkbox-label">
+                <span className="checkbox-label" style={{ color: 'var(--white)' }}>
                   Li e concordo com a{' '}
                   <a 
                     href="/politica-de-privacidade"

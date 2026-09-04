@@ -167,44 +167,52 @@ export function FunnelPage({
       
       {/* Content wrapper with z-index to sit above the fixed backgrounds */}
       <div className="relative z-10 min-h-screen flex flex-col">
-      {/* Step indicator (hidden on hero) */}
+      {/* Progress & Back logic kept separate from animations to avoid flashing */}
+      
       {currentStep !== 'hero' && currentStep !== 'confirmation' && (
-        <div className="fixed top-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-sm border-b border-gray-100">
-          <div className="container-narrow py-3 flex items-center justify-between">
-            <button 
-              onClick={() => goTo(STEP_ORDER[currentIndex - 1])}
-              className="btn btn-ghost py-1 px-2 text-sm flex items-center gap-1"
-              aria-label="Voltar"
+        <div className="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+          <div className="container-narrow h-16 flex items-center justify-between">
+            <button
+              onClick={() => {
+                const idx = getStepIndex(currentStep)
+                if (idx > 1) {
+                  goTo(STEP_ORDER[idx - 1])
+                } else {
+                  goTo('hero')
+                }
+              }}
+              className="text-primary font-medium flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              ← Voltar
+              <span aria-hidden="true">←</span> Voltar
             </button>
-            <div className="step-indicator">
-              {STEP_ORDER.slice(1, -1).map((step, i) => (
-                <div
-                  key={step}
-                  className={`step-dot ${step === currentStep ? 'active' : i < currentIndex - 1 ? 'bg-red-600' : ''}`}
-                  style={{ 
-                    backgroundColor: i < currentIndex - 1 ? 'var(--red)' : undefined,
-                    opacity: i < currentIndex - 1 ? 0.5 : undefined 
-                  }}
-                />
-              ))}
+            
+            <div className="flex gap-1.5" aria-label="Progresso">
+              {['neighborhood', 'church', 'material', 'form'].map((step, i) => {
+                const isActive = getStepIndex(currentStep) >= getStepIndex(step as FunnelStep)
+                return (
+                  <div
+                    key={step}
+                    className="h-1.5 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: isActive ? 24 : 8,
+                      backgroundColor: isActive ? 'var(--red)' : 'var(--gray-200)'
+                    }}
+                  />
+                )
+              })}
             </div>
-            <div className="w-16" /> {/* spacer */}
           </div>
         </div>
       )}
 
-      <AnimatePresence mode="wait" custom={direction}>
+      {/* Main Content Area without AnimatePresence to prevent flashing */}
+      <div className="relative z-10 w-full min-h-screen">
         <motion.div
           key={currentStep}
-          custom={direction}
-          variants={variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-          className="flex-1"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="pt-16 md:pt-0"
         >
           {currentStep === 'hero' && (
             <HeroStep
@@ -260,8 +268,8 @@ export function FunnelPage({
             />
           )}
         </motion.div>
-      </AnimatePresence>
       </div>
+    </div>
     </div>
   )
 }
