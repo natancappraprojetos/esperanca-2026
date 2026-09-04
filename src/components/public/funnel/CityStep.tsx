@@ -129,7 +129,10 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
 
   return (
     <div className="min-h-svh flex flex-col items-center" style={{ paddingTop: '5rem' }}>
-      <div className="container-narrow w-full flex flex-col gap-10 mt-4 md:mt-12 bg-white/95 backdrop-blur-2xl border border-gray-100 pt-20 pb-16 px-6 sm:px-12 sm:pt-24 sm:pb-20 rounded-[32px] shadow-2xl">
+      <div 
+        className="container-narrow w-full flex flex-col gap-10 mt-4 md:mt-12 bg-white/95 backdrop-blur-2xl border border-gray-100 px-6 sm:px-12 rounded-[32px] shadow-2xl"
+        style={{ paddingTop: '5rem', paddingBottom: '5rem' }}
+      >
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
