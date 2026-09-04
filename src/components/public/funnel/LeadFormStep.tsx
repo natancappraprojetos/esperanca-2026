@@ -26,8 +26,16 @@ const schema = z.object({
   consentData: z.boolean().refine(v => v === true, {
     message: 'Você precisa aceitar a política de privacidade para continuar',
   }),
-  consentReminder: z.boolean().optional(),
+  consentReminder: z.enum(['yes', 'no']).optional(),
 })
+
+function formatWhatsApp(value: string) {
+  const digits = value.replace(/\D/g, '')
+  if (digits.length === 0) return ''
+  if (digits.length <= 2) return `(${digits}`
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`
+}
 
 type FormValues = z.infer<typeof schema>
 
@@ -35,13 +43,13 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: data.leadName || '',
       whatsapp: data.leadWhatsapp || '',
       consentData: false,
-      consentReminder: false,
+      consentReminder: undefined,
     },
   })
 
@@ -83,7 +91,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
           material_id: data.material?.id || null,
           church_assignment_method: data.assignmentMethod,
           consent_data: values.consentData,
-          consent_reminder_whatsapp: values.consentReminder || false,
+          consent_reminder_whatsapp: values.consentReminder === 'yes',
           utm_source: data.utmSource,
           utm_medium: data.utmMedium,
           utm_campaign: data.utmCampaign,
@@ -128,7 +136,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
         leadName: values.name.trim(),
         leadWhatsapp: normalizedWhatsapp,
         consentData: values.consentData,
-        consentReminder: values.consentReminder || false,
+        consentReminder: values.consentReminder === 'yes',
         leadId: result.leadId,
       })
     } catch (err) {
@@ -144,12 +152,12 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col gap-8 bg-gray-900/90 backdrop-blur-2xl border border-gray-700/50 p-6 sm:p-10 rounded-[32px] shadow-2xl max-w-xl mx-auto"
+          className="flex flex-col gap-8 bg-black/60 backdrop-blur-2xl border border-gray-700/50 p-8 sm:p-12 rounded-[32px] shadow-2xl max-w-md mx-auto"
         >
           {/* Header */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 text-center">
             <div 
-              className="flex items-center justify-center"
+              className="flex items-center justify-center mx-auto"
               style={{
                 width: 56,
                 height: 56,
@@ -218,6 +226,11 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
                 autoComplete="tel"
                 inputMode="numeric"
                 {...register('whatsapp')}
+                onChange={(e) => {
+                  const formatted = formatWhatsApp(e.target.value)
+                  e.target.value = formatted
+                  setValue('whatsapp', formatted, { shouldValidate: true })
+                }}
               />
               {errors.whatsapp && (
                 <span className="form-error" role="alert">
@@ -250,12 +263,6 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
                     value="yes"
                     className="radio-input"
                     {...register('consentReminder')}
-                    onChange={() => {}}
-                    onClick={() => {
-                      const el = document.querySelector('input[name="consentReminder"][value="yes"]') as HTMLInputElement
-                      if (el) el.checked = true
-                      setValue('consentReminder', 'yes', { shouldValidate: true, shouldDirty: true })
-                    }}
                   />
                   <span>Sim, quero receber lembretes pelo WhatsApp</span>
                 </label>
@@ -265,12 +272,6 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
                     value="no"
                     className="radio-input"
                     {...register('consentReminder')}
-                    onChange={() => {}}
-                    onClick={() => {
-                      const el = document.querySelector('input[name="consentReminder"][value="no"]') as HTMLInputElement
-                      if (el) el.checked = true
-                      setValue('consentReminder', 'no', { shouldValidate: true, shouldDirty: true })
-                    }}
                   />
                   <span>Não, obrigado</span>
                 </label>
