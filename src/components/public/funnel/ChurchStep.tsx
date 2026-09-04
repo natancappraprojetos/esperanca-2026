@@ -166,7 +166,7 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
                 <img
                   src={banner.image_desktop_url || banner.image_mobile_url || ''}
                   alt={`Banner da ${church.name}`}
-                  className="w-full h-auto object-contain"
+                  className="w-full h-auto object-contain mx-auto max-h-[65vh]"
                   style={{ borderRadius: 'var(--radius-xl)' }}
                 />
               </picture>
@@ -174,19 +174,25 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
               {/* Overlay Download Button */}
               <button
                 onClick={handleSave}
-                className="absolute top-4 right-4 bg-white/90 backdrop-blur shadow-lg p-3 rounded-full hover:scale-105 active:scale-95 transition-all text-gray-900 flex items-center justify-center"
-                aria-label="Baixar Imagem"
-                title="Baixar imagem"
+                className="absolute top-4 right-4 bg-white/95 backdrop-blur shadow-xl px-4 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all text-gray-900 flex items-center gap-2 text-sm font-semibold border border-gray-100"
+                aria-label="Baixar convite"
+                title="Baixar convite"
               >
                 {saved ? (
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M16 5L7 14l-4-4" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                      <path d="M16 5L7 14l-4-4" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>Salvo!</span>
+                  </>
                 ) : (
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M10 14l-5-5 1.4-1.4L9 11.2V2h2v9.2l2.6-2.6L15 9l-5 5z" fill="currentColor"/>
-                    <path d="M3 16h14v2H3z" fill="currentColor"/>
-                  </svg>
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                      <path d="M10 14l-5-5 1.4-1.4L9 11.2V2h2v9.2l2.6-2.6L15 9l-5 5z" fill="currentColor"/>
+                      <path d="M3 16h14v2H3z" fill="currentColor"/>
+                    </svg>
+                    <span>Baixe seu convite</span>
+                  </>
                 )}
               </button>
             </div>
