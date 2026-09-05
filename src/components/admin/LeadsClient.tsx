@@ -26,6 +26,7 @@ export default function LeadsClient({
   const router = useRouter()
   const searchParams = useSearchParams()
   const [exporting, setExporting] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const totalPages = Math.ceil(total / limit)
   const isChurchAdmin = profile.role === 'church_admin'
 
@@ -66,6 +67,24 @@ export default function LeadsClient({
       window.open(`/api/admin/leads/export?${params.toString()}`, '_blank')
     } catch { } finally {
       setExporting(false)
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!window.confirm('Tem certeza que deseja excluir este lead? Essa ação não pode ser desfeita.')) return
+    
+    setDeletingId(id)
+    try {
+      const res = await fetch(`/api/admin/leads/${id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const json = await res.json()
+        throw new Error(json.error || 'Erro ao excluir')
+      }
+      router.refresh()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erro ao excluir')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -187,13 +206,14 @@ export default function LeadsClient({
                 <th>Lembrete</th>
                 <th>Origem</th>
                 <th>Data</th>
+                {!isChurchAdmin && <th style={{ textAlign: 'right' }}>Ações</th>}
               </tr>
             </thead>
             <tbody>
               {leads.length === 0 ? (
                 <tr>
                   <td 
-                    colSpan={isChurchAdmin ? 7 : 8} 
+                    colSpan={isChurchAdmin ? 7 : 9} 
                     style={{ textAlign: 'center', padding: '3rem', color: 'var(--gray-400)' }}
                   >
                     Nenhum lead encontrado com esses filtros.
@@ -235,6 +255,19 @@ export default function LeadsClient({
                         hour: '2-digit', minute: '2-digit',
                       })}
                     </td>
+                    {!isChurchAdmin && (
+                      <td style={{ textAlign: 'right' }}>
+                        <button
+                          onClick={() => handleDelete(lead.id)}
+                          disabled={deletingId === lead.id}
+                          className="btn btn-secondary"
+                          style={{ padding: '0.25rem 0.5rem', color: 'var(--red)', border: 'none', background: 'transparent' }}
+                          title="Excluir lead"
+                        >
+                          {deletingId === lead.id ? '⏳' : '🗑️'}
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
