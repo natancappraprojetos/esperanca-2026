@@ -10,6 +10,7 @@ export default function PastorsClient({ initialPastors }: { initialPastors: any[
   const [pastors, setPastors] = useState(initialPastors)
   const [search, setSearch] = useState('')
   const [churchFilter, setChurchFilter] = useState('')
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null)
 
   const [editingPastor, setEditingPastor] = useState<any | null>(null)
   const [editName, setEditName] = useState('')
@@ -31,7 +32,34 @@ export default function PastorsClient({ initialPastors }: { initialPastors: any[
   const filteredPastors = pastors
     .filter(p => p.full_name.toLowerCase().includes(search.toLowerCase()))
     .filter(p => (churchFilter ? p.church_id === churchFilter : true))
-    .sort((a, b) => a.full_name.localeCompare(b.full_name))
+    .sort((a, b) => {
+      if (!sortConfig) return a.full_name.localeCompare(b.full_name)
+      
+      let aValue: any = a[sortConfig.key] || ''
+      let bValue: any = b[sortConfig.key] || ''
+      
+      if (sortConfig.key === 'church') {
+        aValue = a.churches?.name || ''
+        bValue = b.churches?.name || ''
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
+      return 0
+    })
+
+  const requestSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc'
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
+  }
+
+  const getSortIndicator = (key: string) => {
+    if (!sortConfig || sortConfig.key !== key) return null
+    return sortConfig.direction === 'asc' ? ' ↑' : ' ↓'
+  }
 
   function handleEditClick(pastor: any) {
     setEditingPastor(pastor)
@@ -113,10 +141,10 @@ export default function PastorsClient({ initialPastors }: { initialPastors: any[
         <table className="table">
           <thead>
             <tr>
-              <th>Nome</th>
+              <th onClick={() => requestSort('full_name')} className="cursor-pointer hover:bg-gray-50 select-none">Nome{getSortIndicator('full_name')}</th>
               <th>Função</th>
-              <th>Igreja Designada</th>
-              <th>Telefone</th>
+              <th onClick={() => requestSort('church')} className="cursor-pointer hover:bg-gray-50 select-none">Igreja Designada{getSortIndicator('church')}</th>
+              <th onClick={() => requestSort('phone')} className="cursor-pointer hover:bg-gray-50 select-none">Telefone{getSortIndicator('phone')}</th>
               <th>Ações</th>
             </tr>
           </thead>

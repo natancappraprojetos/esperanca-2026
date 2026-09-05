@@ -15,6 +15,7 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [] 
   const [churches, setChurches] = useState(initialChurches)
   const [search, setSearch] = useState('')
   const [regionFilter, setRegionFilter] = useState('')
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null)
   
   const [editingChurch, setEditingChurch] = useState<any | null>(null)
   const [editName, setEditName] = useState('')
@@ -32,7 +33,43 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [] 
       c.cities?.name?.toLowerCase().includes(search.toLowerCase())
     )
     .filter(c => (regionFilter ? String(c.region) === regionFilter : true))
-    .sort((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => {
+      if (!sortConfig) return a.name.localeCompare(b.name)
+      
+      let aValue: any = a[sortConfig.key]
+      let bValue: any = b[sortConfig.key]
+      
+      if (sortConfig.key === 'city') {
+        aValue = a.cities?.name || ''
+        bValue = b.cities?.name || ''
+      } else if (sortConfig.key === 'pastor') {
+        aValue = a.pastors?.[0]?.full_name || ''
+        bValue = b.pastors?.[0]?.full_name || ''
+      } else if (sortConfig.key === 'campaign') {
+        aValue = a.campaign_churches?.find((cc: any) => cc.campaigns.status === 'active')?.campaigns?.name || ''
+        bValue = b.campaign_churches?.find((cc: any) => cc.campaigns.status === 'active')?.campaigns?.name || ''
+      } else if (sortConfig.key === 'region') {
+        aValue = a.region || 0
+        bValue = b.region || 0
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
+      return 0
+    })
+
+  const requestSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc'
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
+  }
+
+  const getSortIndicator = (key: string) => {
+    if (!sortConfig || sortConfig.key !== key) return null
+    return sortConfig.direction === 'asc' ? ' ↑' : ' ↓'
+  }
 
   function handleEditClick(church: any) {
     setEditingChurch(church)
@@ -172,13 +209,13 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [] 
           <table className="table">
             <thead>
               <tr>
-                <th>Status</th>
-                <th>Igreja</th>
-                <th>Cidade</th>
-                <th>Região</th>
-                <th>Pregador</th>
-                <th>Pr. Distrital</th>
-                <th>Campanha Atual</th>
+                <th onClick={() => requestSort('status')} className="cursor-pointer hover:bg-gray-50 select-none">Status{getSortIndicator('status')}</th>
+                <th onClick={() => requestSort('name')} className="cursor-pointer hover:bg-gray-50 select-none">Igreja{getSortIndicator('name')}</th>
+                <th onClick={() => requestSort('city')} className="cursor-pointer hover:bg-gray-50 select-none">Cidade{getSortIndicator('city')}</th>
+                <th onClick={() => requestSort('region')} className="cursor-pointer hover:bg-gray-50 select-none">Região{getSortIndicator('region')}</th>
+                <th onClick={() => requestSort('pastor')} className="cursor-pointer hover:bg-gray-50 select-none">Pregador{getSortIndicator('pastor')}</th>
+                <th onClick={() => requestSort('district_pastor')} className="cursor-pointer hover:bg-gray-50 select-none">Pr. Distrital{getSortIndicator('district_pastor')}</th>
+                <th onClick={() => requestSort('campaign')} className="cursor-pointer hover:bg-gray-50 select-none">Campanha Atual{getSortIndicator('campaign')}</th>
                 <th>Ações</th>
               </tr>
             </thead>
