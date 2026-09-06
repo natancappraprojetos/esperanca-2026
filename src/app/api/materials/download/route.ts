@@ -58,10 +58,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Cadastro necessário para download' }, { status: 403 })
   }
 
+  // If file_url is an external link or a public folder asset, return it directly
+  if (material.file_url.startsWith('http') || material.file_url.startsWith('/')) {
+    return NextResponse.json({ 
+      url: material.file_url,
+      name: material.name,
+    })
+  }
+
   // Generate signed URL (valid for 5 minutes)
   // The file_url is a Supabase Storage path like: materials/contagem-regressiva.pdf
   const bucketName = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET_MATERIALS || 'materials'
-  const filePath = material.file_url.startsWith(bucketName + '/') 
+  const filePath = material.file_url.startsWith(bucketName + '/')  
     ? material.file_url.substring(bucketName.length + 1)
     : material.file_url
 
