@@ -615,9 +615,9 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
               </button>
             </div>
 
-            <div className="p-5 flex flex-col gap-5 max-h-[80vh] overflow-y-auto">
+            <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
               {/* ---- Informações básicas ---- */}
-              <section className="flex flex-col gap-3">
+              <section className="space-y-4">
                 <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
                   Informações Básicas
                 </h4>
@@ -693,7 +693,7 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
               </section>
 
               {/* ---- Endereço ---- */}
-              <section className="flex flex-col gap-3 pt-2 border-t border-gray-100">
+              <section className="space-y-4 pt-4 border-t border-gray-100">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
                     Endereço
@@ -811,9 +811,19 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
                           <p className="text-xs text-gray-500 mt-0.5">{geocodeAddress}</p>
                         )}
                         {geocodeCoords && (
-                          <p className="text-xs text-gray-400 mt-0.5">
-                            {geocodeCoords.lat.toFixed(6)}, {geocodeCoords.lng.toFixed(6)}
-                          </p>
+                          <div className="flex items-center gap-3 mt-1.5">
+                            <p className="text-xs text-gray-400">
+                              {geocodeCoords.lat.toFixed(6)}, {geocodeCoords.lng.toFixed(6)}
+                            </p>
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${geocodeCoords.lat},${geocodeCoords.lng}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                            >
+                              Ver no Mapa
+                            </a>
+                          </div>
                         )}
                       </div>
                     )}
