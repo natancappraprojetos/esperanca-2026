@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
         })
 
         if (nearestChurches && Array.isArray(nearestChurches) && nearestChurches.length > 0) {
-          result = { ...nearestChurches[0], assignment_method: 'proximity_custom' }
+          result = { ...nearestChurches[0], assignment_method: 'proximity' }
         }
 
       }

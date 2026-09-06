@@ -94,12 +94,9 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
 
   return (
     <div className="min-h-svh flex flex-col w-full" style={{ background: 'var(--cream)' }}>
-      <div className="w-full max-w-md mx-auto px-4 py-12 flex flex-col gap-8">
+      <div className="w-full max-w-md mx-auto px-4 py-12 flex flex-col items-center text-center gap-8">
 
-        {/* Success header */}
-        <div
-          className="flex flex-col items-center text-center gap-4 pt-4"
-        >
+        <div className="flex flex-col items-center text-center gap-4 pt-4">
           <div className="success-checkmark" role="img" aria-label="Sucesso">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
               <path d="M5 13l4 4L19 7" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -186,9 +183,9 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
         {/* Church info */}
         {church && (
           <div
-            className="card p-5 flex flex-col gap-4"
+            className="card p-5 flex flex-col gap-4 items-center text-center"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center gap-2">
               <div 
                 className="w-1 h-8 rounded-full flex-shrink-0"
                 style={{ backgroundColor: 'var(--red)' }}
@@ -202,7 +199,7 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
             </div>
 
             {schedules.length > 0 && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col items-center justify-center gap-2">
                 {schedules.map((s, i) => (
                   <div key={i} className="flex items-center gap-3 text-small" style={{ color: 'var(--gray-600)' }}>
                     <span style={{ fontWeight: 600, color: 'var(--gray-800)' }}>{s.day}</span>
