@@ -142,18 +142,7 @@ export function FunnelPage({
   return (
     <div className="funnel-wrapper min-h-screen text-gray-900 relative overflow-x-hidden">
       {/* Background Images */}
-      <div className="fixed inset-0 z-0 hidden md:block">
-        <Image
-          src="/images/bg-desktop-2.jpg"
-          alt="Background"
-          fill
-          priority
-          quality={100}
-          unoptimized
-          style={{ objectFit: 'cover', objectPosition: 'center top' }}
-        />
-      </div>
-      <div className="fixed inset-0 z-0 block md:hidden">
+      <div className="fixed inset-0 z-0">
         <Image
           src="/images/bg-mobile-2.png"
           alt="Background"
