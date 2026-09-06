@@ -49,7 +49,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
       name: data.leadName || '',
       whatsapp: data.leadWhatsapp || '',
       consentData: false,
-      consentReminder: undefined,
+      consentReminder: 'yes',
     },
   })
 
@@ -158,9 +158,9 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
   }
 
   return (
-    <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
-      <div className="w-full max-w-md mx-auto px-4 py-8 sm:py-12">
-        <div className="flex flex-col gap-8 bg-black/60 backdrop-blur-2xl border border-gray-700/50 p-6 sm:p-10 rounded-[24px] sm:rounded-[32px] shadow-2xl w-full">
+    <div className="min-h-svh flex flex-col items-center justify-center w-full" style={{ paddingTop: '4rem', paddingBottom: '4rem' }}>
+      <div className="w-full max-w-lg mx-auto px-6 py-12 sm:py-16">
+        <div className="flex flex-col gap-10 bg-black/60 backdrop-blur-2xl border border-gray-700/50 p-8 sm:p-12 rounded-[32px] sm:rounded-[40px] shadow-2xl w-full">
           {/* Header */}
           <div className="flex flex-col gap-2 text-center">
             <h2 className="text-heading-2" style={{ color: 'var(--white)' }}>
