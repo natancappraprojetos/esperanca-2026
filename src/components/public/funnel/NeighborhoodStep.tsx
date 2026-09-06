@@ -99,10 +99,10 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
       })
       if (!isCustom) {
         params.set('neighborhood_id', neighborhood.id)
-      } else {
-        // Para bairros customizados, passa o texto para geocodificação no servidor
-        params.set('neighborhood_text', neighborhood.name)
       }
+      // Sempre passa o texto para permitir fallback de geocodificação no servidor
+      // caso o bairro no banco não tenha centróide.
+      params.set('neighborhood_text', neighborhood.name)
 
       const res = await fetch(`/api/geo/find-church?${params.toString()}`)
       const json = await res.json()

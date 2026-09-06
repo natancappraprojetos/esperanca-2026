@@ -87,11 +87,12 @@ export async function GET(request: NextRequest) {
   }
 
   // ============================================================
-  // CASO 2: bairro digitado manualmente (não é UUID, ex: 'custom-Meu Bairro')
-  // Tenta geocodificar o texto + city_id e usa find_church_for_neighborhood
-  // com um neighborhood virtual baseado nas coordenadas obtidas
+  // CASO 2: Se não houver resultado, ou se o resultado foi 'fallback' genérico,
+  // tenta geocodificar o texto + city_id e usa find_nearest_church_for_point
   // ============================================================
-  if (!result && cityId && neighborhoodText && !isValidUUID(neighborhoodId)) {
+  const isFallback = result?.assignment_method === 'fallback'
+  
+  if ((!result || isFallback) && cityId && neighborhoodText) {
     // Busca a cidade para obter nome e estado (para geocodificação mais precisa)
     const { data: cityData } = await supabase
       .from('cities')
