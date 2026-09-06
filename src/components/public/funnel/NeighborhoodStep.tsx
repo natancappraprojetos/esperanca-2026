@@ -190,7 +190,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
                 ref={inputRef}
                 type="text"
                 className="form-input"
-                placeholder="Digite seu bairro, rua ou região..."
+                placeholder="Digite seu bairro ou região..."
                 value={query}
                 onChange={handleInput}
                 onFocus={() => setFocused(true)}
