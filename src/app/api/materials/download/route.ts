@@ -8,11 +8,12 @@ const schema = z.object({
 })
 
 export async function POST(request: NextRequest) {
-  let body: unknown
+  let body: unknown = {}
   try {
-    body = await request.json()
+    const text = await request.text()
+    if (text) body = JSON.parse(text)
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+    // Ignore JSON parse error, proceed to fallback
   }
 
   const parsed = schema.safeParse(body)
