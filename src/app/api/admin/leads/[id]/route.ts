@@ -43,10 +43,13 @@ export async function DELETE(
     // We use admin client to bypass any RLS on delete if necessary
     const adminSupabase = await createAdminClient()
     
-    // Deleting a lead will cascade delete contacts and lead_consents if foreign keys are set up correctly.
-    // If not, we should delete consents first, then lead, then contact (if contact not shared).
-    // Let's just delete the lead first. If it fails due to FK, we'll see it in the error.
+    // Delete tracking records first (foreign key without ON DELETE CASCADE)
+    await adminSupabase.from('lead_tracking').delete().eq('lead_id', id)
+
+    // Delete consents
+    await adminSupabase.from('lead_consents').delete().eq('lead_id', id)
     
+    // Delete the lead
     const { error } = await adminSupabase
       .from('leads')
       .delete()
@@ -54,7 +57,7 @@ export async function DELETE(
 
     if (error) {
       console.error('Delete lead error:', error)
-      return NextResponse.json({ error: 'Erro ao excluir o lead' }, { status: 500 })
+      return NextResponse.json({ error: 'Erro ao excluir o lead: ' + error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
