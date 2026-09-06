@@ -185,17 +185,11 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
           <div
             className="card p-5 flex flex-col gap-4 items-center text-center"
           >
-            <div className="flex items-center justify-center gap-2">
-              <div 
-                className="w-1 h-8 rounded-full flex-shrink-0"
-                style={{ backgroundColor: 'var(--red)' }}
-              />
-              <div>
-                <p className="text-overline" style={{ color: 'var(--gray-500)' }}>
-                  Programação
-                </p>
-                <p style={{ fontWeight: 600, color: 'var(--gray-900)' }}>{church.name}</p>
-              </div>
+            <div className="flex flex-col items-center justify-center gap-1">
+              <p className="text-overline" style={{ color: 'var(--gray-500)' }}>
+                Programação
+              </p>
+              <p style={{ fontWeight: 600, color: 'var(--gray-900)' }}>{church.name}</p>
             </div>
 
             {schedules.length > 0 && (

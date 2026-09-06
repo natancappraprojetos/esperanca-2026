@@ -45,6 +45,7 @@ export async function DELETE(
     
     // Delete tracking records first (foreign key without ON DELETE CASCADE)
     await adminSupabase.from('lead_tracking').delete().eq('lead_id', id)
+    await adminSupabase.from('funnel_events').delete().eq('lead_id', id)
 
     // Delete consents
     await adminSupabase.from('lead_consents').delete().eq('lead_id', id)
