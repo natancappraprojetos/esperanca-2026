@@ -211,6 +211,7 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
                   </div>
                 ))}
               </div>
+            )}
           </div>
         )}
 
