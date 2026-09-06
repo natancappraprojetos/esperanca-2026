@@ -1,156 +1,424 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'react-hot-toast'
-import { Save, X } from 'lucide-react'
+import { Save, X, Plus, MapPin, RefreshCw, CheckCircle, AlertCircle, Loader } from 'lucide-react'
+
+interface City {
+  id: string
+  name: string
+  state_id: string
+  states: { id: string; name: string; uf: string } | null
+}
 
 interface ChurchesClientProps {
   churches: any[]
   pixels?: any[]
+  cities: City[]
 }
 
-export default function ChurchesClient({ churches: initialChurches, pixels = [] }: ChurchesClientProps) {
+type GeocodeStatus = 'idle' | 'loading' | 'ok' | 'failed'
+
+type ModalMode = 'edit' | 'create'
+
+const EMPTY_FORM = {
+  name: '',
+  city_id: '',
+  address_street: '',
+  address_number: '',
+  address_complement: '',
+  address_neighborhood: '',
+  address_cep: '',
+  district_pastor: '',
+  pixel_id: '',
+}
+
+export default function ChurchesClient({ churches: initialChurches, pixels = [], cities }: ChurchesClientProps) {
   const [churches, setChurches] = useState(initialChurches)
   const [search, setSearch] = useState('')
-  const [regionFilter, setRegionFilter] = useState('')
+  const [cityFilter, setCityFilter] = useState('')
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null)
-  
+
+  const [modalMode, setModalMode] = useState<ModalMode>('edit')
   const [editingChurch, setEditingChurch] = useState<any | null>(null)
-  const [editName, setEditName] = useState('')
-  const [editDistrictPastor, setEditDistrictPastor] = useState('')
-  const [editPixelId, setEditPixelId] = useState('')
+  const [form, setForm] = useState(EMPTY_FORM)
   const [isSaving, setIsSaving] = useState(false)
+  const [geocodeStatus, setGeocodeStatus] = useState<GeocodeStatus>('idle')
+  const [geocodeAddress, setGeocodeAddress] = useState<string | null>(null)
+  const [geocodeCoords, setGeocodeCoords] = useState<{ lat: number; lng: number } | null>(null)
+
+  // Estado local de pixels (mutável para feedback imediato)
+  const [localPixels, setLocalPixels] = useState(pixels)
 
   const supabase = createClient()
 
-  const regions = Array.from(new Set(churches.map(c => c.region).filter(Boolean))).sort()
+  // ------------------------------------
+  // Filtragem e ordenação
+  // ------------------------------------
+  const uniqueCityIds = Array.from(new Set(churches.map((c) => c.city_id).filter(Boolean)))
+  const cityOptions = cities.filter((c) => uniqueCityIds.includes(c.id))
 
   const filtered = churches
-    .filter(c => 
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.cities?.name?.toLowerCase().includes(search.toLowerCase())
+    .filter(
+      (c) =>
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.cities?.name?.toLowerCase().includes(search.toLowerCase()) ||
+        c.address_neighborhood?.toLowerCase().includes(search.toLowerCase())
     )
-    .filter(c => (regionFilter ? String(c.region) === regionFilter : true))
+    .filter((c) => (cityFilter ? c.city_id === cityFilter : true))
     .sort((a, b) => {
       if (!sortConfig) return a.name.localeCompare(b.name)
-      
       let aValue: any = a[sortConfig.key]
       let bValue: any = b[sortConfig.key]
-      
       if (sortConfig.key === 'city') {
         aValue = a.cities?.name || ''
         bValue = b.cities?.name || ''
       } else if (sortConfig.key === 'pastor') {
         aValue = a.pastors?.[0]?.full_name || ''
         bValue = b.pastors?.[0]?.full_name || ''
-      } else if (sortConfig.key === 'campaign') {
-        aValue = a.campaign_churches?.find((cc: any) => cc.campaigns.status === 'active')?.campaigns?.name || ''
-        bValue = b.campaign_churches?.find((cc: any) => cc.campaigns.status === 'active')?.campaigns?.name || ''
-      } else if (sortConfig.key === 'region') {
-        aValue = a.region || 0
-        bValue = b.region || 0
       }
-
       if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1
       if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1
       return 0
     })
 
-  const requestSort = (key: string) => {
+  function requestSort(key: string) {
     let direction: 'asc' | 'desc' = 'asc'
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc'
-    }
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc'
     setSortConfig({ key, direction })
   }
 
-  const getSortIndicator = (key: string) => {
+  function getSortIndicator(key: string) {
     if (!sortConfig || sortConfig.key !== key) return null
     return sortConfig.direction === 'asc' ? ' ↑' : ' ↓'
   }
 
-  function handleEditClick(church: any) {
+  // ------------------------------------
+  // Abertura do modal
+  // ------------------------------------
+  function openEditModal(church: any) {
+    setModalMode('edit')
     setEditingChurch(church)
-    setEditName(church.name || '')
-    setEditDistrictPastor(church.district_pastor || '')
-    
-    const existingPixel = pixels.find(p => p.church_id === church.id)
-    setEditPixelId(existingPixel?.pixel_id || '')
+    const existingPixel = localPixels.find((p) => p.church_id === church.id)
+    setForm({
+      name: church.name || '',
+      city_id: church.city_id || '',
+      address_street: church.address_street || '',
+      address_number: church.address_number || '',
+      address_complement: church.address_complement || '',
+      address_neighborhood: church.address_neighborhood || '',
+      address_cep: church.address_cep || '',
+      district_pastor: church.district_pastor || '',
+      pixel_id: existingPixel?.pixel_id || '',
+    })
+    setGeocodeStatus(church.geocode_status === 'ok' ? 'ok' : 'idle')
+    setGeocodeAddress(church.geocode_formatted_address || null)
+    setGeocodeCoords(
+      church.latitude && church.longitude
+        ? { lat: church.latitude, lng: church.longitude }
+        : null
+    )
   }
 
+  function openCreateModal() {
+    setModalMode('create')
+    setEditingChurch(null)
+    setForm({ ...EMPTY_FORM })
+    setGeocodeStatus('idle')
+    setGeocodeAddress(null)
+    setGeocodeCoords(null)
+  }
+
+  function closeModal() {
+    setEditingChurch(null)
+    setModalMode('edit')
+    setGeocodeStatus('idle')
+    setGeocodeAddress(null)
+    setGeocodeCoords(null)
+  }
+
+  function updateField(field: keyof typeof EMPTY_FORM, value: string) {
+    setForm((prev) => ({ ...prev, [field]: value }))
+    // Se o campo de endereço mudou, reseta status de geocodificação
+    if (['address_street', 'address_number', 'address_neighborhood', 'address_cep', 'city_id'].includes(field)) {
+      setGeocodeStatus('idle')
+      setGeocodeAddress(null)
+    }
+  }
+
+  // ------------------------------------
+  // Geocodificação manual (botão)
+  // ------------------------------------
+  const handleGeocode = useCallback(
+    async (churchId?: string) => {
+      // Para criação, precisamos salvar primeiro para ter um ID
+      // Para edição, usa o ID existente
+      const id = churchId || editingChurch?.id
+      if (!id) return
+
+      setGeocodeStatus('loading')
+      try {
+        const res = await fetch('/api/admin/geocode-church', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ church_id: id }),
+        })
+        const json = await res.json()
+
+        if (!res.ok || !json.success) {
+          setGeocodeStatus('failed')
+          toast.error('Não foi possível geocodificar o endereço. Verifique os dados e tente novamente.')
+          return
+        }
+
+        setGeocodeStatus('ok')
+        setGeocodeAddress(json.formatted_address)
+        setGeocodeCoords({ lat: json.latitude, lng: json.longitude })
+        toast.success(`Localização encontrada via ${json.provider}`)
+
+        // Atualiza estado local
+        setChurches((prev) =>
+          prev.map((c) =>
+            c.id === id
+              ? { ...c, latitude: json.latitude, longitude: json.longitude, geocode_status: 'ok' }
+              : c
+          )
+        )
+      } catch {
+        setGeocodeStatus('failed')
+        toast.error('Erro ao geocodificar. Tente novamente.')
+      }
+    },
+    [editingChurch]
+  )
+
+  // ------------------------------------
+  // Salvar (edição)
+  // ------------------------------------
   async function handleSave() {
     if (!editingChurch) return
     setIsSaving(true)
 
+    const addressChanged =
+      form.address_street !== (editingChurch.address_street || '') ||
+      form.address_number !== (editingChurch.address_number || '') ||
+      form.address_neighborhood !== (editingChurch.address_neighborhood || '') ||
+      form.address_cep !== (editingChurch.address_cep || '') ||
+      form.city_id !== (editingChurch.city_id || '')
+
     try {
-      // Update church
+      const updatePayload: any = {
+        name: form.name,
+        city_id: form.city_id || editingChurch.city_id,
+        address_street: form.address_street || null,
+        address_number: form.address_number || null,
+        address_complement: form.address_complement || null,
+        address_neighborhood: form.address_neighborhood || null,
+        address_cep: form.address_cep.replace(/\D/g, '') || null,
+        district_pastor: form.district_pastor || null,
+        updated_at: new Date().toISOString(),
+      }
+
       const { error: churchError } = await supabase
         .from('churches')
-        .update({
-          name: editName,
-          district_pastor: editDistrictPastor
-        })
+        .update(updatePayload)
         .eq('id', editingChurch.id)
 
       if (churchError) throw churchError
 
-      // Update pixel
-      const existingPixel = pixels.find(p => p.church_id === editingChurch.id)
-      
-      if (!editPixelId) {
-        if (existingPixel) {
-          const { error: pixelError } = await supabase
-            .from('tracking_pixels')
-            .delete()
-            .eq('id', existingPixel.id)
-          if (pixelError) throw pixelError
-        }
-      } else {
-        if (existingPixel) {
-          const { error: pixelError } = await supabase
-            .from('tracking_pixels')
-            .update({ pixel_id: editPixelId })
-            .eq('id', existingPixel.id)
-          if (pixelError) throw pixelError
+      // Atualiza pixel
+      const existingPixel = localPixels.find((p) => p.church_id === editingChurch.id)
+      if (!form.pixel_id && existingPixel) {
+        await supabase.from('tracking_pixels').delete().eq('id', existingPixel.id)
+        setLocalPixels((prev) => prev.filter((p) => p.id !== existingPixel.id))
+      } else if (form.pixel_id && existingPixel) {
+        await supabase.from('tracking_pixels').update({ pixel_id: form.pixel_id }).eq('id', existingPixel.id)
+        setLocalPixels((prev) => prev.map((p) => (p.id === existingPixel.id ? { ...p, pixel_id: form.pixel_id } : p)))
+      } else if (form.pixel_id && !existingPixel) {
+        const { data: newPixel } = await supabase
+          .from('tracking_pixels')
+          .insert({ scope: 'church', church_id: editingChurch.id, pixel_type: 'meta', pixel_id: form.pixel_id, is_active: true })
+          .select()
+          .single()
+        if (newPixel) setLocalPixels((prev) => [...prev, newPixel])
+      }
+
+      // Se o endereço mudou, geocodifica automaticamente
+      if (addressChanged) {
+        toast.loading('Atualizando localização...', { id: 'geocode' })
+        setGeocodeStatus('loading')
+
+        const geoRes = await fetch('/api/admin/geocode-church', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ church_id: editingChurch.id }),
+        })
+        const geoJson = await geoRes.json()
+
+        if (geoJson.success) {
+          setGeocodeStatus('ok')
+          setGeocodeAddress(geoJson.formatted_address)
+          setGeocodeCoords({ lat: geoJson.latitude, lng: geoJson.longitude })
+          toast.success('Localização atualizada!', { id: 'geocode' })
         } else {
-          const { error: pixelError } = await supabase
-            .from('tracking_pixels')
-            .insert({
-              scope: 'church',
-              church_id: editingChurch.id,
-              pixel_type: 'meta',
-              pixel_id: editPixelId,
-              is_active: true
-            })
-          if (pixelError) throw pixelError
+          setGeocodeStatus('failed')
+          toast.error('Igreja salva, mas não foi possível geocodificar o endereço.', { id: 'geocode' })
         }
       }
 
-      // Update local state
-      setChurches(prev => prev.map(c => {
-        if (c.id === editingChurch.id) {
-          return { ...c, name: editName, district_pastor: editDistrictPastor }
-        }
-        return c
-      }))
-
-      // Update local pixels state mutating the passed prop is anti-pattern but works for quick UI feedback
-      if (existingPixel) {
-        existingPixel.pixel_id = editPixelId
-      } else if (editPixelId) {
-        pixels.push({ church_id: editingChurch.id, pixel_id: editPixelId })
-      }
+      // Atualiza estado local com os novos dados
+      const updatedCity = cities.find((c) => c.id === (form.city_id || editingChurch.city_id))
+      setChurches((prev) =>
+        prev.map((c) =>
+          c.id === editingChurch.id
+            ? {
+                ...c,
+                ...updatePayload,
+                cities: updatedCity
+                  ? { name: updatedCity.name, states: updatedCity.states }
+                  : c.cities,
+              }
+            : c
+        )
+      )
 
       toast.success('Igreja atualizada com sucesso!')
-      setEditingChurch(null)
+      closeModal()
     } catch (err: any) {
       toast.error('Erro ao salvar: ' + err.message)
     } finally {
       setIsSaving(false)
     }
   }
+
+  // ------------------------------------
+  // Criar nova igreja
+  // ------------------------------------
+  async function handleCreate() {
+    if (!form.name || !form.city_id) {
+      toast.error('Nome e cidade são obrigatórios.')
+      return
+    }
+    setIsSaving(true)
+
+    try {
+      // Gera slug único a partir do nome
+      const slugBase = form.name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+
+      // Busca a organização
+      const { data: orgData } = await supabase.from('organizations').select('id').limit(1).single()
+      if (!orgData) throw new Error('Organização não encontrada')
+
+      const newChurch: any = {
+        organization_id: orgData.id,
+        name: form.name,
+        city_id: form.city_id,
+        slug: `${slugBase}-${Date.now()}`,
+        address_street: form.address_street || null,
+        address_number: form.address_number || null,
+        address_complement: form.address_complement || null,
+        address_neighborhood: form.address_neighborhood || null,
+        address_cep: form.address_cep.replace(/\D/g, '') || null,
+        district_pastor: form.district_pastor || null,
+        status: 'active',
+        needs_geocode: true,
+        geocode_status: 'pending',
+      }
+
+      const { data: created, error: createError } = await supabase
+        .from('churches')
+        .insert(newChurch)
+        .select('id, name, city_id, slug')
+        .single()
+
+      if (createError) throw createError
+
+      toast.loading('Geocodificando endereço...', { id: 'geocode-create' })
+      setGeocodeStatus('loading')
+
+      const geoRes = await fetch('/api/admin/geocode-church', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ church_id: created.id }),
+      })
+      const geoJson = await geoRes.json()
+
+      if (geoJson.success) {
+        setGeocodeStatus('ok')
+        setGeocodeAddress(geoJson.formatted_address)
+        setGeocodeCoords({ lat: geoJson.latitude, lng: geoJson.longitude })
+        toast.success('Igreja criada com localização!', { id: 'geocode-create' })
+      } else {
+        setGeocodeStatus('failed')
+        toast('Igreja criada, mas sem localização. Verifique o endereço.', { id: 'geocode-create', icon: '⚠️' })
+      }
+
+      // Adiciona pixel se informado
+      if (form.pixel_id) {
+        await supabase.from('tracking_pixels').insert({
+          scope: 'church',
+          church_id: created.id,
+          pixel_type: 'meta',
+          pixel_id: form.pixel_id,
+          is_active: true,
+        })
+      }
+
+      // Adiciona na lista local (recarrega com dados completos)
+      const updatedCity = cities.find((c) => c.id === form.city_id)
+      setChurches((prev) => [
+        ...prev,
+        {
+          ...newChurch,
+          id: created.id,
+          slug: created.slug,
+          latitude: geoJson.latitude || null,
+          longitude: geoJson.longitude || null,
+          geocode_status: geoJson.success ? 'ok' : 'failed',
+          cities: updatedCity
+            ? { name: updatedCity.name, states: updatedCity.states }
+            : null,
+          pastors: [],
+          campaign_churches: [],
+        },
+      ])
+
+      closeModal()
+    } catch (err: any) {
+      toast.error('Erro ao criar igreja: ' + err.message)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // ------------------------------------
+  // Render
+  // ------------------------------------
+  const isEditing = modalMode === 'edit' && editingChurch !== null
+  const isCreating = modalMode === 'create'
+  const showModal = isEditing || isCreating
+
+  // Agrupar cidades por estado para o select
+  const citiesByState = cities.reduce<Record<string, City[]>>((acc, city) => {
+    const stateLabel = city.states ? `${city.states.name} (${city.states.uf})` : 'Sem estado'
+    if (!acc[stateLabel]) acc[stateLabel] = []
+    acc[stateLabel].push(city)
+    return acc
+  }, {})
+
+  const geocodeIcon = {
+    idle: null,
+    loading: <Loader size={14} className="animate-spin text-blue-500" />,
+    ok: <CheckCircle size={14} className="text-green-500" />,
+    failed: <AlertCircle size={14} className="text-amber-500" />,
+  }[geocodeStatus]
 
   return (
     <div className="flex flex-col gap-6 relative">
@@ -160,46 +428,58 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [] 
         className="flex items-center justify-between flex-wrap gap-4"
       >
         <div>
-          <h1 
+          <h1
             className="text-heading-2"
             style={{ fontFamily: 'var(--font-serif)', color: 'var(--gray-900)' }}
           >
             Igrejas
           </h1>
           <p className="text-small" style={{ color: 'var(--gray-500)' }}>
-            Gerencie as igrejas participantes e seus pastores
+            Gerencie as igrejas participantes — {churches.length} cadastradas
           </p>
         </div>
-        <button className="btn btn-primary">
-          + Nova Igreja
+        <button className="btn btn-primary flex items-center gap-2" onClick={openCreateModal}>
+          <Plus size={16} /> Nova Igreja
         </button>
       </motion.div>
 
+      {/* Filtros */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="flex items-center gap-3"
+        className="flex items-center gap-3 flex-wrap"
       >
         <input
           type="text"
-          placeholder="Buscar por nome ou cidade..."
-          className="form-input max-w-md"
+          placeholder="Buscar por nome, cidade ou bairro..."
+          className="form-input max-w-sm"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
         />
         <select
-          className="form-input max-w-[150px]"
-          value={regionFilter}
-          onChange={e => setRegionFilter(e.target.value)}
+          className="form-input max-w-[220px]"
+          value={cityFilter}
+          onChange={(e) => setCityFilter(e.target.value)}
         >
-          <option value="">Todas Regiões</option>
-          {regions.map((r: any) => (
-            <option key={r} value={String(r)}>Região {r}</option>
+          <option value="">Todas as cidades</option>
+          {cityOptions.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name} / {c.states?.uf}
+            </option>
           ))}
         </select>
+        {(search || cityFilter) && (
+          <button
+            className="text-small text-gray-500 hover:text-gray-800 underline"
+            onClick={() => { setSearch(''); setCityFilter('') }}
+          >
+            Limpar filtros
+          </button>
+        )}
       </motion.div>
 
+      {/* Tabela */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -209,13 +489,21 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [] 
           <table className="table">
             <thead>
               <tr>
-                <th onClick={() => requestSort('status')} className="cursor-pointer hover:bg-gray-50 select-none">Status{getSortIndicator('status')}</th>
-                <th onClick={() => requestSort('name')} className="cursor-pointer hover:bg-gray-50 select-none">Igreja{getSortIndicator('name')}</th>
-                <th onClick={() => requestSort('city')} className="cursor-pointer hover:bg-gray-50 select-none">Cidade{getSortIndicator('city')}</th>
-                <th onClick={() => requestSort('region')} className="cursor-pointer hover:bg-gray-50 select-none">Região{getSortIndicator('region')}</th>
-                <th onClick={() => requestSort('pastor')} className="cursor-pointer hover:bg-gray-50 select-none">Pregador{getSortIndicator('pastor')}</th>
-                <th onClick={() => requestSort('district_pastor')} className="cursor-pointer hover:bg-gray-50 select-none">Pr. Distrital{getSortIndicator('district_pastor')}</th>
-                <th onClick={() => requestSort('campaign')} className="cursor-pointer hover:bg-gray-50 select-none">Campanha Atual{getSortIndicator('campaign')}</th>
+                <th onClick={() => requestSort('status')} className="cursor-pointer hover:bg-gray-50 select-none">
+                  Status{getSortIndicator('status')}
+                </th>
+                <th onClick={() => requestSort('name')} className="cursor-pointer hover:bg-gray-50 select-none">
+                  Igreja{getSortIndicator('name')}
+                </th>
+                <th onClick={() => requestSort('city')} className="cursor-pointer hover:bg-gray-50 select-none">
+                  Cidade{getSortIndicator('city')}
+                </th>
+                <th>Localização</th>
+                <th onClick={() => requestSort('pastor')} className="cursor-pointer hover:bg-gray-50 select-none">
+                  Pregador{getSortIndicator('pastor')}
+                </th>
+                <th>Pr. Distrital</th>
+                <th>Campanha</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -229,7 +517,11 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [] 
               ) : (
                 filtered.map((church: any) => {
                   const pastor = church.pastors?.[0]
-                  const activeCampaign = church.campaign_churches?.find((cc: any) => cc.campaigns.status === 'active')?.campaigns
+                  const activeCampaign = church.campaign_churches?.find(
+                    (cc: any) => cc.campaigns.status === 'active'
+                  )?.campaigns
+                  const hasCoords = church.latitude && church.longitude
+                  const geocodePending = church.geocode_status === 'pending' || church.needs_geocode
 
                   return (
                     <tr key={church.id}>
@@ -243,36 +535,56 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [] 
                       <td style={{ fontWeight: 500, color: 'var(--gray-900)' }}>
                         {church.name}
                         <div className="text-caption mt-1" style={{ color: 'var(--gray-500)', fontWeight: 400 }}>
-                          {church.address_street}, {church.address_neighborhood}
+                          {[church.address_street, church.address_number, church.address_neighborhood]
+                            .filter(Boolean)
+                            .join(', ')}
                         </div>
                       </td>
                       <td style={{ color: 'var(--gray-600)' }}>
                         {church.cities?.name} / {church.cities?.states?.uf}
                       </td>
-                      <td style={{ color: 'var(--gray-600)' }}>
-                        {church.region ? `Região ${church.region}` : <span style={{ color: 'var(--gray-400)' }}>—</span>}
+                      <td>
+                        {hasCoords ? (
+                          <div className="flex items-center gap-1.5">
+                            <CheckCircle size={14} className="text-green-500 flex-shrink-0" />
+                            <span className="text-caption" style={{ color: 'var(--gray-500)' }}>
+                              {church.latitude?.toFixed(4)}, {church.longitude?.toFixed(4)}
+                            </span>
+                          </div>
+                        ) : geocodePending ? (
+                          <div className="flex items-center gap-1.5">
+                            <AlertCircle size={14} className="text-amber-500 flex-shrink-0" />
+                            <span className="text-caption" style={{ color: 'var(--amber-600)' }}>
+                              Pendente
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-caption" style={{ color: 'var(--gray-400)' }}>—</span>
+                        )}
                       </td>
                       <td style={{ color: 'var(--gray-600)' }}>
-                        {pastor ? (
-                          <div>{pastor.full_name}</div>
-                        ) : (
-                          <span style={{ color: 'var(--gray-400)' }}>—</span>
-                        )}
+                        {pastor ? pastor.full_name : <span style={{ color: 'var(--gray-400)' }}>—</span>}
                       </td>
                       <td style={{ color: 'var(--gray-600)' }}>
                         {church.district_pastor || <span style={{ color: 'var(--gray-400)' }}>—</span>}
                       </td>
                       <td style={{ color: 'var(--gray-600)' }}>
-                        {activeCampaign ? activeCampaign.name : <span style={{ color: 'var(--gray-400)' }}>—</span>}
+                        {activeCampaign ? (
+                          activeCampaign.name
+                        ) : (
+                          <span style={{ color: 'var(--gray-400)' }}>—</span>
+                        )}
                       </td>
                       <td>
-                        <button 
-                          className="text-small font-medium flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded"
-                          style={{ color: 'var(--gray-800)' }}
-                          onClick={() => handleEditClick(church)}
-                        >
-                          Editar
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="text-small font-medium flex items-center gap-1 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded"
+                            style={{ color: 'var(--gray-800)' }}
+                            onClick={() => openEditModal(church)}
+                          >
+                            Editar
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -283,75 +595,279 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [] 
         </div>
       </motion.div>
 
-      {/* Edit Modal */}
-      {editingChurch && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <motion.div 
+      {/* ============================================================
+          MODAL DE EDIÇÃO / CRIAÇÃO
+          ============================================================ */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden"
+            className="bg-white rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden my-4"
           >
+            {/* Header */}
             <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-              <h3 className="font-semibold text-lg text-gray-900">Editar Igreja</h3>
-              <button 
-                onClick={() => setEditingChurch(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
+              <h3 className="font-semibold text-lg text-gray-900">
+                {isCreating ? '+ Nova Igreja' : 'Editar Igreja'}
+              </h3>
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
                 <X size={20} />
               </button>
             </div>
-            
-            <div className="p-5 flex flex-col gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Igreja</label>
-                <input 
-                  type="text" 
-                  className="form-input w-full" 
-                  value={editName}
-                  onChange={e => setEditName(e.target.value)}
-                />
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Pastor Distrital</label>
-                <input 
-                  type="text" 
-                  className="form-input w-full" 
-                  value={editDistrictPastor}
-                  onChange={e => setEditDistrictPastor(e.target.value)}
-                  placeholder="Nome do pastor do distrito..."
-                />
-              </div>
+            <div className="p-5 flex flex-col gap-5 max-h-[80vh] overflow-y-auto">
+              {/* ---- Informações básicas ---- */}
+              <section className="flex flex-col gap-3">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                  Informações Básicas
+                </h4>
 
-              <div className="p-4 bg-gray-50 rounded-lg border border-gray-100 mt-2">
-                <label className="block text-sm font-medium text-gray-900 mb-1">ID do Meta Pixel (Específico da Igreja)</label>
-                <p className="text-xs text-gray-500 mb-2">
-                  Se preenchido, os leads desta igreja serão marcados com este Pixel além do pixel da campanha/cidade.
-                </p>
-                <input 
-                  type="text" 
-                  className="form-input w-full bg-white" 
-                  value={editPixelId}
-                  onChange={e => setEditPixelId(e.target.value)}
-                  placeholder="Ex: 1234567890123"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nome da Igreja <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="form-input w-full"
+                    value={form.name}
+                    onChange={(e) => updateField('name', e.target.value)}
+                    placeholder="Ex: IASD Vila Nova"
+                  />
+                </div>
+
+                {/* Cidade — select dinâmico do banco, sem hardcode */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cidade <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    className="form-input w-full"
+                    value={form.city_id}
+                    onChange={(e) => updateField('city_id', e.target.value)}
+                  >
+                    <option value="">Selecione a cidade...</option>
+                    {Object.entries(citiesByState)
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([stateLabel, stateCities]) => (
+                        <optgroup key={stateLabel} label={stateLabel}>
+                          {stateCities
+                            .sort((a, b) => a.name.localeCompare(b.name))
+                            .map((city) => (
+                              <option key={city.id} value={city.id}>
+                                {city.name}
+                              </option>
+                            ))}
+                        </optgroup>
+                      ))}
+                  </select>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Não encontrou a cidade?{' '}
+                    <a href="/admin/cidades" className="text-blue-500 underline" target="_blank">
+                      Cadastre em Cidades
+                    </a>
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Pastor Distrital</label>
+                    <input
+                      type="text"
+                      className="form-input w-full"
+                      value={form.district_pastor}
+                      onChange={(e) => updateField('district_pastor', e.target.value)}
+                      placeholder="Nome do pastor"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Meta Pixel ID</label>
+                    <input
+                      type="text"
+                      className="form-input w-full"
+                      value={form.pixel_id}
+                      onChange={(e) => updateField('pixel_id', e.target.value)}
+                      placeholder="1234567890123"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* ---- Endereço ---- */}
+              <section className="flex flex-col gap-3 pt-2 border-t border-gray-100">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                    Endereço
+                  </h4>
+                  <p className="text-xs text-gray-400">
+                    A geolocalização é calculada automaticamente ao salvar
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Rua / Logradouro</label>
+                    <input
+                      type="text"
+                      className="form-input w-full"
+                      value={form.address_street}
+                      onChange={(e) => updateField('address_street', e.target.value)}
+                      placeholder="Ex: Rua das Flores"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
+                    <input
+                      type="text"
+                      className="form-input w-full"
+                      value={form.address_number}
+                      onChange={(e) => updateField('address_number', e.target.value)}
+                      placeholder="123"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+                    <input
+                      type="text"
+                      className="form-input w-full"
+                      value={form.address_neighborhood}
+                      onChange={(e) => updateField('address_neighborhood', e.target.value)}
+                      placeholder="Ex: Centro"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+                    <input
+                      type="text"
+                      className="form-input w-full"
+                      value={form.address_cep}
+                      onChange={(e) => updateField('address_cep', e.target.value)}
+                      placeholder="00000-000"
+                      maxLength={9}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+                  <input
+                    type="text"
+                    className="form-input w-full"
+                    value={form.address_complement}
+                    onChange={(e) => updateField('address_complement', e.target.value)}
+                    placeholder="Sala 2, Bloco B, etc."
+                  />
+                </div>
+
+                {/* Status de geocodificação */}
+                <div
+                  className="flex items-start gap-3 p-3 rounded-lg border"
+                  style={{
+                    borderColor:
+                      geocodeStatus === 'ok'
+                        ? 'var(--green-200, #bbf7d0)'
+                        : geocodeStatus === 'failed'
+                        ? 'var(--amber-200, #fde68a)'
+                        : 'var(--gray-200)',
+                    backgroundColor:
+                      geocodeStatus === 'ok'
+                        ? 'rgba(187,247,208,0.2)'
+                        : geocodeStatus === 'failed'
+                        ? 'rgba(253,230,138,0.2)'
+                        : 'var(--gray-50)',
+                  }}
+                >
+                  <MapPin
+                    size={16}
+                    className="flex-shrink-0 mt-0.5"
+                    style={{
+                      color:
+                        geocodeStatus === 'ok'
+                          ? 'var(--green)'
+                          : geocodeStatus === 'failed'
+                          ? '#d97706'
+                          : 'var(--gray-400)',
+                    }}
+                  />
+                  <div className="flex-1">
+                    {geocodeStatus === 'idle' && (
+                      <p className="text-xs text-gray-500">
+                        {isEditing && editingChurch?.latitude
+                          ? `Localização atual: ${editingChurch.latitude.toFixed(5)}, ${editingChurch.longitude.toFixed(5)}`
+                          : 'Localização será calculada ao salvar.'}
+                      </p>
+                    )}
+                    {geocodeStatus === 'loading' && (
+                      <p className="text-xs text-blue-600 flex items-center gap-1.5">
+                        <Loader size={12} className="animate-spin" /> Geocodificando...
+                      </p>
+                    )}
+                    {geocodeStatus === 'ok' && (
+                      <div>
+                        <p className="text-xs font-medium text-green-700">✓ Localização encontrada</p>
+                        {geocodeAddress && (
+                          <p className="text-xs text-gray-500 mt-0.5">{geocodeAddress}</p>
+                        )}
+                        {geocodeCoords && (
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {geocodeCoords.lat.toFixed(6)}, {geocodeCoords.lng.toFixed(6)}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {geocodeStatus === 'failed' && (
+                      <div>
+                        <p className="text-xs font-medium text-amber-700">
+                          ⚠ Não foi possível geocodificar este endereço
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Verifique os dados e tente novamente, ou insira as coordenadas manualmente.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {/* Botão de re-geocodificação (apenas em edição, quando a church já existe) */}
+                  {isEditing && (geocodeStatus === 'failed' || geocodeStatus === 'idle') && (
+                    <button
+                      onClick={() => handleGeocode()}
+                      disabled={!editingChurch}
+                      className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+                      style={{ color: 'var(--gray-700)' }}
+                    >
+                      <RefreshCw size={12} /> Geocodificar
+                    </button>
+                  )}
+
+                </div>
+              </section>
             </div>
 
+            {/* Footer */}
             <div className="p-5 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
-              <button 
-                onClick={() => setEditingChurch(null)}
+              <button
+                onClick={closeModal}
                 className="btn bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
               >
                 Cancelar
               </button>
-              <button 
-                onClick={handleSave}
-                disabled={isSaving}
+              <button
+                onClick={isCreating ? handleCreate : handleSave}
+                disabled={isSaving || geocodeStatus === 'loading'}
                 className="btn btn-primary flex items-center gap-2"
               >
-                <Save size={16} />
-                {isSaving ? 'Salvando...' : 'Salvar Alterações'}
+                {isSaving ? (
+                  <>
+                    <Loader size={16} className="animate-spin" />
+                    {isCreating ? 'Criando...' : 'Salvando...'}
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} />
+                    {isCreating ? 'Criar Igreja' : 'Salvar Alterações'}
+                  </>
+                )}
               </button>
             </div>
           </motion.div>

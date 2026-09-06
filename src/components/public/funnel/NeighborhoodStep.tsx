@@ -89,9 +89,22 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
 
     setLoading(true)
     try {
-      const res = await fetch(
-        `/api/geo/find-church?neighborhood_id=${neighborhood.id}&city_id=${city.id}&campaign_id=${campaign.id}`
-      )
+      // Detecta se o bairro é customizado (não cadastrado no banco)
+      const isCustom = !neighborhood.id || neighborhood.id.startsWith('custom-')
+
+      // Monta URL da API
+      const params = new URLSearchParams({
+        city_id: city.id,
+        campaign_id: campaign.id,
+      })
+      if (!isCustom) {
+        params.set('neighborhood_id', neighborhood.id)
+      } else {
+        // Para bairros customizados, passa o texto para geocodificação no servidor
+        params.set('neighborhood_text', neighborhood.name)
+      }
+
+      const res = await fetch(`/api/geo/find-church?${params.toString()}`)
       const json = await res.json()
       const church = json.church || null
       const method = json.method || 'fallback'
@@ -121,6 +134,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
       setLoading(false)
     }
   }
+
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (!results.length) return

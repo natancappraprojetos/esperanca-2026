@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'Igrejas | Admin' }
 export default async function ChurchesPage() {
   const supabase = await createClient()
 
-  // Fetch all churches, their cities, and assigned pastors
+  // Busca igrejas com cidades, estados, pastores e campanhas
   const { data: churches } = await supabase
     .from('churches')
     .select(`
@@ -19,11 +19,31 @@ export default async function ChurchesPage() {
       )
     `)
     .order('name')
-    
+
+  // Pixels específicos por igreja
   const { data: pixels } = await supabase
     .from('tracking_pixels')
     .select('*')
     .eq('scope', 'church')
 
-  return <ChurchesClient churches={churches || []} pixels={pixels || []} />
+  // Busca todas as cidades ativas com seus estados — passadas ao client para o select dinâmico
+  // Genérico: retorna todas as cidades cadastradas, sem filtro por estado/nome
+  const { data: cities } = await supabase
+    .from('cities')
+    .select(`
+      id,
+      name,
+      state_id,
+      states (id, name, uf)
+    `)
+    .eq('status', 'active')
+    .order('name')
+
+  return (
+    <ChurchesClient
+      churches={churches || []}
+      pixels={pixels || []}
+      cities={(cities || []) as any[]}
+    />
+  )
 }
