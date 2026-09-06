@@ -198,7 +198,7 @@ export default function PastorsClient({ initialPastors }: { initialPastors: any[
               </button>
             </div>
             
-            <div className="p-5 flex flex-col gap-4">
+            <div className="p-6 space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
                 <input 
