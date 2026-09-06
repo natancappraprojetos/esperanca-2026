@@ -37,84 +37,58 @@ async function geocodeViaNominatim(
   cep: string | null,
   country = 'Brasil'
 ): Promise<GeocodeResult | null> {
-  // Monta a query priorizando dados mais específicos primeiro
-  const parts: string[] = []
-
+  
+  // Tenta 3 níveis de especificidade:
+  // 1. Rua + Número + Bairro + Cidade
+  // 2. Rua + Bairro + Cidade (se falhar com número)
+  // 3. Bairro + Cidade (se falhar rua)
+  const attempts: string[] = []
+  
   if (street) {
-    parts.push(number ? `${street}, ${number}` : street)
+    if (number) attempts.push(`${street}, ${number}, ${neighborhood ? neighborhood + ', ' : ''}${city}, ${state_uf}, ${country}`)
+    attempts.push(`${street}, ${neighborhood ? neighborhood + ', ' : ''}${city}, ${state_uf}, ${country}`)
   }
   if (neighborhood) {
-    parts.push(neighborhood)
+    attempts.push(`${neighborhood}, ${city}, ${state_uf}, ${country}`)
   }
-  parts.push(city)
-  parts.push(state_uf)
-  parts.push(country)
+  // Remove duplicatas caso falte algum dado
+  const uniqueAttempts = [...new Set(attempts)]
 
-  const q = parts.join(', ')
-
-  const url = new URL('https://nominatim.openstreetmap.org/search')
-  url.searchParams.set('q', q)
-  url.searchParams.set('format', 'json')
-  url.searchParams.set('limit', '3')
-  url.searchParams.set('countrycodes', 'br')
-  url.searchParams.set('addressdetails', '1')
-
-  // Se CEP disponível, usa também como hint de postalcode
-  if (cep) {
-    url.searchParams.set('postalcode', cep)
-  }
-
-  try {
-    const res = await fetch(url.toString(), {
-      headers: {
-        // Nominatim exige User-Agent identificável
-        'User-Agent': 'EvangelismoApp/1.0 (church-routing-system)',
-        'Accept-Language': 'pt-BR,pt;q=0.9',
-      },
-      // Nominatim limita a 1 req/s, mas para uso admin isso é aceitável
-      next: { revalidate: 0 },
-    })
-
-    if (!res.ok) return null
-
-    const data: NominatimResult[] = await res.json()
-
-    if (!data || data.length === 0) {
-      // Tenta query simplificada (apenas cidade + estado) como fallback interno
-      const simpleUrl = new URL('https://nominatim.openstreetmap.org/search')
-      simpleUrl.searchParams.set('q', `${city}, ${state_uf}, ${country}`)
-      simpleUrl.searchParams.set('format', 'json')
-      simpleUrl.searchParams.set('limit', '1')
-      simpleUrl.searchParams.set('countrycodes', 'br')
-
-      const simpleRes = await fetch(simpleUrl.toString(), {
-        headers: { 'User-Agent': 'EvangelismoApp/1.0 (church-routing-system)' },
+  for (const q of uniqueAttempts) {
+    const url = new URL('https://nominatim.openstreetmap.org/search')
+    url.searchParams.set('q', q)
+    url.searchParams.set('format', 'json')
+    url.searchParams.set('limit', '1')
+    url.searchParams.set('countrycodes', 'br')
+    
+    try {
+      const res = await fetch(url.toString(), {
+        headers: {
+          'User-Agent': 'EvangelismoApp/1.0 (church-routing-system)',
+          'Accept-Language': 'pt-BR,pt;q=0.9',
+        },
         next: { revalidate: 0 },
       })
 
-      if (!simpleRes.ok) return null
-      const simpleData: NominatimResult[] = await simpleRes.json()
-      if (!simpleData || simpleData.length === 0) return null
-
-      return {
-        latitude: parseFloat(simpleData[0].lat),
-        longitude: parseFloat(simpleData[0].lon),
-        formatted_address: simpleData[0].display_name,
-        provider: 'nominatim',
+      if (res.ok) {
+        const data: NominatimResult[] = await res.json()
+        if (data && data.length > 0) {
+          const best = data[0]
+          return {
+            latitude: parseFloat(best.lat),
+            longitude: parseFloat(best.lon),
+            formatted_address: best.display_name,
+            provider: 'nominatim',
+          }
+        }
       }
+    } catch {
+      // continua para a próxima tentativa
     }
-
-    // Usa o resultado com maior importância
-    const best = data[0]
-    return {
-      latitude: parseFloat(best.lat),
-      longitude: parseFloat(best.lon),
-      formatted_address: best.display_name,
-      provider: 'nominatim',
-    }
-  } catch {
-    return null
   }
+
+  // Se todas falharem, retorna null em vez de usar o centro da cidade (o que estragaria o roteamento matemático)
+  return null
 }
 
 // ------------------------------------

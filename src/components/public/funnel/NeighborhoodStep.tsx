@@ -233,11 +233,6 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
                     <span style={{ fontWeight: 500, color: 'var(--gray-900)' }}>
                       {r.neighborhood.name}
                     </span>
-                    {r.score < 0.7 && (
-                      <span className="text-caption ml-auto" style={{ color: 'var(--gray-400)' }}>
-                        similar
-                      </span>
-                    )}
                   </button>
                 ))}
               </div>
