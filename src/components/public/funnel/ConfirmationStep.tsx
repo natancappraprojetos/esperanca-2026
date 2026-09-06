@@ -93,8 +93,8 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
   const firstName = data.leadName?.split(' ')[0] || 'você'
 
   return (
-    <div className="min-h-svh flex flex-col" style={{ background: 'var(--cream)' }}>
-      <div className="container-narrow py-12 flex flex-col gap-8">
+    <div className="min-h-svh flex flex-col w-full" style={{ background: 'var(--cream)' }}>
+      <div className="w-full max-w-md mx-auto px-4 py-12 flex flex-col gap-8">
 
         {/* Success header */}
         <div
@@ -211,13 +211,6 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
                   </div>
                 ))}
               </div>
-            )}
-
-            {church.address_street && (
-              <p className="text-small" style={{ color: 'var(--gray-500)' }}>
-                📍 {[church.address_street, church.address_number, church.address_neighborhood].filter(Boolean).join(', ')}
-              </p>
-            )}
           </div>
         )}
 
