@@ -178,63 +178,24 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
     const file = e.target.files?.[0]
     if (!file || !editingChurch) return
 
+    const campaignId = activeCampaign?.id
+    if (!campaignId) {
+      toast.error('Nenhuma campanha ativa encontrada')
+      return
+    }
+
     setUploadingBanner(true)
     try {
       // Upload to Supabase Storage
       const ext = file.name.split('.').pop()
       const fileName = `banners/${editingChurch.id}-${Date.now()}.${ext}`
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('public-assets')
         .upload(fileName, file, { upsert: true })
       
       if (uploadError) {
-        // Fallback: save as base64 data URL or use public folder path
-        // For now, use the /banners/ public path convention
-        const reader = new FileReader()
-        reader.onload = async (ev) => {
-          // We'll save the banner URL as a relative path
-          // The file needs to be in /public/banners/
-          const safeName = `${editingChurch.slug || editingChurch.id}.${ext}`
-          const bannerUrl = `/banners/${safeName}`
-          
-          // Upsert banner record in DB
-          const campaignId = activeCampaign?.id
-          if (!campaignId) {
-            toast.error('Nenhuma campanha ativa encontrada')
-            return
-          }
-          
-          if (churchBanner && churchBanner.id !== 'fallback') {
-            // Update existing
-            await supabase
-              .from('banners')
-              .update({
-                image_desktop_url: bannerUrl,
-                image_mobile_url: bannerUrl,
-                name: `Banner ${editingChurch.name}`,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', churchBanner.id)
-          } else {
-            // Insert new
-            await supabase
-              .from('banners')
-              .insert({
-                church_id: editingChurch.id,
-                campaign_id: campaignId,
-                name: `Banner ${editingChurch.name}`,
-                image_desktop_url: bannerUrl,
-                image_mobile_url: bannerUrl,
-                display_order: 1,
-                status: 'active'
-              })
-          }
-          
-          toast.success('Banner atualizado! Coloque o arquivo na pasta /public/banners/ com o nome: ' + safeName)
-          fetchBanner(editingChurch.id)
-        }
-        reader.readAsDataURL(file)
+        toast.error('Erro no upload: ' + uploadError.message)
         return
       }
 
@@ -242,13 +203,8 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
       const { data: urlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
       const publicUrl = urlData.publicUrl
 
-      const campaignId = activeCampaign?.id
-      if (!campaignId) {
-        toast.error('Nenhuma campanha ativa encontrada')
-        return
-      }
-
-      if (churchBanner && churchBanner.id !== 'fallback') {
+      if (churchBanner) {
+        // Update existing banner record
         await supabase
           .from('banners')
           .update({
@@ -259,6 +215,7 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
           })
           .eq('id', churchBanner.id)
       } else {
+        // Insert new banner record
         await supabase
           .from('banners')
           .insert({
