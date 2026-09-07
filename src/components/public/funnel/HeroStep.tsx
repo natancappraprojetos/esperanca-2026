@@ -16,7 +16,7 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="flex-1 flex flex-col h-svh w-full relative overflow-hidden">
+    <div className="flex-1 flex flex-col items-center h-svh w-full relative overflow-hidden">
       
       {/* Spacer to position the CTA in the upper half of the screen */}
       <div className="h-[25vh] md:h-[30vh]" />
