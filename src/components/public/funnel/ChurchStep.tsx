@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { toast } from 'react-hot-toast'
 import { trackEvent } from '@/lib/tracking/events'
 import type { Church, Campaign, Banner } from '@/types/database'
 import type { FunnelData } from '../FunnelPage'
@@ -81,8 +82,9 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
       session_token: data.sessionToken,
     })
 
-    // Try Web Share API first, then download
-    if (navigator.share) {
+    // Try Web Share API first on mobile, then fallback to download
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    if (isMobile && navigator.share) {
       try {
         const res = await fetch(bannerUrl)
         const blob = await res.blob()
@@ -114,7 +116,8 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
     })
 
     setSharing(true)
-    if (navigator.share) {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    if (isMobile && navigator.share) {
       try {
         await navigator.share({
           title: `${church.name} — Semana da Esperança 2026`,
@@ -124,7 +127,7 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
       } catch { /* user cancelled */ }
     } else {
       await navigator.clipboard.writeText(url)
-      // Could show a toast here
+      toast.success('Link copiado!')
     }
     setSharing(false)
   }
