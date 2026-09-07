@@ -531,7 +531,7 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
   // Copiar link da igreja
   // ------------------------------------
   function handleCopyLink(churchSlug: string) {
-    const url = `${process.env.NEXT_PUBLIC_APP_URL}/igreja/${churchSlug}`
+    const url = `${window.location.origin}/igreja/${churchSlug}`
     navigator.clipboard.writeText(url)
     toast.success('Link copiado!')
   }
