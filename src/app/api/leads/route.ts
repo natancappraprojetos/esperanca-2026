@@ -12,6 +12,7 @@ const leadSchema = z.object({
   church_id: z.string().length(36).optional().nullable(),
   city_id: z.string().length(36).optional().nullable(),
   neighborhood_id: z.string().length(36).optional().nullable(),
+  neighborhood_name: z.string().optional().nullable(),
   material_id: z.string().length(36).optional().nullable(),
   church_assignment_method: z.string().optional().nullable(),
   consent_data: z.boolean(),
@@ -107,6 +108,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Erro ao salvar contato: ${contactError?.message}` }, { status: 500 })
     }
 
+    // 1.5 Handle custom neighborhood if typed by user and not found
+    let finalNeighborhoodId = data.neighborhood_id
+    if (!finalNeighborhoodId && data.neighborhood_name && data.city_id) {
+      // First try to find it by name in this city (case insensitive)
+      const { data: existingBairro } = await supabase
+        .from('neighborhoods')
+        .select('id')
+        .eq('city_id', data.city_id)
+        .ilike('name', data.neighborhood_name.trim())
+        .maybeSingle()
+
+      if (existingBairro) {
+        finalNeighborhoodId = existingBairro.id
+      } else {
+        // Insert new neighborhood
+        const { data: newBairro, error: bairroError } = await supabase
+          .from('neighborhoods')
+          .insert({
+            name: data.neighborhood_name.trim(),
+            city_id: data.city_id,
+            // latitude and longitude are null initially
+          })
+          .select('id')
+          .single()
+
+        if (!bairroError && newBairro) {
+          finalNeighborhoodId = newBairro.id
+        }
+      }
+    }
+
     // 2. Create or update lead (unique per contact + campaign)
     const { data: lead, error: leadError } = await supabase
       .from('leads')
@@ -116,7 +148,7 @@ export async function POST(request: NextRequest) {
           campaign_id: data.campaign_id,
           church_id: data.church_id || null,
           city_id: data.city_id || null,
-          neighborhood_id: data.neighborhood_id || null,
+          neighborhood_id: finalNeighborhoodId || null,
           material_id: data.material_id || null,
           church_assignment_method: data.church_assignment_method || null,
           ip_address: ip !== 'unknown' ? ip : null,
