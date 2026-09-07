@@ -49,17 +49,12 @@ export default async function ChurchPage({ params, searchParams }: ChurchPagePro
 
   if (!church) notFound()
 
-  // Find the active campaign for this church
-  const { data: campaignChurch } = await supabase
-    .from('campaign_churches')
-    .select(`
-      campaigns (*)
-    `)
-    .eq('church_id', church.id)
-    .limit(1)
-    .maybeSingle()
-
-  const campaign = (campaignChurch?.campaigns as any) || null
+  // Find the active campaign directly
+  const { data: campaign } = await supabase
+    .from('campaigns')
+    .select('*')
+    .eq('status', 'active')
+    .single()
 
   if (!campaign) {
     // No active campaign — show a simple page

@@ -1,4 +1,4 @@
-﻿import { Metadata } from 'next'
+import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { FunnelPage } from '@/components/public/FunnelPage'
@@ -9,19 +9,18 @@ import { cookies } from 'next/headers'
 // ISR: revalidate every 5 minutes
 export const revalidate = 300
 
-interface CampaignPageProps {
-  params: Promise<{ slug: string; cidade?: string }>
+interface CityPageProps {
+  params: Promise<{ slug: string }>
   searchParams: Promise<Record<string, string>>
 }
 
-export async function generateMetadata({ params }: CampaignPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
   const { slug } = await params
   const supabase = await createClient()
   
   const { data: campaign } = await supabase
     .from('campaigns')
     .select('name, theme, tagline, cover_image_url')
-    .eq('slug', slug)
     .eq('status', 'active')
     .single()
 
@@ -38,16 +37,15 @@ export async function generateMetadata({ params }: CampaignPageProps): Promise<M
   }
 }
 
-export default async function CampaignPage({ params, searchParams }: CampaignPageProps) {
-  const { slug, cidade } = await params
+export default async function CityPage({ params, searchParams }: CityPageProps) {
+  const { slug } = await params
   const sp = await searchParams
   const supabase = await createClient()
 
-  // Fetch campaign
+  // Fetch active campaign
   const { data: campaign } = await supabase
     .from('campaigns')
     .select('*')
-    .eq('slug', slug)
     .eq('status', 'active')
     .single()
 
@@ -63,17 +61,13 @@ export default async function CampaignPage({ params, searchParams }: CampaignPag
     .limit(1)
     .maybeSingle()
 
-  // If cidade param, pre-load city
-  let initialCity = null
-  if (cidade) {
-    const { data: city } = await supabase
-      .from('cities')
-      .select('*')
-      .eq('slug', cidade)
-      .eq('status', 'active')
-      .single()
-    initialCity = city
-  }
+  // Fetch city
+  const { data: initialCity } = await supabase
+    .from('cities')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'active')
+    .single()
 
   // Session token (could also be stored in cookie for persistence)
   const cookieStore = await cookies()

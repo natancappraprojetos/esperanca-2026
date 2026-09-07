@@ -62,11 +62,7 @@ export default function CitiesClient({ initialCities, pixels, activeCampaign }: 
   }
 
   function handleCopyLink(slug: string, uf: string) {
-    if (!activeCampaign) {
-      toast.error('Nenhuma campanha ativa encontrada.')
-      return
-    }
-    const url = `${window.location.origin}/campanha/${activeCampaign.slug}/${slug}`
+    const url = `${window.location.origin}/cidade/${slug}`
     navigator.clipboard.writeText(url)
     toast.success('Link direto copiado!')
   }
@@ -136,7 +132,7 @@ export default function CitiesClient({ initialCities, pixels, activeCampaign }: 
                 <td>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-600 truncate max-w-[200px]">
-                      /campanha/{activeCampaign?.slug || 'campanha'}/{city.slug}
+                      /cidade/{city.slug}
                     </span>
                     <button 
                       onClick={() => handleCopyLink(city.slug, city.states?.uf)}
