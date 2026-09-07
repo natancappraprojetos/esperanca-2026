@@ -17,6 +17,7 @@ interface ChurchesClientProps {
   churches: any[]
   pixels?: any[]
   globalPixels?: any[]
+  activeCampaign?: any
   cities: City[]
 }
 
@@ -36,7 +37,7 @@ const EMPTY_FORM = {
   pixel_id: '',
 }
 
-export default function ChurchesClient({ churches: initialChurches, pixels = [], globalPixels = [], cities }: ChurchesClientProps) {
+export default function ChurchesClient({ churches: initialChurches, pixels = [], globalPixels = [], activeCampaign, cities }: ChurchesClientProps) {
   const [churches, setChurches] = useState(initialChurches)
   const [search, setSearch] = useState('')
   const [cityFilter, setCityFilter] = useState('')
@@ -70,6 +71,12 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
     globalPixels.find(p => p.pixel_type === 'meta')?.pixel_id || ''
   )
   const [savingGlobalPixel, setSavingGlobalPixel] = useState(false)
+
+  // Funnel Model
+  const [funnelModel, setFunnelModel] = useState<'model-1' | 'model-2' | 'model-3'>(
+    (activeCampaign?.settings as any)?.funnel_model || 'model-1'
+  )
+  const [savingModel, setSavingModel] = useState(false)
 
   const supabase = createClient()
 
@@ -439,6 +446,28 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
     failed: <AlertCircle size={14} className="text-amber-500" />,
   }[geocodeStatus]
 
+  async function handleSaveModel(model: 'model-1' | 'model-2' | 'model-3') {
+    if (!activeCampaign) return
+    setSavingModel(true)
+    setFunnelModel(model)
+    try {
+      const currentSettings = activeCampaign.settings || {}
+      const newSettings = { ...currentSettings, funnel_model: model }
+      
+      const { error } = await supabase
+        .from('campaigns')
+        .update({ settings: newSettings })
+        .eq('id', activeCampaign.id)
+        
+      if (error) throw error
+      toast.success('Modelo de funil atualizado com sucesso!')
+    } catch (err: any) {
+      toast.error('Erro ao atualizar modelo: ' + err.message)
+    } finally {
+      setSavingModel(false)
+    }
+  }
+
   // ------------------------------------
   // Salvar Pixel Global
   // ------------------------------------
@@ -560,38 +589,77 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
       </motion.div>
 
       {/* Configurações Globais */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05 }}
-        className="card-soft p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gray-50/50"
-      >
-        <div>
-          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-            Pixel Global (Link Geral)
-          </h3>
-          <p className="text-small text-gray-500 mt-1">
-            Este pixel será disparado na página inicial quando as pessoas entrarem no link principal (sem ser link direto de igreja).
-          </p>
-        </div>
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <input
-            type="text"
-            className="form-input max-w-[200px]"
-            placeholder="ID do Pixel (Meta)"
-            value={globalPixelData}
-            onChange={(e) => setGlobalPixelData(e.target.value)}
-          />
-          <button
-            onClick={handleSaveGlobalPixel}
-            disabled={savingGlobalPixel}
-            className="btn btn-primary py-2 flex items-center gap-2 flex-shrink-0"
-          >
-            <Save size={16} />
-            {savingGlobalPixel ? '...' : 'Salvar Pixel'}
-          </button>
-        </div>
-      </motion.div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Pixel Global */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="card-soft p-5 flex flex-col justify-between gap-4 bg-gray-50/50 h-full"
+        >
+          <div>
+            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+              Pixel Global (Link Geral)
+            </h3>
+            <p className="text-small text-gray-500 mt-1">
+              Este pixel será disparado na página inicial quando as pessoas entrarem no link principal (sem ser link direto de igreja).
+            </p>
+          </div>
+          <div className="flex items-center gap-2 mt-auto w-full">
+            <input
+              type="text"
+              className="form-input flex-1"
+              placeholder="ID do Pixel (Meta)"
+              value={globalPixelData}
+              onChange={(e) => setGlobalPixelData(e.target.value)}
+            />
+            <button
+              onClick={handleSaveGlobalPixel}
+              disabled={savingGlobalPixel}
+              className="btn btn-primary py-2 px-4 flex items-center justify-center gap-2 flex-shrink-0"
+            >
+              <Save size={16} />
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Modelo de Funil */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.06 }}
+          className="card-soft p-5 flex flex-col gap-4 bg-gray-50/50 h-full"
+        >
+          <div>
+            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+              Modelo de Funil (Link Geral)
+            </h3>
+            <p className="text-small text-gray-500 mt-1 mb-3">
+              Escolha a ordem das páginas da sua campanha atual.
+            </p>
+          </div>
+          
+          <div className="flex flex-col gap-2 mt-auto">
+            {[
+              { id: 'model-1', label: '1. Padrão (Igreja antes do Formulário)' },
+              { id: 'model-2', label: '2. Invertido (Formulário antes da Igreja)' },
+              { id: 'model-3', label: '3. Enxuto (Sem seleção de igreja)' }
+            ].map(m => (
+              <label key={m.id} className="flex items-center gap-2 p-2 rounded-lg border border-gray-200 cursor-pointer hover:bg-white transition-colors bg-white/50">
+                <input 
+                  type="radio" 
+                  name="funnel_model"
+                  className="w-4 h-4 accent-gray-900"
+                  checked={funnelModel === m.id}
+                  onChange={() => handleSaveModel(m.id as any)}
+                  disabled={savingModel}
+                />
+                <span className="text-sm font-medium text-gray-800">{m.label}</span>
+              </label>
+            ))}
+          </div>
+        </motion.div>
+      </div>
 
       {/* Filtros */}
       <motion.div

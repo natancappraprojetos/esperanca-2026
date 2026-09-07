@@ -9,9 +9,10 @@ import type { FunnelData } from '../FunnelPage'
 interface ConfirmationStepProps {
   data: FunnelData
   campaign: Campaign
+  onContinue?: () => void
 }
 
-export default function ConfirmationStep({ data, campaign }: ConfirmationStepProps) {
+export default function ConfirmationStep({ data, campaign, onContinue }: ConfirmationStepProps) {
   const [downloading, setDownloading] = useState(false)
   const [downloaded, setDownloaded] = useState(false)
 
@@ -198,6 +199,15 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
         >
           Será uma alegria receber você. ✨
         </motion.p>
+        
+        {onContinue && (
+          <button 
+            onClick={onContinue}
+            className="btn btn-primary w-full mt-4"
+          >
+            Encontrar a igreja mais próxima
+          </button>
+        )}
       </div>
     </div>
   )

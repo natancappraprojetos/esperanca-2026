@@ -32,6 +32,13 @@ export default async function ChurchesPage() {
     .select('*')
     .eq('scope', 'global')
 
+  // Campanha ativa
+  const { data: activeCampaign } = await supabase
+    .from('campaigns')
+    .select('*')
+    .eq('status', 'active')
+    .single()
+
   // Busca todas as cidades ativas com seus estados — passadas ao client para o select dinâmico
   // Genérico: retorna todas as cidades cadastradas, sem filtro por estado/nome
   const { data: cities } = await supabase
@@ -50,6 +57,7 @@ export default async function ChurchesPage() {
       churches={churches || []}
       pixels={pixels || []}
       globalPixels={globalPixels || []}
+      activeCampaign={activeCampaign}
       cities={(cities || []) as any[]}
     />
   )

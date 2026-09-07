@@ -28,6 +28,20 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
       city_id: church.city_id,
       session_token: data.sessionToken,
     })
+
+    // Se o Lead já existe (foi criado no passo de form antes de chegar na igreja), atualiza a igreja
+    if (data.leadId && data.sessionToken) {
+      fetch('/api/leads/assign-church', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lead_id: data.leadId,
+          church_id: church.id,
+          session_token: data.sessionToken
+        })
+      }).catch(err => console.error('Failed to update church', err))
+    }
+
     // Load banner
     fetch(`/api/banners?church_id=${church.id}&campaign_id=${campaign.id}`)
       .then(r => r.json())

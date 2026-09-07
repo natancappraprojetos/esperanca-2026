@@ -46,10 +46,12 @@ export type FunnelStep =
   | 'form'
   | 'confirmation'
 
-const STEP_ORDER: FunnelStep[] = ['hero', 'city', 'neighborhood', 'church', 'material', 'form', 'confirmation']
+export type FunnelModel = 'model-1' | 'model-2' | 'model-3'
 
-function getStepIndex(step: FunnelStep) {
-  return STEP_ORDER.indexOf(step)
+export const MODELS: Record<FunnelModel, FunnelStep[]> = {
+  'model-1': ['hero', 'city', 'neighborhood', 'church', 'form', 'confirmation'],
+  'model-2': ['hero', 'form', 'confirmation', 'city', 'neighborhood', 'church'],
+  'model-3': ['hero', 'form', 'confirmation']
 }
 
 interface FunnelPageProps {
@@ -73,6 +75,13 @@ export function FunnelPage({
   globalPixels = [],
   churchPixels = []
 }: FunnelPageProps) {
+  const activeModel = ((campaign.settings as any)?.funnel_model || 'model-1') as FunnelModel
+  const stepOrder = MODELS[activeModel] || MODELS['model-1']
+
+  function getStepIndex(step: FunnelStep) {
+    return stepOrder.indexOf(step)
+  }
+
   const [currentStep, setCurrentStep] = useState<FunnelStep>(
     initialChurch ? 'neighborhood' : initialCity ? 'neighborhood' : 'hero'
   )
@@ -122,6 +131,13 @@ export function FunnelPage({
     }
   }, [data.churchPixels])
 
+  function goToNext(updatedData?: Partial<FunnelData>) {
+    const currentIndex = getStepIndex(currentStep)
+    if (currentIndex >= 0 && currentIndex < stepOrder.length - 1) {
+      goTo(stepOrder[currentIndex + 1], updatedData)
+    }
+  }
+
   function goTo(step: FunnelStep, updatedData?: Partial<FunnelData>) {
     const currentIndex = getStepIndex(currentStep)
     const nextIndex = getStepIndex(step)
@@ -133,7 +149,7 @@ export function FunnelPage({
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const stepCount = STEP_ORDER.length
+  const stepCount = stepOrder.length
   const currentIndex = getStepIndex(currentStep)
 
   const variants = {
@@ -199,7 +215,7 @@ export function FunnelPage({
             </button>
             
             <div className="flex gap-1.5" aria-label="Progresso">
-              {['neighborhood', 'church', 'material', 'form'].map((step, i) => {
+              {stepOrder.filter(s => s !== 'hero' && s !== 'confirmation').map((step, i) => {
                 const isActive = getStepIndex(currentStep) >= getStepIndex(step as FunnelStep)
                 return (
                   <div
@@ -230,14 +246,14 @@ export function FunnelPage({
             <HeroStep
               campaign={campaign}
               material={material}
-              onStart={() => goTo('city')}
+              onStart={() => goToNext()}
               data={data}
             />
           )}
           {currentStep === 'city' && (
             <CityStep
               campaign={campaign}
-              onSelect={(city) => goTo('neighborhood', { city })}
+              onSelect={(city) => goToNext({ city })}
               data={data}
             />
           )}
@@ -246,7 +262,7 @@ export function FunnelPage({
               city={data.city!}
               campaign={campaign}
               onSelect={(neighborhood, church, method, pixels) => 
-                goTo('church', { neighborhood, church, assignmentMethod: method, churchPixels: pixels })}
+                goToNext({ neighborhood, church, assignmentMethod: method, churchPixels: pixels })}
               data={data}
             />
           )}
@@ -254,22 +270,22 @@ export function FunnelPage({
             <ChurchStep
               church={data.church!}
               campaign={campaign}
-              onContinue={() => goTo('form')}
+              onContinue={() => goToNext()}
               data={data}
             />
           )}
           {currentStep === 'material' && (
             <MaterialStep
               material={data.material}
-              onDownloadRequest={() => goTo('form')}
-              onSkip={() => goTo('confirmation')}
+              onDownloadRequest={() => goToNext()}
+              onSkip={() => goToNext()}
               data={data}
             />
           )}
           {currentStep === 'form' && (
             <LeadFormStep
               campaign={campaign}
-              onSubmit={(leadData) => goTo('confirmation', leadData)}
+              onSubmit={(leadData) => goToNext(leadData)}
               data={data}
             />
           )}
@@ -277,6 +293,7 @@ export function FunnelPage({
             <ConfirmationStep
               data={data}
               campaign={campaign}
+              onContinue={getStepIndex('confirmation') < stepOrder.length - 1 ? () => goToNext() : undefined}
             />
           )}
         </motion.div>
