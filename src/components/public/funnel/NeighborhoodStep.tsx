@@ -137,6 +137,17 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
 
 
   function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      if (results.length > 0 && highlightedIndex >= 0) {
+        handleSelect(results[highlightedIndex].neighborhood)
+      } else if (query.trim().length >= 3) {
+        // Fallback geocoding search for typed text
+        handleSelect({ id: `custom-${Date.now()}`, name: query.trim() })
+      }
+      return
+    }
+
     if (!results.length) return
     if (e.key === 'ArrowDown') {
       e.preventDefault()
@@ -144,9 +155,6 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
     } else if (e.key === 'ArrowUp') {
       e.preventDefault()
       setHighlightedIndex(i => Math.max(i - 1, 0))
-    } else if (e.key === 'Enter' && highlightedIndex >= 0) {
-      e.preventDefault()
-      handleSelect(results[highlightedIndex].neighborhood)
     }
   }
 

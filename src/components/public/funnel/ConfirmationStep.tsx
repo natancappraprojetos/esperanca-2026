@@ -93,8 +93,8 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
   const firstName = data.leadName?.split(' ')[0] || 'você'
 
   return (
-    <div className="min-h-svh flex flex-col w-full" style={{ background: 'var(--cream)' }}>
-      <div className="w-full max-w-md mx-auto px-4 py-12 flex flex-col items-center text-center gap-8">
+    <div className="min-h-svh flex flex-col items-center justify-center w-full" style={{ background: 'var(--cream)' }}>
+      <div className="w-full max-w-lg mx-auto px-6 py-12 flex flex-col items-center text-center gap-8">
 
         <div className="flex flex-col items-center text-center gap-4 pt-4">
           <div className="success-checkmark" role="img" aria-label="Sucesso">
@@ -180,31 +180,6 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
           </div>
         )}
 
-        {/* Church info */}
-        {church && (
-          <div
-            className="card p-5 flex flex-col gap-4 items-center text-center"
-          >
-            <div className="flex flex-col items-center justify-center gap-1">
-              <p className="text-overline" style={{ color: 'var(--gray-500)' }}>
-                Programação
-              </p>
-              <p style={{ fontWeight: 600, color: 'var(--gray-900)' }}>{church.name}</p>
-            </div>
-
-            {schedules.length > 0 && (
-              <div className="flex flex-col items-center justify-center gap-2">
-                {schedules.map((s, i) => (
-                  <div key={i} className="flex items-center gap-3 text-small" style={{ color: 'var(--gray-600)' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--gray-800)' }}>{s.day}</span>
-                    <span>às {s.time}</span>
-                    {s.description && <span style={{ color: 'var(--gray-400)' }}>— {s.description}</span>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Footer message */}
         <motion.p
