@@ -253,10 +253,6 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
           <div
             className="card-soft p-5 flex flex-col gap-4"
           >
-            <p style={{ color: 'var(--gray-700)', fontWeight: 500 }}>
-              Não encontramos o bairro &ldquo;{query}&rdquo;.
-            </p>
-
             {suggestions.length > 0 && (
               <div className="flex flex-col gap-2">
                 <p className="text-small" style={{ color: 'var(--gray-500)' }}>
