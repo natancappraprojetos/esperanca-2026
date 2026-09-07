@@ -45,10 +45,10 @@ export default function HeroStep({ campaign, material, onStart }: HeroStepProps)
       </div>
 
       {/* Footer / Info / Decorative divider */}
-      <div className="absolute bottom-6 left-0 right-0 px-4 z-10">
-        <div className="flex items-center gap-4 max-w-sm mx-auto opacity-70">
+      <div className="absolute bottom-6 left-0 right-0 w-full px-4 z-10 flex justify-center">
+        <div className="flex items-center justify-center gap-4 w-full max-w-sm opacity-70">
           <div style={{ flex: 1, height: 1, backgroundColor: 'var(--white)', opacity: 0.2 }} />
-          <p className="text-caption" style={{ color: 'var(--gray-300)' }}>
+          <p className="text-caption text-center" style={{ color: 'var(--gray-300)' }}>
             Há um lugar preparado para você.
           </p>
           <div style={{ flex: 1, height: 1, backgroundColor: 'var(--white)', opacity: 0.2 }} />
