@@ -36,6 +36,13 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
       church_id: church?.id,
       session_token: data.sessionToken,
     })
+
+    // Auto-download material on confirmation page load
+    const timer = setTimeout(() => {
+      handleDownload()
+    }, 1000)
+
+    return () => clearTimeout(timer)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleDownload() {

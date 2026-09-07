@@ -254,7 +254,7 @@ export function FunnelPage({
             <ChurchStep
               church={data.church!}
               campaign={campaign}
-              onContinue={() => goTo('material')}
+              onContinue={() => goTo('form')}
               data={data}
             />
           )}
