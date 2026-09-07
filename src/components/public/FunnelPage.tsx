@@ -204,7 +204,7 @@ export function FunnelPage({
               onClick={() => {
                 const idx = getStepIndex(currentStep)
                 if (idx > 1) {
-                  goTo(STEP_ORDER[idx - 1])
+                  goTo(stepOrder[idx - 1])
                 } else {
                   goTo('hero')
                 }
