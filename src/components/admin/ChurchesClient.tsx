@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'react-hot-toast'
-import { Save, X, Plus, MapPin, RefreshCw, CheckCircle, AlertCircle, Loader } from 'lucide-react'
+import { Save, X, Plus, MapPin, RefreshCw, CheckCircle, AlertCircle, Loader, Copy } from 'lucide-react'
 
 interface City {
   id: string
@@ -51,6 +51,18 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
 
   // Estado local de pixels (mutável para feedback imediato)
   const [localPixels, setLocalPixels] = useState(pixels)
+  
+  // Estado para os inputs de pixel diretamente na tabela
+  const [pixelData, setPixelData] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {}
+    pixels.forEach((p: any) => {
+      if (p.church_id && p.pixel_id) {
+        initial[p.church_id] = p.pixel_id
+      }
+    })
+    return initial
+  })
+  const [savingPixel, setSavingPixel] = useState<string | null>(null)
 
   const supabase = createClient()
 
@@ -420,6 +432,59 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
     failed: <AlertCircle size={14} className="text-amber-500" />,
   }[geocodeStatus]
 
+  // ------------------------------------
+  // Salvar Pixel Direto da Tabela
+  // ------------------------------------
+  async function handleSavePixel(churchId: string) {
+    const pixelId = pixelData[churchId]
+    setSavingPixel(churchId)
+    
+    try {
+      if (!pixelId) {
+        const { error } = await supabase
+          .from('tracking_pixels')
+          .delete()
+          .eq('church_id', churchId)
+          .eq('scope', 'church')
+        if (error) throw error
+        toast.success('Pixel removido da igreja')
+      } else {
+        const existing = localPixels.find(p => p.church_id === churchId)
+        if (existing) {
+          const { error } = await supabase
+            .from('tracking_pixels')
+            .update({ pixel_id: pixelId })
+            .eq('id', existing.id)
+          if (error) throw error
+          setLocalPixels(prev => prev.map(p => p.id === existing.id ? { ...p, pixel_id: pixelId } : p))
+        } else {
+          const { data, error } = await supabase
+            .from('tracking_pixels')
+            .insert({ scope: 'church', church_id: churchId, pixel_type: 'meta', pixel_id: pixelId, is_active: true })
+            .select()
+            .single()
+          if (error) throw error
+          if (data) setLocalPixels(prev => [...prev, data])
+        }
+        toast.success('Pixel salvo com sucesso')
+      }
+    } catch (err: any) {
+      toast.error('Erro ao salvar pixel')
+      console.error(err)
+    } finally {
+      setSavingPixel(null)
+    }
+  }
+
+  // ------------------------------------
+  // Copiar link da igreja
+  // ------------------------------------
+  function handleCopyLink(churchSlug: string) {
+    const url = `${process.env.NEXT_PUBLIC_APP_URL}/igreja/${churchSlug}`
+    navigator.clipboard.writeText(url)
+    toast.success('Link copiado!')
+  }
+
   return (
     <div className="flex flex-col gap-6 relative">
       <motion.div
@@ -502,8 +567,8 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
                 <th onClick={() => requestSort('pastor')} className="cursor-pointer hover:bg-gray-50 select-none">
                   Pregador{getSortIndicator('pastor')}
                 </th>
-                <th>Pr. Distrital</th>
-                <th>Campanha</th>
+                <th>Link Direto</th>
+                <th>Pixel do Facebook (Meta)</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -565,15 +630,42 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
                       <td style={{ color: 'var(--gray-600)' }}>
                         {pastor ? pastor.full_name : <span style={{ color: 'var(--gray-400)' }}>—</span>}
                       </td>
-                      <td style={{ color: 'var(--gray-600)' }}>
-                        {church.district_pastor || <span style={{ color: 'var(--gray-400)' }}>—</span>}
-                      </td>
-                      <td style={{ color: 'var(--gray-600)' }}>
-                        {activeCampaign ? (
-                          activeCampaign.name
+                      <td>
+                        {church.slug ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-600 truncate max-w-[120px]" title={`/igreja/${church.slug}`}>
+                              /igreja/{church.slug}
+                            </span>
+                            <button 
+                              onClick={() => handleCopyLink(church.slug)}
+                              className="text-gray-400 hover:text-gray-900"
+                              title="Copiar Link"
+                            >
+                              <Copy size={16} />
+                            </button>
+                          </div>
                         ) : (
                           <span style={{ color: 'var(--gray-400)' }}>—</span>
                         )}
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            className="form-input text-sm py-1.5 px-3 h-auto min-w-[150px]"
+                            placeholder="ID do Pixel"
+                            value={pixelData[church.id] || ''}
+                            onChange={(e) => setPixelData({ ...pixelData, [church.id]: e.target.value })}
+                          />
+                          <button
+                            onClick={() => handleSavePixel(church.id)}
+                            disabled={savingPixel === church.id}
+                            className="btn btn-primary py-1.5 px-3 text-sm flex items-center gap-2 flex-shrink-0"
+                          >
+                            <Save size={14} />
+                            {savingPixel === church.id ? '...' : 'Salvar'}
+                          </button>
+                        </div>
                       </td>
                       <td>
                         <div className="flex items-center gap-2">

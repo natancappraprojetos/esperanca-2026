@@ -142,22 +142,27 @@ export async function POST(request: NextRequest) {
 
     // 3. Register LGPD consents
     const now = new Date().toISOString()
-    await supabase
+    
+    // Workaround for missing UNIQUE constraint on lead_id: delete existing then insert
+    await supabase.from('lead_consents').delete().eq('lead_id', lead.id)
+    
+    const { error: consentError } = await supabase
       .from('lead_consents')
-      .upsert(
-        {
-          lead_id: lead.id,
-          contact_id: contact.id,
-          consent_data: data.consent_data,
-          consent_data_at: data.consent_data ? now : null,
-          policy_version: '1.0',
-          consent_reminder_whatsapp: data.consent_reminder_whatsapp,
-          consent_reminder_at: data.consent_reminder_whatsapp ? now : null,
-          consent_ip: ip !== 'unknown' ? ip : null,
-          consent_user_agent: userAgent || null,
-        },
-        { onConflict: 'lead_id', ignoreDuplicates: false }
-      )
+      .insert({
+        lead_id: lead.id,
+        contact_id: contact.id,
+        consent_data: data.consent_data,
+        consent_data_at: data.consent_data ? now : null,
+        policy_version: '1.0',
+        consent_reminder_whatsapp: data.consent_reminder_whatsapp,
+        consent_reminder_at: data.consent_reminder_whatsapp ? now : null,
+        consent_ip: ip !== 'unknown' ? ip : null,
+        consent_user_agent: userAgent || null,
+      })
+
+    if (consentError) {
+      console.error('Consent insert error:', consentError)
+    }
 
     // 4. Log download if material_id provided
     if (data.material_id) {

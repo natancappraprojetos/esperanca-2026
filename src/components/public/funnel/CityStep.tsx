@@ -263,6 +263,11 @@ export default function CityStep({ campaign, onSelect, data }: CityStepProps) {
               )}
               <span>{locating ? 'Buscando sua localização...' : 'Usar minha localização atual'}</span>
             </button>
+            {errorMsg && (
+              <div className="text-sm mt-3 text-center" style={{ color: 'var(--amber-600)' }}>
+                {errorMsg}
+              </div>
+            )}
           </div>
         </div>
 
