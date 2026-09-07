@@ -37,7 +37,9 @@ export default async function ChurchesPage() {
     .from('campaigns')
     .select('*')
     .eq('status', 'active')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   // Busca todas as cidades ativas com seus estados — passadas ao client para o select dinâmico
   // Genérico: retorna todas as cidades cadastradas, sem filtro por estado/nome

@@ -27,7 +27,9 @@ export default async function CitiesPage() {
     .from('campaigns')
     .select('*')
     .eq('status', 'active')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   return (
     <div className="flex flex-col gap-6">

@@ -20,7 +20,9 @@ export async function generateMetadata({ params }: ChurchPageProps): Promise<Met
     .select('name, address_neighborhood')
     .eq('slug', slug)
     .eq('status', 'active')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (!church) return {}
 
@@ -45,7 +47,9 @@ export default async function ChurchPage({ params, searchParams }: ChurchPagePro
     `)
     .eq('slug', slug)
     .eq('status', 'active')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (!church) notFound()
 
@@ -54,7 +58,9 @@ export default async function ChurchPage({ params, searchParams }: ChurchPagePro
     .from('campaigns')
     .select('*')
     .eq('status', 'active')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (!campaign) {
     // No active campaign — show a simple page

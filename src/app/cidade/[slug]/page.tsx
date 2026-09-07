@@ -22,7 +22,9 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
     .from('campaigns')
     .select('name, theme, tagline, cover_image_url')
     .eq('status', 'active')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (!campaign) return {}
 
@@ -47,7 +49,9 @@ export default async function CityPage({ params, searchParams }: CityPageProps) 
     .from('campaigns')
     .select('*')
     .eq('status', 'active')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (!campaign) notFound()
 
@@ -67,7 +71,9 @@ export default async function CityPage({ params, searchParams }: CityPageProps) 
     .select('*')
     .eq('slug', slug)
     .eq('status', 'active')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   // Session token (could also be stored in cookie for persistence)
   const cookieStore = await cookies()

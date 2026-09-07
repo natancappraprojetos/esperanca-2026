@@ -23,7 +23,9 @@ export async function generateMetadata({ params }: CampaignPageProps): Promise<M
     .select('name, theme, tagline, cover_image_url')
     .eq('slug', slug)
     .eq('status', 'active')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (!campaign) return {}
 
@@ -49,7 +51,9 @@ export default async function CampaignPage({ params, searchParams }: CampaignPag
     .select('*')
     .eq('slug', slug)
     .eq('status', 'active')
-    .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (!campaign) notFound()
 
@@ -71,7 +75,9 @@ export default async function CampaignPage({ params, searchParams }: CampaignPag
       .select('*')
       .eq('slug', cidade)
       .eq('status', 'active')
-      .single()
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
     initialCity = city
   }
 
