@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://esperanca-2026.vercel.app'),
   title: {
     default: 'Semana da Esperança 2026 | Jesus, Nossa Esperança',
     template: '%s | Semana da Esperança 2026',
@@ -10,6 +11,11 @@ export const metadata: Metadata = {
   keywords: ['Semana da Esperança', 'Jesus', 'Igreja', 'Evangelismo', '2026', 'Rio Grande do Sul'],
   authors: [{ name: 'Associação Gaúcha' }],
   creator: 'Associação Gaúcha',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
@@ -17,11 +23,20 @@ export const metadata: Metadata = {
     siteName: 'Semana da Esperança 2026',
     title: 'Semana da Esperança 2026 | Jesus, Nossa Esperança',
     description: 'Uma semana para reencontrar a esperança. Encontre uma igreja perto de você.',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Semana da Esperança 2026',
+      }
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Semana da Esperança 2026',
     description: 'Uma semana para reencontrar a esperança.',
+    images: ['/og-image.jpg'],
   },
   robots: {
     index: true,
