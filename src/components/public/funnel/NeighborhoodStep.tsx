@@ -75,8 +75,6 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data, initi
     setQuery(val)
     setHighlightedIndex(-1)
     setNotFound(false)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => searchNeighborhoods(val), 280)
   }
 
   async function handleSelect(neighborhood: Neighborhood) {
@@ -146,22 +144,19 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data, initi
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter') {
       e.preventDefault()
-      if (results.length > 0 && highlightedIndex >= 0) {
-        handleSelect(results[highlightedIndex].neighborhood)
-      } else if (query.trim().length >= 3) {
+      if (query.trim().length >= 3) {
         // Fallback geocoding search for typed text
-        handleSelect({ id: `custom-${Date.now()}`, name: query.trim() })
+        handleSelect({ 
+          id: `custom-${Date.now()}`, 
+          name: query.trim(),
+          name_normalized: query.trim(),
+          latitude: null,
+          longitude: null,
+          city_id: city.id,
+          status: 'active'
+        } as Neighborhood)
       }
       return
-    }
-
-    if (!results.length) return
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      setHighlightedIndex(i => Math.min(i + 1, results.length - 1))
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setHighlightedIndex(i => Math.max(i - 1, 0))
     }
   }
 
@@ -254,23 +249,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data, initi
                   </span>
                 </button>
 
-                {results.map((r, i) => (
-                  <button
-                    key={r.neighborhood.id}
-                    role="option"
-                    aria-selected={i === highlightedIndex}
-                    className={`autocomplete-item w-full text-left ${i === highlightedIndex ? 'highlighted' : ''}`}
-                    onMouseEnter={() => setHighlightedIndex(i)}
-                    onMouseDown={() => handleSelect(r.neighborhood)}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style={{ color: 'var(--gray-400)', flexShrink: 0 }}>
-                      <path d="M10 2C7.24 2 5 4.24 5 7c0 4.25 5 11 5 11s5-6.75 5-11c0-2.76-2.24-5-5-5zm0 6.5c-.83 0-1.5-.67-1.5-1.5S9.17 5.5 10 5.5s1.5.67 1.5 1.5S10.83 8.5 10 8.5z" fill="currentColor"/>
-                    </svg>
-                    <span style={{ fontWeight: 500, color: 'var(--gray-900)' }}>
-                      {r.neighborhood.name}
-                    </span>
-                  </button>
-                ))}
+                {/* Removed results mapping as per user request */}
               </div>
             )}
           </div>
