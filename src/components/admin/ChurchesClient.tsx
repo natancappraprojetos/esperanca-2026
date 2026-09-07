@@ -186,8 +186,11 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
 
     setUploadingBanner(true)
     try {
+      // Comprimir a imagem antes de enviar para evitar o limite de 4.5MB da Vercel
+      const compressedFile = await compressImage(file, 1920, 0.8)
+
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', compressedFile)
       formData.append('church_id', editingChurch.id)
       formData.append('campaign_id', campaignId)
       formData.append('church_name', editingChurch.name || '')
@@ -214,6 +217,49 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
     } finally {
       setUploadingBanner(false)
     }
+  }
+
+  // Função utilitária para comprimir imagem no client-side
+  function compressImage(file: File, maxWidth: number, quality: number): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const img = new window.Image()
+      img.src = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(img.src)
+        let width = img.width
+        let height = img.height
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width)
+          width = maxWidth
+        }
+
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          resolve(file)
+          return
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height)
+        
+        // Sempre converte para WebP para melhor compressão, a não ser que não seja suportado
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            resolve(file)
+            return
+          }
+          const newFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.webp'), {
+            type: 'image/webp',
+            lastModified: Date.now(),
+          })
+          resolve(newFile)
+        }, 'image/webp', quality)
+      }
+      img.onerror = () => resolve(file)
+    })
   }
 
   async function handleDeleteBanner() {
