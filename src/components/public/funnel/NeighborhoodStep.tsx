@@ -158,7 +158,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
     }
   }
 
-  const showDropdown = focused && results.length > 0
+  const showDropdown = focused && query.trim().length > 0
 
   return (
     <div className="min-h-svh flex flex-col" style={{ paddingTop: '4rem' }}>
@@ -178,7 +178,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
             Passo 2 de 3
           </span>
           <h2 className="text-heading-2" style={{ color: 'var(--gray-900)' }}>
-            Qual é o seu bairro ou região?
+            Qual é o seu endereço, bairro ou rua?
           </h2>
           <p className="text-body" style={{ color: 'var(--gray-500)' }}>
             Encontraremos a programação mais próxima de você.
@@ -190,7 +190,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
         >
           <div className="form-group">
             <label htmlFor="neighborhood-search" className="sr-only">
-              Nome do bairro
+              Endereço ou Bairro
             </label>
             <div className="relative">
               <input
@@ -198,7 +198,7 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
                 ref={inputRef}
                 type="text"
                 className="form-input"
-                placeholder="Digite seu bairro ou região..."
+                placeholder="Digite seu endereço, bairro ou rua..."
                 value={query}
                 onChange={handleInput}
                 onFocus={() => setFocused(true)}
@@ -226,6 +226,27 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
                 className="autocomplete-dropdown absolute left-0 right-0 top-full mt-1"
                 role="listbox"
               >
+                {/* Fixed option to always allow searching exactly what was typed */}
+                <button
+                  role="option"
+                  aria-selected={highlightedIndex === -1}
+                  className={`autocomplete-item w-full text-left ${highlightedIndex === -1 ? 'highlighted' : ''}`}
+                  onMouseEnter={() => setHighlightedIndex(-1)}
+                  onMouseDown={() => handleSelect({ 
+                    id: `custom-${Date.now()}`, 
+                    name: query.trim(),
+                    name_normalized: query.trim(),
+                    latitude: null,
+                    longitude: null,
+                    city_id: city.id,
+                    status: 'active'
+                  })}
+                >
+                  <span style={{ fontWeight: 600, color: 'var(--red)' }}>
+                    📍 Buscar por &ldquo;{query}&rdquo;
+                  </span>
+                </button>
+
                 {results.map((r, i) => (
                   <button
                     key={r.neighborhood.id}
@@ -273,29 +294,6 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
                 </div>
               </div>
             )}
-
-            <div 
-              className="flex flex-col gap-2 pt-2"
-              style={{ borderTop: '1px solid var(--gray-100)' }}
-            >
-              <button
-                onClick={() => {
-                  handleSelect({
-                    id: 'custom-' + query,
-                    name: query,
-                    name_normalized: query,
-                    latitude: null,
-                    longitude: null,
-                    city_id: city.id,
-                    status: 'active'
-                  })
-                }}
-                className="btn btn-primary"
-                style={{ alignSelf: 'flex-start' }}
-              >
-                Usar bairro &ldquo;{query}&rdquo;
-              </button>
-            </div>
           </div>
         )}
       </div>
