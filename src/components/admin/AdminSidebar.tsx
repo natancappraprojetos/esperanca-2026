@@ -31,6 +31,12 @@ const navItems = [
       { href: '/admin/leads', label: 'Leads', icon: '📋', roles: ['super_admin', 'admin_general', 'church_admin'] },
       { href: '/admin/relatorios', label: 'Relatórios', icon: '📈', roles: ['super_admin', 'admin_general', 'church_admin'] },
     ]
+  },
+  {
+    section: 'Configurações',
+    items: [
+      { href: '/admin/usuarios', label: 'Acessos', icon: '🔐', roles: ['super_admin', 'admin_general'] },
+    ]
   }
 ]
 
