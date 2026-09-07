@@ -26,6 +26,12 @@ export default async function ChurchesPage() {
     .select('*')
     .eq('scope', 'church')
 
+  // Pixel Global (link geral)
+  const { data: globalPixels } = await supabase
+    .from('tracking_pixels')
+    .select('*')
+    .eq('scope', 'global')
+
   // Busca todas as cidades ativas com seus estados — passadas ao client para o select dinâmico
   // Genérico: retorna todas as cidades cadastradas, sem filtro por estado/nome
   const { data: cities } = await supabase
@@ -43,6 +49,7 @@ export default async function ChurchesPage() {
     <ChurchesClient
       churches={churches || []}
       pixels={pixels || []}
+      globalPixels={globalPixels || []}
       cities={(cities || []) as any[]}
     />
   )

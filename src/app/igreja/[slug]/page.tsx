@@ -85,6 +85,20 @@ export default async function ChurchPage({ params, searchParams }: ChurchPagePro
     .limit(1)
     .maybeSingle()
 
+  // Fetch specific church pixels
+  const { data: churchPixels } = await supabase
+    .from('tracking_pixels')
+    .select('*')
+    .eq('church_id', church.id)
+    .eq('scope', 'church')
+
+  // Fetch global pixels
+  const { data: globalPixels } = await supabase
+    .from('tracking_pixels')
+    .select('*')
+    .eq('scope', 'global')
+    .eq('is_active', true)
+
   const sessionToken = generateSessionToken()
   const utmParams = {
     utm_source: sp.utm_source || null,
@@ -102,6 +116,8 @@ export default async function ChurchPage({ params, searchParams }: ChurchPagePro
       initialChurch={church}
       utmParams={utmParams}
       sessionToken={sessionToken}
+      globalPixels={globalPixels || []}
+      churchPixels={churchPixels || []}
     />
   )
 }

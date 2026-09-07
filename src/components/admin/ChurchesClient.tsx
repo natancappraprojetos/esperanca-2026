@@ -16,6 +16,7 @@ interface City {
 interface ChurchesClientProps {
   churches: any[]
   pixels?: any[]
+  globalPixels?: any[]
   cities: City[]
 }
 
@@ -35,7 +36,7 @@ const EMPTY_FORM = {
   pixel_id: '',
 }
 
-export default function ChurchesClient({ churches: initialChurches, pixels = [], cities }: ChurchesClientProps) {
+export default function ChurchesClient({ churches: initialChurches, pixels = [], globalPixels = [], cities }: ChurchesClientProps) {
   const [churches, setChurches] = useState(initialChurches)
   const [search, setSearch] = useState('')
   const [cityFilter, setCityFilter] = useState('')
@@ -63,6 +64,12 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
     return initial
   })
   const [savingPixel, setSavingPixel] = useState<string | null>(null)
+
+  // Pixel global
+  const [globalPixelData, setGlobalPixelData] = useState<string>(
+    globalPixels.find(p => p.pixel_type === 'meta')?.pixel_id || ''
+  )
+  const [savingGlobalPixel, setSavingGlobalPixel] = useState(false)
 
   const supabase = createClient()
 
@@ -433,6 +440,50 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
   }[geocodeStatus]
 
   // ------------------------------------
+  // Salvar Pixel Global
+  // ------------------------------------
+  async function handleSaveGlobalPixel() {
+    setSavingGlobalPixel(true)
+    
+    try {
+      if (!globalPixelData) {
+        // Se o input estiver vazio, deletamos o pixel global se existir
+        const { error } = await supabase
+          .from('tracking_pixels')
+          .delete()
+          .eq('scope', 'global')
+        if (error) throw error
+        toast.success('Pixel Global removido')
+      } else {
+        const existing = globalPixels?.find(p => p.pixel_type === 'meta')
+        if (existing) {
+          const { error } = await supabase
+            .from('tracking_pixels')
+            .update({ pixel_id: globalPixelData })
+            .eq('id', existing.id)
+          if (error) throw error
+        } else {
+          const { error } = await supabase
+            .from('tracking_pixels')
+            .insert({
+              pixel_type: 'meta',
+              pixel_id: globalPixelData,
+              scope: 'global',
+              is_active: true
+            })
+          if (error) throw error
+        }
+        toast.success('Pixel Global salvo com sucesso!')
+      }
+    } catch (err: any) {
+      console.error(err)
+      toast.error('Erro ao salvar pixel global: ' + err.message)
+    } finally {
+      setSavingGlobalPixel(false)
+    }
+  }
+
+  // ------------------------------------
   // Salvar Pixel Direto da Tabela
   // ------------------------------------
   async function handleSavePixel(churchId: string) {
@@ -506,6 +557,40 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
         <button className="btn btn-primary flex items-center gap-2" onClick={openCreateModal}>
           <Plus size={16} /> Nova Igreja
         </button>
+      </motion.div>
+
+      {/* Configurações Globais */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="card-soft p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gray-50/50"
+      >
+        <div>
+          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+            Pixel Global (Link Geral)
+          </h3>
+          <p className="text-small text-gray-500 mt-1">
+            Este pixel será disparado na página inicial quando as pessoas entrarem no link principal (sem ser link direto de igreja).
+          </p>
+        </div>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <input
+            type="text"
+            className="form-input max-w-[200px]"
+            placeholder="ID do Pixel (Meta)"
+            value={globalPixelData}
+            onChange={(e) => setGlobalPixelData(e.target.value)}
+          />
+          <button
+            onClick={handleSaveGlobalPixel}
+            disabled={savingGlobalPixel}
+            className="btn btn-primary py-2 flex items-center gap-2 flex-shrink-0"
+          >
+            <Save size={16} />
+            {savingGlobalPixel ? '...' : 'Salvar Pixel'}
+          </button>
+        </div>
       </motion.div>
 
       {/* Filtros */}

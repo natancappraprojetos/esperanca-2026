@@ -58,6 +58,13 @@ export default async function HomePage({
     .limit(1)
     .maybeSingle()
 
+  // Fetch global pixels
+  const { data: globalPixels } = await supabase
+    .from('tracking_pixels')
+    .select('*')
+    .eq('scope', 'global')
+    .eq('is_active', true)
+
   const sessionToken = generateSessionToken()
   const utmParams = {
     utm_source: sp.utm_source || null,
@@ -73,6 +80,7 @@ export default async function HomePage({
       material={material}
       utmParams={utmParams}
       sessionToken={sessionToken}
+      globalPixels={globalPixels || []}
     />
   )
 }

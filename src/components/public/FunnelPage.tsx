@@ -59,6 +59,8 @@ interface FunnelPageProps {
   material: DigitalMaterial | null
   utmParams?: Record<string, string>
   sessionToken: string
+  globalPixels?: any[]
+  churchPixels?: any[]
 }
 
 export function FunnelPage({ 
@@ -67,10 +69,12 @@ export function FunnelPage({
   campaign,
   material,
   utmParams = {},
-  sessionToken
+  sessionToken,
+  globalPixels = [],
+  churchPixels = []
 }: FunnelPageProps) {
   const [currentStep, setCurrentStep] = useState<FunnelStep>(
-    initialChurch ? 'church' : initialCity ? 'neighborhood' : 'hero'
+    initialChurch ? 'neighborhood' : initialCity ? 'neighborhood' : 'hero'
   )
   const [direction, setDirection] = useState(1) // 1 = forward, -1 = backward
   
@@ -86,6 +90,7 @@ export function FunnelPage({
     consentData: false,
     consentReminder: false,
     leadId: null,
+    churchPixels: churchPixels.length > 0 ? churchPixels : undefined,
     utmSource: utmParams.utm_source || null,
     utmMedium: utmParams.utm_medium || null,
     utmCampaign: utmParams.utm_campaign || null,
@@ -93,6 +98,13 @@ export function FunnelPage({
     utmTerm: utmParams.utm_term || null,
     sessionToken,
   })
+
+  // Initialize global pixels on mount
+  useEffect(() => {
+    if (globalPixels.length > 0) {
+      initializePixels(globalPixels)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     trackEvent('PageView', { 

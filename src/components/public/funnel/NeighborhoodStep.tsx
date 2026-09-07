@@ -11,6 +11,7 @@ interface NeighborhoodStepProps {
   campaign: Campaign
   onSelect: (neighborhood: Neighborhood, church: Church | null, method: string, pixels?: any[]) => void
   data: FunnelData
+  initialChurch?: Church | null
 }
 
 type SearchResult = {
@@ -18,7 +19,7 @@ type SearchResult = {
   score: number
 }
 
-export default function NeighborhoodStep({ city, campaign, onSelect, data }: NeighborhoodStepProps) {
+export default function NeighborhoodStep({ city, campaign, onSelect, data, initialChurch }: NeighborhoodStepProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
   const [suggestions, setSuggestions] = useState<SearchResult[]>([])
@@ -89,6 +90,12 @@ export default function NeighborhoodStep({ city, campaign, onSelect, data }: Nei
 
     setLoading(true)
     try {
+      if (initialChurch) {
+        // Se a igreja já veio fixa (Link Direto), pula a geolocalização e envia os pixels que já estão no FunnelPage
+        onSelect(neighborhood, initialChurch, 'direct_link', data.churchPixels)
+        return
+      }
+
       // Detecta se o bairro é customizado (não cadastrado no banco)
       const isCustom = !neighborhood.id || neighborhood.id.startsWith('custom-')
 
