@@ -137,14 +137,19 @@ export async function GET(request: NextRequest) {
       .order('name') // ordenação estável
 
     if (cityChurches && cityChurches.length > 0) {
-      // Prefere igrejas com coordenadas (para que no futuro possa aplicar proximidade)
-      const withCoords = cityChurches.filter((c) => c.latitude && c.longitude)
-      const best = withCoords.length > 0 ? withCoords[0] : cityChurches[0]
+      // Prioritize "Central" church if available
+      let best = cityChurches.find(c => c.name.toLowerCase().includes('central'))
+      
+      if (!best) {
+        // Prefere igrejas com coordenadas
+        const withCoords = cityChurches.filter((c) => c.latitude && c.longitude)
+        best = withCoords.length > 0 ? withCoords[0] : cityChurches[0]
+      }
 
       result = {
         church_id: best.id,
         church_name: best.name,
-        assignment_method: cityChurches.length === 1 ? 'single_church' : 'fallback_city',
+        assignment_method: cityChurches.length === 1 ? 'single_church' : (best.name.toLowerCase().includes('central') ? 'fallback_central' : 'fallback_city'),
         distance_meters: null,
       }
     }

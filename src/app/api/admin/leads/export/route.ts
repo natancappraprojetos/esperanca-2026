@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
     'Igreja': lead.churches?.name || '',
     'Cidade': lead.cities?.name || '',
     'Bairro': lead.neighborhoods?.name || '',
+    'Método de Atribuição': lead.church_assignment_method || '',
     'Campanha': lead.campaigns?.name || '',
     'Lembrete WhatsApp': lead.lead_consents?.[0]?.consent_reminder_whatsapp ? 'Sim' : 'Não',
     'Origem (UTM Source)': lead.utm_source || '',
@@ -98,8 +99,9 @@ export async function GET(request: NextRequest) {
     { wch: 40 }, // Igreja
     { wch: 20 }, // Cidade
     { wch: 25 }, // Bairro
-    { wch: 30 }, // Campanha
-    { wch: 20 }, // Lembrete
+    { wch: 18 }, // Método de Atribuição
+    { wch: 20 }, // Campanha
+    { wch: 18 }, // Lembrete WhatsApp
     { wch: 20 }, // UTM Source
     { wch: 20 }, // UTM Medium
     { wch: 25 }, // UTM Campaign

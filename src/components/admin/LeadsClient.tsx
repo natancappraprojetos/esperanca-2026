@@ -229,8 +229,15 @@ export default function LeadsClient({
                       {lead.contacts?.whatsapp ? formatWhatsappDisplay(lead.contacts.whatsapp) : '—'}
                     </td>
                     {!isChurchAdmin && (
-                      <td style={{ color: 'var(--gray-600)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {lead.churches?.name || '—'}
+                      <td style={{ color: 'var(--gray-600)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div className="flex flex-col">
+                          <span>{lead.churches?.name || '—'}</span>
+                          {lead.church_assignment_method && (
+                            <span className="text-[10px] text-gray-400 font-mono mt-0.5" title="Método de atribuição da igreja">
+                              {lead.church_assignment_method}
+                            </span>
+                          )}
+                        </div>
                       </td>
                     )}
                     <td style={{ color: 'var(--gray-600)' }}>
