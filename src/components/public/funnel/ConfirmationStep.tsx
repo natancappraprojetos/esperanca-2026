@@ -93,7 +93,7 @@ export default function ConfirmationStep({ data, campaign }: ConfirmationStepPro
   const firstName = data.leadName?.split(' ')[0] || 'você'
 
   return (
-    <div className="min-h-svh flex flex-col items-center justify-center w-full" style={{ background: 'var(--cream)' }}>
+    <div className="flex-1 min-h-svh flex flex-col items-center justify-center w-full" style={{ background: 'var(--cream)' }}>
       <div className="w-full max-w-lg mx-auto px-6 py-12 flex flex-col items-center text-center gap-8">
 
         <div className="flex flex-col items-center text-center gap-4 pt-4">
