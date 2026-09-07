@@ -40,7 +40,7 @@ export default async function ChurchPage({ params, searchParams }: ChurchPagePro
     .from('churches')
     .select(`
       *,
-      pastors (id, full_name, photo_url),
+      pastors!pastors_church_id_fkey (id, full_name, photo_url),
       cities (*)
     `)
     .eq('slug', slug)

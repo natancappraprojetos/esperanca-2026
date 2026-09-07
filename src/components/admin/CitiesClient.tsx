@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { toast } from 'react-hot-toast'
 import { Copy, Save } from 'lucide-react'
 
-export default function CitiesClient({ initialCities, pixels }: { initialCities: any[], pixels: any[] }) {
+export default function CitiesClient({ initialCities, pixels, activeCampaign }: { initialCities: any[], pixels: any[], activeCampaign?: any }) {
   const [search, setSearch] = useState('')
   const [ufFilter, setUfFilter] = useState('')
   const [cities, setCities] = useState(initialCities)
@@ -62,9 +62,13 @@ export default function CitiesClient({ initialCities, pixels }: { initialCities:
   }
 
   function handleCopyLink(slug: string, uf: string) {
-    const url = `${window.location.origin}/${uf.toLowerCase()}/${slug}`
+    if (!activeCampaign) {
+      toast.error('Nenhuma campanha ativa encontrada.')
+      return
+    }
+    const url = `${window.location.origin}/campanha/${activeCampaign.slug}/${slug}`
     navigator.clipboard.writeText(url)
-    toast.success('Link copiado!')
+    toast.success('Link direto copiado!')
   }
 
   // Obter UFs únicos para o filtro
@@ -132,7 +136,7 @@ export default function CitiesClient({ initialCities, pixels }: { initialCities:
                 <td>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-600 truncate max-w-[200px]">
-                      /{city.states?.uf.toLowerCase()}/{city.slug}
+                      /campanha/{activeCampaign?.slug || 'campanha'}/{city.slug}
                     </span>
                     <button 
                       onClick={() => handleCopyLink(city.slug, city.states?.uf)}
