@@ -186,47 +186,25 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
 
     setUploadingBanner(true)
     try {
-      // Upload to Supabase Storage
-      const ext = file.name.split('.').pop()
-      const fileName = `banners/${editingChurch.id}-${Date.now()}.${ext}`
-      
-      const { error: uploadError } = await supabase.storage
-        .from('public-assets')
-        .upload(fileName, file, { upsert: true })
-      
-      if (uploadError) {
-        toast.error('Erro no upload: ' + uploadError.message)
-        return
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('church_id', editingChurch.id)
+      formData.append('campaign_id', campaignId)
+      formData.append('church_name', editingChurch.name || '')
+      if (churchBanner?.id) {
+        formData.append('existing_banner_id', churchBanner.id)
       }
 
-      // Get public URL
-      const { data: urlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
-      const publicUrl = urlData.publicUrl
+      const res = await fetch('/api/admin/banners/upload', {
+        method: 'POST',
+        body: formData,
+      })
 
-      if (churchBanner) {
-        // Update existing banner record
-        await supabase
-          .from('banners')
-          .update({
-            image_desktop_url: publicUrl,
-            image_mobile_url: publicUrl,
-            name: `Banner ${editingChurch.name}`,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', churchBanner.id)
-      } else {
-        // Insert new banner record
-        await supabase
-          .from('banners')
-          .insert({
-            church_id: editingChurch.id,
-            campaign_id: campaignId,
-            name: `Banner ${editingChurch.name}`,
-            image_desktop_url: publicUrl,
-            image_mobile_url: publicUrl,
-            display_order: 1,
-            status: 'active'
-          })
+      const json = await res.json()
+
+      if (!res.ok) {
+        toast.error(json.error || 'Erro ao enviar banner')
+        return
       }
 
       toast.success('Banner enviado com sucesso!')
