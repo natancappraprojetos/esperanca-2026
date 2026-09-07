@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'react-hot-toast'
-import { Save, X, Plus, MapPin, RefreshCw, CheckCircle, AlertCircle, Loader, Copy } from 'lucide-react'
+import { Save, X, Plus, MapPin, RefreshCw, CheckCircle, AlertCircle, Loader, Copy, Image as ImageIcon, Upload, Trash2, Eye } from 'lucide-react'
 
 interface City {
   id: string
@@ -78,6 +78,11 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
   )
   const [savingModel, setSavingModel] = useState(false)
 
+  // Banner state
+  const [churchBanner, setChurchBanner] = useState<any | null>(null)
+  const [bannerLoading, setBannerLoading] = useState(false)
+  const [uploadingBanner, setUploadingBanner] = useState(false)
+
   const supabase = createClient()
 
   // ------------------------------------
@@ -146,6 +151,145 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
         ? { lat: church.latitude, lng: church.longitude }
         : null
     )
+    // Fetch banner for this church
+    fetchBanner(church.id)
+  }
+
+  async function fetchBanner(churchId: string) {
+    setBannerLoading(true)
+    setChurchBanner(null)
+    try {
+      const { data: banners } = await supabase
+        .from('banners')
+        .select('*')
+        .eq('church_id', churchId)
+        .eq('status', 'active')
+        .order('display_order')
+        .limit(1)
+      setChurchBanner(banners && banners.length > 0 ? banners[0] : null)
+    } catch {
+      setChurchBanner(null)
+    } finally {
+      setBannerLoading(false)
+    }
+  }
+
+  async function handleBannerUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !editingChurch) return
+
+    setUploadingBanner(true)
+    try {
+      // Upload to Supabase Storage
+      const ext = file.name.split('.').pop()
+      const fileName = `banners/${editingChurch.id}-${Date.now()}.${ext}`
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('public-assets')
+        .upload(fileName, file, { upsert: true })
+      
+      if (uploadError) {
+        // Fallback: save as base64 data URL or use public folder path
+        // For now, use the /banners/ public path convention
+        const reader = new FileReader()
+        reader.onload = async (ev) => {
+          // We'll save the banner URL as a relative path
+          // The file needs to be in /public/banners/
+          const safeName = `${editingChurch.slug || editingChurch.id}.${ext}`
+          const bannerUrl = `/banners/${safeName}`
+          
+          // Upsert banner record in DB
+          const campaignId = activeCampaign?.id
+          if (!campaignId) {
+            toast.error('Nenhuma campanha ativa encontrada')
+            return
+          }
+          
+          if (churchBanner && churchBanner.id !== 'fallback') {
+            // Update existing
+            await supabase
+              .from('banners')
+              .update({
+                image_desktop_url: bannerUrl,
+                image_mobile_url: bannerUrl,
+                name: `Banner ${editingChurch.name}`,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', churchBanner.id)
+          } else {
+            // Insert new
+            await supabase
+              .from('banners')
+              .insert({
+                church_id: editingChurch.id,
+                campaign_id: campaignId,
+                name: `Banner ${editingChurch.name}`,
+                image_desktop_url: bannerUrl,
+                image_mobile_url: bannerUrl,
+                display_order: 1,
+                status: 'active'
+              })
+          }
+          
+          toast.success('Banner atualizado! Coloque o arquivo na pasta /public/banners/ com o nome: ' + safeName)
+          fetchBanner(editingChurch.id)
+        }
+        reader.readAsDataURL(file)
+        return
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage.from('public-assets').getPublicUrl(fileName)
+      const publicUrl = urlData.publicUrl
+
+      const campaignId = activeCampaign?.id
+      if (!campaignId) {
+        toast.error('Nenhuma campanha ativa encontrada')
+        return
+      }
+
+      if (churchBanner && churchBanner.id !== 'fallback') {
+        await supabase
+          .from('banners')
+          .update({
+            image_desktop_url: publicUrl,
+            image_mobile_url: publicUrl,
+            name: `Banner ${editingChurch.name}`,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', churchBanner.id)
+      } else {
+        await supabase
+          .from('banners')
+          .insert({
+            church_id: editingChurch.id,
+            campaign_id: campaignId,
+            name: `Banner ${editingChurch.name}`,
+            image_desktop_url: publicUrl,
+            image_mobile_url: publicUrl,
+            display_order: 1,
+            status: 'active'
+          })
+      }
+
+      toast.success('Banner enviado com sucesso!')
+      fetchBanner(editingChurch.id)
+    } catch (err: any) {
+      toast.error('Erro ao enviar banner: ' + err.message)
+    } finally {
+      setUploadingBanner(false)
+    }
+  }
+
+  async function handleDeleteBanner() {
+    if (!churchBanner || churchBanner.id === 'fallback') return
+    try {
+      await supabase.from('banners').delete().eq('id', churchBanner.id)
+      setChurchBanner(null)
+      toast.success('Banner removido!')
+    } catch {
+      toast.error('Erro ao remover banner')
+    }
   }
 
   function openCreateModal() {
@@ -1097,6 +1241,89 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
 
                 </div>
               </section>
+
+              {/* === BANNER SECTION === */}
+              {isEditing && (
+                <section className="flex flex-col gap-3">
+                  <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--gray-700)' }}>
+                    <ImageIcon size={16} /> Banner da Igreja
+                  </h3>
+                  
+                  {bannerLoading ? (
+                    <div className="flex items-center gap-2 p-4 rounded-xl border border-dashed border-gray-200 bg-gray-50">
+                      <Loader size={16} className="animate-spin text-gray-400" />
+                      <span className="text-sm text-gray-500">Carregando banner...</span>
+                    </div>
+                  ) : churchBanner ? (
+                    <div className="flex flex-col gap-3">
+                      {/* Preview */}
+                      <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                        <img 
+                          src={churchBanner.image_desktop_url || churchBanner.image_mobile_url}
+                          alt={`Banner de ${editingChurch?.name}`}
+                          className="w-full h-auto max-h-[200px] object-contain"
+                        />
+                        <div className="absolute top-2 right-2 flex gap-1.5">
+                          <a
+                            href={churchBanner.image_desktop_url || churchBanner.image_mobile_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="bg-white/90 backdrop-blur rounded-lg p-1.5 hover:bg-white shadow-sm border border-gray-100"
+                            title="Ver em tela cheia"
+                          >
+                            <Eye size={14} className="text-gray-600" />
+                          </a>
+                          <button
+                            onClick={handleDeleteBanner}
+                            className="bg-white/90 backdrop-blur rounded-lg p-1.5 hover:bg-red-50 shadow-sm border border-gray-100"
+                            title="Remover banner"
+                          >
+                            <Trash2 size={14} className="text-red-500" />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Arquivo: {churchBanner.image_desktop_url}
+                      </p>
+                      {/* Replace button */}
+                      <label className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 cursor-pointer w-fit transition-colors">
+                        <Upload size={14} />
+                        Trocar Banner
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleBannerUpload}
+                          disabled={uploadingBanner}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 p-6 rounded-xl border border-dashed border-gray-300 bg-gray-50/50">
+                      <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
+                        <ImageIcon size={24} className="text-gray-400" />
+                      </div>
+                      <p className="text-sm text-gray-500 text-center">
+                        Nenhum banner cadastrado para esta igreja.
+                      </p>
+                      <label className="btn btn-primary text-sm py-2 px-4 flex items-center gap-2 cursor-pointer">
+                        {uploadingBanner ? (
+                          <><Loader size={14} className="animate-spin" /> Enviando...</>
+                        ) : (
+                          <><Upload size={14} /> Enviar Banner</>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleBannerUpload}
+                          disabled={uploadingBanner}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </section>
+              )}
             </div>
 
             {/* Footer */}
