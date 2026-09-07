@@ -61,12 +61,10 @@ export async function GET(request: NextRequest) {
   const rows = leads.map((lead: any) => ({
     'Nome': lead.contacts?.full_name || '',
     'WhatsApp': lead.contacts?.whatsapp ? formatWhatsappDisplay(lead.contacts.whatsapp) : '',
-    'Igreja': lead.churches?.name || '',
     'Cidade': lead.cities?.name || '',
     'Bairro': lead.neighborhoods?.name || '',
-    'Método de Atribuição': lead.church_assignment_method || '',
+    'Igreja que foi encaminhado': lead.churches?.name || '',
     'Campanha': lead.campaigns?.name || '',
-    'Lembrete WhatsApp': lead.lead_consents?.[0]?.consent_reminder_whatsapp ? 'Sim' : 'Não',
     'Origem (UTM Source)': lead.utm_source || '',
     'Mídia (UTM Medium)': lead.utm_medium || '',
     'Campanha UTM': lead.utm_campaign || '',
@@ -75,6 +73,52 @@ export async function GET(request: NextRequest) {
     'Data': new Date(lead.created_at).toLocaleDateString('pt-BR'),
     'Hora': new Date(lead.created_at).toLocaleTimeString('pt-BR'),
   }))
+
+  if (format === 'pdf') {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Leads Export</title>
+        <style>
+          body { font-family: sans-serif; margin: 2rem; }
+          h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+          table { width: 100%; border-collapse: collapse; font-size: 12px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f8f9fa; font-weight: bold; }
+          @media print {
+            @page { margin: 1cm; size: landscape; }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Relatório de Leads</h1>
+        <table>
+          <thead>
+            <tr>
+              ${Object.keys(rows[0] || {}).map(key => `<th>${key}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((row: any) => `
+              <tr>
+                ${Object.values(row).map(val => `<td>${val}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <script>
+          window.onload = () => window.print();
+        </script>
+      </body>
+      </html>
+    `
+    return new NextResponse(html, {
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+      },
+    })
+  }
 
   if (format === 'csv') {
     // CSV export
@@ -96,12 +140,10 @@ export async function GET(request: NextRequest) {
   ws['!cols'] = [
     { wch: 30 }, // Nome
     { wch: 18 }, // WhatsApp
-    { wch: 40 }, // Igreja
     { wch: 20 }, // Cidade
     { wch: 25 }, // Bairro
-    { wch: 18 }, // Método de Atribuição
+    { wch: 40 }, // Igreja que foi encaminhado
     { wch: 20 }, // Campanha
-    { wch: 18 }, // Lembrete WhatsApp
     { wch: 20 }, // UTM Source
     { wch: 20 }, // UTM Medium
     { wch: 25 }, // UTM Campaign
