@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'react-hot-toast'
-import { Copy, Save } from 'lucide-react'
+import { Copy, Save, Check } from 'lucide-react'
 
 export default function CitiesClient({ initialCities, pixels, activeCampaign }: { initialCities: any[], pixels: any[], activeCampaign?: any }) {
   const [search, setSearch] = useState('')
@@ -13,6 +13,7 @@ export default function CitiesClient({ initialCities, pixels, activeCampaign }: 
     pixels.reduce((acc, p) => ({ ...acc, [p.city_id]: p.pixel_id }), {})
   )
   const [saving, setSaving] = useState<string | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
   
   const supabase = createClient()
 
@@ -61,10 +62,12 @@ export default function CitiesClient({ initialCities, pixels, activeCampaign }: 
     }
   }
 
-  function handleCopyLink(slug: string, uf: string) {
+  function handleCopyLink(cityId: string, slug: string) {
     const url = `${window.location.origin}/cidade/${slug}`
     navigator.clipboard.writeText(url)
     toast.success('Link direto copiado!')
+    setCopiedId(cityId)
+    setTimeout(() => setCopiedId(null), 2000)
   }
 
   // Obter UFs únicos para o filtro
@@ -135,11 +138,11 @@ export default function CitiesClient({ initialCities, pixels, activeCampaign }: 
                       /cidade/{city.slug}
                     </span>
                     <button 
-                      onClick={() => handleCopyLink(city.slug, city.states?.uf)}
-                      className="text-gray-400 hover:text-gray-900"
-                      title="Copiar Link"
+                      onClick={() => handleCopyLink(city.id, city.slug)}
+                      className={`transition-colors p-1 rounded ${copiedId === city.id ? 'text-green-600 bg-green-50' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100'}`}
+                      title={copiedId === city.id ? "Copiado!" : "Copiar Link"}
                     >
-                      <Copy size={16} />
+                      {copiedId === city.id ? <Check size={16} /> : <Copy size={16} />}
                     </button>
                   </div>
                 </td>

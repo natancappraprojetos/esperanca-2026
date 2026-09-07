@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'react-hot-toast'
-import { Save, X } from 'lucide-react'
+import { Save, X, Loader } from 'lucide-react'
 
 export default function PastorsClient({ initialPastors }: { initialPastors: any[] }) {
   const [pastors, setPastors] = useState(initialPastors)
@@ -16,6 +16,7 @@ export default function PastorsClient({ initialPastors }: { initialPastors: any[
   const [editName, setEditName] = useState('')
   const [editPhone, setEditPhone] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [openingModalId, setOpeningModalId] = useState<string | null>(null)
 
   const supabase = createClient()
 
@@ -62,9 +63,13 @@ export default function PastorsClient({ initialPastors }: { initialPastors: any[
   }
 
   function handleEditClick(pastor: any) {
-    setEditingPastor(pastor)
-    setEditName(pastor.full_name || '')
-    setEditPhone(pastor.phone || '')
+    setOpeningModalId(pastor.id)
+    setTimeout(() => {
+      setEditingPastor(pastor)
+      setEditName(pastor.full_name || '')
+      setEditPhone(pastor.phone || '')
+      setOpeningModalId(null)
+    }, 10)
   }
 
   async function handleSave() {
@@ -166,11 +171,16 @@ export default function PastorsClient({ initialPastors }: { initialPastors: any[
                   <td style={{ color: 'var(--gray-600)' }}>{pastor.phone || '—'}</td>
                   <td>
                     <button 
-                      className="text-small font-medium flex items-center justify-center gap-1 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded"
+                      className="text-small font-medium flex items-center justify-center gap-1.5 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded transition-colors"
                       style={{ color: 'var(--gray-800)' }}
                       onClick={() => handleEditClick(pastor)}
+                      disabled={openingModalId === pastor.id}
                     >
-                      Editar
+                      {openingModalId === pastor.id ? (
+                        <><Loader size={14} className="animate-spin" /> ...</>
+                      ) : (
+                        'Editar'
+                      )}
                     </button>
                   </td>
                 </tr>

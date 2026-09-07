@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'react-hot-toast'
-import { Save, X, Plus, MapPin, RefreshCw, CheckCircle, AlertCircle, Loader, Copy, Image as ImageIcon, Upload, Trash2, Eye } from 'lucide-react'
+import { Save, X, Plus, MapPin, RefreshCw, CheckCircle, AlertCircle, Loader, Copy, Image as ImageIcon, Upload, Trash2, Eye, Check } from 'lucide-react'
 
 interface City {
   id: string
@@ -83,6 +83,10 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
   const [bannerLoading, setBannerLoading] = useState(false)
   const [uploadingBanner, setUploadingBanner] = useState(false)
 
+  // UI Feedback state
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [openingModalId, setOpeningModalId] = useState<string | null>(null)
+
   const supabase = createClient()
 
   // ------------------------------------
@@ -153,6 +157,17 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
     )
     // Fetch banner for this church
     fetchBanner(church.id)
+    
+    // Clear loading state if it was set
+    setOpeningModalId(null)
+  }
+
+  function handleEditClick(church: any) {
+    setOpeningModalId(church.id)
+    // Pequeno delay para permitir que a UI renderize o spinner antes de travar no openEditModal
+    setTimeout(() => {
+      openEditModal(church)
+    }, 10)
   }
 
   async function fetchBanner(churchId: string) {
@@ -684,10 +699,12 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
   // ------------------------------------
   // Copiar link da igreja
   // ------------------------------------
-  function handleCopyLink(churchSlug: string) {
+  function handleCopyLink(churchId: string, churchSlug: string) {
     const url = `${window.location.origin}/igreja/${churchSlug}`
     navigator.clipboard.writeText(url)
     toast.success('Link copiado!')
+    setCopiedId(churchId)
+    setTimeout(() => setCopiedId(null), 2000)
   }
 
   return (
@@ -915,11 +932,11 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
                               /igreja/{church.slug}
                             </span>
                             <button 
-                              onClick={() => handleCopyLink(church.slug)}
-                              className="text-gray-400 hover:text-gray-900"
-                              title="Copiar Link"
+                              onClick={() => handleCopyLink(church.id, church.slug)}
+                              className={`transition-colors p-1 rounded ${copiedId === church.id ? 'text-green-600 bg-green-50' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100'}`}
+                              title={copiedId === church.id ? "Copiado!" : "Copiar Link"}
                             >
-                              <Copy size={16} />
+                              {copiedId === church.id ? <Check size={16} /> : <Copy size={16} />}
                             </button>
                           </div>
                         ) : (
@@ -948,11 +965,16 @@ export default function ChurchesClient({ churches: initialChurches, pixels = [],
                       <td>
                         <div className="flex items-center gap-2">
                           <button
-                            className="text-small font-medium flex items-center gap-1 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded"
+                            className="text-small font-medium flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded transition-colors"
                             style={{ color: 'var(--gray-800)' }}
-                            onClick={() => openEditModal(church)}
+                            onClick={() => handleEditClick(church)}
+                            disabled={openingModalId === church.id}
                           >
-                            Editar
+                            {openingModalId === church.id ? (
+                              <><Loader size={14} className="animate-spin" /> ...</>
+                            ) : (
+                              'Editar'
+                            )}
                           </button>
                         </div>
                       </td>
