@@ -23,6 +23,7 @@ const schema = z.object({
   whatsapp: z.string()
     .min(1, 'Por favor, informe seu WhatsApp')
     .refine(val => validateBrazilianWhatsapp(val), 'Número de WhatsApp inválido'),
+  neighborhoodText: z.string().optional(),
   consentData: z.boolean().refine(v => v === true, {
     message: 'Você precisa aceitar a política de privacidade para continuar',
   }),
@@ -48,6 +49,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
     defaultValues: {
       name: data.leadName || '',
       whatsapp: data.leadWhatsapp || '',
+      neighborhoodText: '',
       consentData: false,
       consentReminder: 'yes',
     },
@@ -66,6 +68,11 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
   const hasName = nameValue?.trim().length >= 2
 
   async function onFormSubmit(values: FormValues) {
+    if (!data.neighborhood && (!values.neighborhoodText || values.neighborhoodText.trim().length < 2)) {
+      setError('Por favor, informe o seu bairro.')
+      return
+    }
+
     setSubmitting(true)
     setError(null)
 
@@ -88,7 +95,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
           church_id: data.church?.id || null,
           city_id: data.city?.id || null,
           neighborhood_id: (data.neighborhood?.id && !data.neighborhood.id.startsWith('custom-')) ? data.neighborhood.id : null,
-          neighborhood_name: data.neighborhood?.name || null,
+          neighborhood_name: data.neighborhood?.name || values.neighborhoodText?.trim() || null,
           material_id: data.material?.id || null,
           church_assignment_method: data.assignmentMethod,
           consent_data: values.consentData,
@@ -233,6 +240,24 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
                 Somente para envio do material. Não fazemos spam.
               </p>
             </div>
+
+            {/* Bairro (Aparece apenas se a pessoa acessou por Link Direto e não passou pela etapa de bairro) */}
+            {!data.neighborhood && (
+              <div className="form-group">
+                <label htmlFor="lead-neighborhood" className="form-label" style={{ color: 'var(--gray-200)' }}>
+                  Qual seu bairro?
+                </label>
+                <input
+                  id="lead-neighborhood"
+                  type="text"
+                  className={`form-input ${error === 'Por favor, informe o seu bairro.' ? 'error' : ''}`}
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'var(--white)', border: '1px solid var(--gray-700)' }}
+                  placeholder="Ex: Centro"
+                  autoComplete="address-level2"
+                  {...register('neighborhoodText')}
+                />
+              </div>
+            )}
 
             {/* Reminder consent */}
             <div 
