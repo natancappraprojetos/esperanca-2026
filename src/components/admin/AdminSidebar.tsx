@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import type { UserProfile } from '@/types/database'
+import { createClient } from '@/lib/supabase/client'
 
 interface AdminSidebarProps {
   profile: UserProfile
@@ -42,6 +43,14 @@ const navItems = [
 
 export default function AdminSidebar({ profile }: AdminSidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
+  }
 
   const filteredNav = navItems.map(section => ({
     ...section,
@@ -142,14 +151,14 @@ export default function AdminSidebar({ profile }: AdminSidebarProps) {
             </span>
           </div>
         </div>
-        <Link
-          href="/admin/logout"
-          className="admin-nav-item mt-2 text-caption"
-          style={{ color: 'var(--gray-600)', padding: '0.5rem' }}
+        <button
+          onClick={handleLogout}
+          className="admin-nav-item mt-2 text-caption w-full text-left"
+          style={{ color: 'var(--gray-600)', padding: '0.5rem', cursor: 'pointer', background: 'transparent', border: 'none' }}
         >
           <span>🚪</span>
           <span>Sair</span>
-        </Link>
+        </button>
       </div>
     </aside>
   )
