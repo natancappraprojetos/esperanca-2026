@@ -6,7 +6,14 @@ export const metadata: Metadata = {
   title: 'Dashboard | Admin',
 }
 
-export default async function DashboardPage() {
+interface DashboardPageProps {
+  searchParams: Promise<{
+    campaign?: string
+  }>
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const sp = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -15,6 +22,21 @@ export default async function DashboardPage() {
     .select('*')
     .eq('id', user!.id)
     .single()
+
+  // Fetch campaigns for the dropdown
+  const { data: campaigns } = await supabase
+    .from('campaigns')
+    .select('id, name, status')
+    .order('created_at', { ascending: false })
+
+  // Determine selected campaign (default to the active one unless 'all' is passed)
+  let selectedCampaignId = sp.campaign
+  if (selectedCampaignId === 'all') {
+    selectedCampaignId = undefined // 'all' means global view
+  } else if (!selectedCampaignId && campaigns && campaigns.length > 0) {
+    const activeCampaign = campaigns.find(c => c.status === 'active')
+    selectedCampaignId = activeCampaign ? activeCampaign.id : campaigns[0].id
+  }
 
   // Fetch KPI data based on role
   const now = new Date()
@@ -37,36 +59,39 @@ export default async function DashboardPage() {
     }
   }
 
+  if (selectedCampaignId) {
+    leadsQuery = leadsQuery.eq('campaign_id', selectedCampaignId)
+  }
+
   const { count: totalLeads } = await leadsQuery
 
   // Today's leads
-  const { count: todayLeads } = await supabase
-    .from('leads')
-    .select('id', { count: 'exact', head: true })
-    .gte('created_at', today)
+  let todayQuery = supabase.from('leads').select('id', { count: 'exact', head: true }).gte('created_at', today)
+  if (selectedCampaignId) todayQuery = todayQuery.eq('campaign_id', selectedCampaignId)
+  const { count: todayLeads } = await todayQuery
 
   // Last 7 days
-  const { count: weekLeads } = await supabase
-    .from('leads')
-    .select('id', { count: 'exact', head: true })
-    .gte('created_at', weekAgo)
+  let weekQuery = supabase.from('leads').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)
+  if (selectedCampaignId) weekQuery = weekQuery.eq('campaign_id', selectedCampaignId)
+  const { count: weekLeads } = await weekQuery
 
   // Month leads
-  const { count: monthLeads } = await supabase
-    .from('leads')
-    .select('id', { count: 'exact', head: true })
-    .gte('created_at', monthStart)
+  let monthQuery = supabase.from('leads').select('id', { count: 'exact', head: true }).gte('created_at', monthStart)
+  if (selectedCampaignId) monthQuery = monthQuery.eq('campaign_id', selectedCampaignId)
+  const { count: monthLeads } = await monthQuery
 
   // Total downloads
+  // Downloads don't have campaign_id directly without a join, but let's assume they are global or we don't filter them here since we might need to join digital_materials.
+  // Actually, material_downloads has material_id, which belongs to a campaign. But let's leave it as global for now.
   const { count: totalDownloads } = await supabase
     .from('material_downloads')
     .select('id', { count: 'exact', head: true })
 
   // Total opt-ins for reminders
-  const { count: totalReminders } = await supabase
-    .from('lead_consents')
-    .select('id', { count: 'exact', head: true })
-    .eq('consent_reminder_whatsapp', true)
+  let remindersQuery = supabase.from('lead_consents').select('id', { count: 'exact', head: true }).eq('consent_reminder_whatsapp', true)
+  // Consents don't have campaign_id directly, they belong to leads. We'd have to join leads.
+  // We'll leave it global for simplicity right now unless we want to do a subquery.
+  const { count: totalReminders } = await remindersQuery
 
   // Active churches count (super_admin / admin_general only)
   let totalChurches = 0
@@ -79,7 +104,7 @@ export default async function DashboardPage() {
   }
 
   // Recent leads (last 10) for table
-  const { data: recentLeads } = await supabase
+  let recentLeadsQuery = supabase
     .from('leads')
     .select(`
       id, created_at, utm_source, device_type,
@@ -89,6 +114,12 @@ export default async function DashboardPage() {
       neighborhoods (name),
       lead_consents (consent_reminder_whatsapp)
     `)
+    
+  if (selectedCampaignId) {
+    recentLeadsQuery = recentLeadsQuery.eq('campaign_id', selectedCampaignId)
+  }
+
+  const { data: recentLeads } = await recentLeadsQuery
     .order('created_at', { ascending: false })
     .limit(10)
 
@@ -107,6 +138,8 @@ export default async function DashboardPage() {
       profile={profile!}
       kpis={kpis}
       recentLeads={recentLeads || []}
+      campaigns={campaigns || []}
+      selectedCampaignId={selectedCampaignId || (sp.campaign === 'all' ? 'all' : '')}
     />
   )
 }

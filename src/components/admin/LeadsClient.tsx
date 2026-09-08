@@ -163,13 +163,13 @@ export default function LeadsClient({
         )}
 
         <select
-          value={filters.campaign || ''}
+          value={filters.campaign || 'all'}
           onChange={e => setFilter('campaign', e.target.value)}
           className="form-input"
           style={{ maxWidth: 260, padding: '0.5rem 0.75rem' }}
           aria-label="Filtrar por campanha"
         >
-          <option value="">Todas as campanhas</option>
+          <option value="all">Todas as campanhas (Global)</option>
           {filterOptions.campaigns.map(c => (
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
@@ -206,7 +206,7 @@ export default function LeadsClient({
                 <th>Lembrete</th>
                 <th>Origem</th>
                 <th>Data</th>
-                {!isChurchAdmin && <th style={{ textAlign: 'right' }}>Ações</th>}
+                {profile.role === 'super_admin' && <th style={{ textAlign: 'right' }}>Ações</th>}
               </tr>
             </thead>
             <tbody>
@@ -262,7 +262,7 @@ export default function LeadsClient({
                         hour: '2-digit', minute: '2-digit',
                       })}
                     </td>
-                    {!isChurchAdmin && (
+                    {profile.role === 'super_admin' && (
                       <td style={{ textAlign: 'right' }}>
                         <button
                           onClick={() => handleDelete(lead.id)}

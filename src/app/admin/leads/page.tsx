@@ -55,10 +55,26 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
     }
   }
 
+  // Determine selected campaign (default to the active one unless 'all' is passed)
+  let selectedCampaignId = sp.campaign
+  if (selectedCampaignId === 'all') {
+    selectedCampaignId = undefined // 'all' means global view
+  } else if (!selectedCampaignId) {
+    const { data: activeCampaign } = await supabase
+      .from('campaigns')
+      .select('id')
+      .eq('status', 'active')
+      .limit(1)
+      .maybeSingle()
+    if (activeCampaign) {
+      selectedCampaignId = activeCampaign.id
+    }
+  }
+
   // Filter params
   if (sp.church) query = query.eq('church_id', sp.church)
   if (sp.city) query = query.eq('city_id', sp.city)
-  if (sp.campaign) query = query.eq('campaign_id', sp.campaign)
+  if (selectedCampaignId) query = query.eq('campaign_id', selectedCampaignId)
   if (sp.reminder === 'true') {
     // Filter by reminder via consent — use a different approach
     const { data: consentLeadIds } = await supabase
@@ -99,7 +115,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
       page={page}
       limit={limit}
       profile={profile!}
-      filters={{ church: sp.church, city: sp.city, campaign: sp.campaign, reminder: sp.reminder }}
+      filters={{ church: sp.church, city: sp.city, campaign: selectedCampaignId || (sp.campaign === 'all' ? 'all' : undefined), reminder: sp.reminder }}
       filterOptions={{ churches: churches || [], cities: cities || [], campaigns: campaigns || [] }}
     />
   )

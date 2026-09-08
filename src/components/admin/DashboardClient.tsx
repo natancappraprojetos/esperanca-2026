@@ -17,6 +17,8 @@ interface DashboardClientProps {
     totalChurches: number
   }
   recentLeads: any[]
+  campaigns: Array<{ id: string; name: string; status: string }>
+  selectedCampaignId: string
 }
 
 const kpiConfig = [
@@ -28,7 +30,10 @@ const kpiConfig = [
   { key: 'totalReminders', label: 'Lembretes WhatsApp', color: '#25D366', emoji: '🔔' },
 ]
 
-export default function DashboardClient({ profile, kpis, recentLeads }: DashboardClientProps) {
+import { useRouter } from 'next/navigation'
+
+export default function DashboardClient({ profile, kpis, recentLeads, campaigns, selectedCampaignId }: DashboardClientProps) {
+  const router = useRouter()
   const firstName = profile.full_name?.split(' ')[0] || 'Admin'
   const isChurchAdmin = profile.role === 'church_admin'
   const isSuperAdmin = profile.role === 'super_admin'
@@ -61,6 +66,41 @@ export default function DashboardClient({ profile, kpis, recentLeads }: Dashboar
           </p>
         )}
       </motion.div>
+
+      {/* Campaign Selector */}
+      {!isChurchAdmin && campaigns && campaigns.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="flex items-center gap-3"
+        >
+          <label htmlFor="dashboard-campaign" className="text-small font-medium text-gray-700">
+            Campanha:
+          </label>
+          <select
+            id="dashboard-campaign"
+            value={selectedCampaignId || 'all'}
+            onChange={(e) => {
+              const val = e.target.value
+              if (val) {
+                router.push(`/admin/dashboard?campaign=${val}`)
+              } else {
+                router.push('/admin/dashboard')
+              }
+            }}
+            className="form-input bg-white"
+            style={{ maxWidth: 300, padding: '0.5rem 0.75rem' }}
+          >
+            <option value="all">Todas as Campanhas (Global)</option>
+            {campaigns.map(c => (
+              <option key={c.id} value={c.id}>
+                {c.name} {c.status === 'active' ? '(Ativa)' : ''}
+              </option>
+            ))}
+          </select>
+        </motion.div>
+      )}
 
       {/* KPI Cards */}
       <motion.div
