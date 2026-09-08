@@ -168,7 +168,10 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
   return (
     <div className="min-h-svh flex flex-col items-center justify-center w-full px-6 sm:px-8 py-10 sm:py-16">
       <div className="w-full max-w-md mx-auto mb-6">
-        <div className="flex flex-col gap-6 bg-white/70 backdrop-blur-xl border border-gray-100/50 p-6 sm:p-8 rounded-[24px] shadow-2xl w-full">
+        <div 
+          className="flex flex-col gap-6 md:gap-8 bg-white/60 backdrop-blur-2xl border border-gray-100/50 px-6 sm:px-12 rounded-[32px] shadow-2xl w-full"
+          style={{ paddingTop: '2.5rem', paddingBottom: '2.5rem' }}
+        >
           {/* Header */}
           <div className="flex flex-col gap-1.5 text-center">
             <h2 className="text-xl sm:text-2xl font-serif tracking-tight leading-tight" style={{ color: 'var(--gray-900)' }}>
