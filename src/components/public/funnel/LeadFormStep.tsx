@@ -166,17 +166,17 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
   }
 
   return (
-    <div className="min-h-svh flex flex-col items-center justify-center w-full" style={{ paddingTop: '4rem', paddingBottom: '4rem' }}>
+    <div className="min-h-svh flex flex-col items-center justify-center w-full" style={{ paddingTop: '5rem', paddingBottom: '4rem' }}>
       <div className="w-full max-w-lg mx-auto px-6 py-12 sm:py-16">
-        <div className="flex flex-col gap-10 bg-black/60 backdrop-blur-2xl border border-gray-700/50 p-8 sm:p-12 rounded-[32px] sm:rounded-[40px] shadow-2xl w-full">
+        <div className="flex flex-col gap-10 bg-white/95 backdrop-blur-2xl border border-gray-100 p-8 sm:p-12 rounded-[32px] sm:rounded-[40px] shadow-2xl w-full">
           {/* Header */}
           <div className="flex flex-col gap-2 text-center">
-            <h2 className="text-heading-2" style={{ color: 'var(--white)' }}>
+            <h2 className="text-heading-2" style={{ color: 'var(--gray-900)' }}>
               Seu livro está quase pronto.
             </h2>
-            <p className="text-body" style={{ color: 'var(--gray-300)' }}>
+            <p className="text-body" style={{ color: 'var(--gray-500)' }}>
               Informe seus dados para receber o{' '}
-              <strong style={{ color: 'var(--white)' }}>
+              <strong style={{ color: 'var(--gray-900)' }}>
                 {data.material?.name || 'livro digital'}
               </strong>{' '}
               gratuitamente.
@@ -192,14 +192,14 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
           >
             {/* Name */}
             <div className="form-group">
-              <label htmlFor="lead-name" className="form-label" style={{ color: 'var(--gray-200)' }}>
+              <label htmlFor="lead-name" className="form-label" style={{ color: 'var(--gray-700)' }}>
                 Seu Nome
               </label>
               <input
                 id="lead-name"
                 type="text"
                 className={`form-input ${errors.name ? 'error' : ''}`}
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'var(--white)', border: '1px solid var(--gray-700)' }}
+                style={{ backgroundColor: 'var(--white)', color: 'var(--gray-900)', border: '1px solid var(--gray-200)' }}
                 placeholder="Como você se chama?"
                 autoComplete="given-name"
                 {...register('name')}
@@ -213,14 +213,14 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
 
             {/* WhatsApp */}
             <div className="form-group">
-              <label htmlFor="lead-whatsapp" className="form-label" style={{ color: 'var(--gray-200)' }}>
+              <label htmlFor="lead-whatsapp" className="form-label" style={{ color: 'var(--gray-700)' }}>
                 Seu WhatsApp
               </label>
               <input
                 id="lead-whatsapp"
                 type="tel"
                 className={`form-input ${errors.whatsapp ? 'error' : ''}`}
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'var(--white)', border: '1px solid var(--gray-700)' }}
+                style={{ backgroundColor: 'var(--white)', color: 'var(--gray-900)', border: '1px solid var(--gray-200)' }}
                 placeholder="(51) 99999-9999"
                 autoComplete="tel"
                 inputMode="numeric"
@@ -236,7 +236,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
                   {errors.whatsapp.message}
                 </span>
               )}
-              <p className="text-caption" style={{ color: 'var(--gray-400)' }}>
+              <p className="text-caption" style={{ color: 'var(--gray-500)' }}>
                 Somente para envio do material. Não fazemos spam.
               </p>
             </div>
@@ -244,14 +244,14 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
             {/* Bairro (Aparece apenas se a pessoa acessou por Link Direto e não passou pela etapa de bairro) */}
             {!data.neighborhood && (
               <div className="form-group">
-                <label htmlFor="lead-neighborhood" className="form-label" style={{ color: 'var(--gray-200)' }}>
+                <label htmlFor="lead-neighborhood" className="form-label" style={{ color: 'var(--gray-700)' }}>
                   Qual seu bairro?
                 </label>
                 <input
                   id="lead-neighborhood"
                   type="text"
                   className={`form-input ${error === 'Por favor, informe o seu bairro.' ? 'error' : ''}`}
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'var(--white)', border: '1px solid var(--gray-700)' }}
+                  style={{ backgroundColor: 'var(--white)', color: 'var(--gray-900)', border: '1px solid var(--gray-200)' }}
                   placeholder="Ex: Centro"
                   autoComplete="address-level2"
                   {...register('neighborhoodText')}
@@ -267,13 +267,13 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
             >
               <p 
                 id="reminder-legend"
-                style={{ fontWeight: 600, color: 'var(--white)', fontSize: '0.9375rem' }}
+                style={{ fontWeight: 600, color: 'var(--gray-900)', fontSize: '0.9375rem' }}
               >
                 {hasName ? `${nameValue.trim().split(' ')[0]}, ` : ''}Quer que a gente lembre você da programação?
               </p>
 
               <div className="radio-group">
-                <label className="radio-option" style={{ color: 'var(--gray-200)' }}>
+                <label className="radio-option" style={{ color: 'var(--gray-700)' }}>
                   <input
                     type="radio"
                     value="yes"
@@ -282,7 +282,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
                   />
                   <span>Sim, quero receber lembretes pelo WhatsApp</span>
                 </label>
-                <label className="radio-option" style={{ color: 'var(--gray-200)' }}>
+                <label className="radio-option" style={{ color: 'var(--gray-700)' }}>
                   <input
                     type="radio"
                     value="no"
@@ -303,7 +303,7 @@ export default function LeadFormStep({ campaign, onSubmit, data }: LeadFormStepP
                   className="checkbox-input"
                   {...register('consentData')}
                 />
-                <span className="checkbox-label" style={{ color: 'var(--white)' }}>
+                <span className="checkbox-label" style={{ color: 'var(--gray-600)' }}>
                   Li e concordo com a{' '}
                   <a 
                     href="/politica-de-privacidade"
