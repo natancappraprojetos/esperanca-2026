@@ -16,9 +16,8 @@ interface ChurchStepProps {
 }
 
 export default function ChurchStep({ church, campaign, onContinue, data }: ChurchStepProps) {
-  const [banner, setBanner] = useState<Banner | null>(null)
-  const [sharing, setSharing] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [bannerLoading, setBannerLoading] = useState(true)
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   useEffect(() => {
     if (!church) return
@@ -45,8 +44,13 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
     // Load banner
     fetch(`/api/banners?church_id=${church.id}&campaign_id=${campaign.id}`)
       .then(r => r.json())
-      .then(j => setBanner(j.banner || null))
-      .catch(() => {})
+      .then(j => {
+        setBanner(j.banner || null)
+        setBannerLoading(false)
+      })
+      .catch(() => {
+        setBannerLoading(false)
+      })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!church) {
@@ -167,8 +171,17 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
             borderRadius: 'var(--radius-xl)',
           }}
         >
-          {banner ? (
-            <div className="relative">
+          {bannerLoading ? (
+            <div className="flex items-center justify-center min-h-[300px] w-full bg-gray-100 animate-pulse rounded-[var(--radius-xl)]">
+              <div className="spinner" style={{ borderColor: 'var(--gray-300)', borderTopColor: 'var(--red)', width: 32, height: 32, borderWidth: 3 }} />
+            </div>
+          ) : banner ? (
+            <div className="relative min-h-[300px] w-full bg-gray-100 rounded-[var(--radius-xl)] overflow-hidden flex items-center justify-center">
+              {!imageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100/80 backdrop-blur-sm z-10">
+                   <div className="spinner" style={{ borderColor: 'var(--gray-300)', borderTopColor: 'var(--red)', width: 32, height: 32, borderWidth: 3 }} />
+                </div>
+              )}
               <picture>
                 {banner.image_mobile_url && (
                   <source media="(max-width: 768px)" srcSet={banner.image_mobile_url} />
@@ -176,35 +189,38 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
                 <img
                   src={banner.image_desktop_url || banner.image_mobile_url || ''}
                   alt={`Banner da ${church.name}`}
-                  className="w-full h-auto object-contain mx-auto max-h-[65vh]"
+                  className={`w-full h-auto object-contain mx-auto max-h-[65vh] transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                   style={{ borderRadius: 'var(--radius-xl)' }}
+                  onLoad={() => setImageLoaded(true)}
                 />
               </picture>
               
               {/* Overlay Download Button */}
-              <button
-                onClick={handleSave}
-                className="absolute top-4 right-4 bg-white/95 backdrop-blur shadow-xl px-4 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all text-gray-900 flex items-center gap-2 text-sm font-semibold border border-gray-100"
-                aria-label="Baixar convite"
-                title="Baixar convite"
-              >
-                {saved ? (
-                  <>
-                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                      <path d="M16 5L7 14l-4-4" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <span>Salvo!</span>
-                  </>
-                ) : (
-                  <>
-                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                      <path d="M10 14l-5-5 1.4-1.4L9 11.2V2h2v9.2l2.6-2.6L15 9l-5 5z" fill="currentColor"/>
-                      <path d="M3 16h14v2H3z" fill="currentColor"/>
-                    </svg>
-                    <span>Baixe seu convite</span>
-                  </>
-                )}
-              </button>
+              {imageLoaded && (
+                <button
+                  onClick={handleSave}
+                  className="absolute top-4 right-4 bg-white/95 backdrop-blur shadow-xl px-4 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all text-gray-900 flex items-center gap-2 text-sm font-semibold border border-gray-100 z-20"
+                  aria-label="Baixar convite"
+                  title="Baixar convite"
+                >
+                  {saved ? (
+                    <>
+                      <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                        <path d="M16 5L7 14l-4-4" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span>Salvo!</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 14l-5-5 1.4-1.4L9 11.2V2h2v9.2l2.6-2.6L15 9l-5 5z" fill="currentColor"/>
+                        <path d="M3 16h14v2H3z" fill="currentColor"/>
+                      </svg>
+                      <span>Baixe seu convite</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           ) : (
             /* Fallback visual when no banner */
@@ -213,6 +229,7 @@ export default function ChurchStep({ church, campaign, onContinue, data }: Churc
               style={{ 
                 background: 'linear-gradient(135deg, #1a1a17 0%, #3d3d38 100%)',
                 borderRadius: 'var(--radius-xl)',
+                minHeight: '300px'
               }}
             >
               <p 
