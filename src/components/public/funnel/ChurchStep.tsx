@@ -16,6 +16,9 @@ interface ChurchStepProps {
 }
 
 export default function ChurchStep({ church, campaign, onContinue, data }: ChurchStepProps) {
+  const [banner, setBanner] = useState<Banner | null>(null)
+  const [sharing, setSharing] = useState(false)
+  const [saved, setSaved] = useState(false)
   const [bannerLoading, setBannerLoading] = useState(true)
   const [imageLoaded, setImageLoaded] = useState(false)
 
