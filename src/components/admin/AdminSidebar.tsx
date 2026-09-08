@@ -19,11 +19,11 @@ const navItems = [
   {
     section: 'Campanha',
     items: [
-      { href: '/admin/campanhas', label: 'Campanhas', icon: '🎯', roles: ['super_admin', 'admin_general'] },
-      { href: '/admin/igrejas', label: 'Igrejas', icon: '🏛️', roles: ['super_admin', 'admin_general'] },
-      { href: '/admin/pastores', label: 'Pastores', icon: '👤', roles: ['super_admin', 'admin_general'] },
-      { href: '/admin/cidades', label: 'Cidades', icon: '📍', roles: ['super_admin', 'admin_general'] },
-      { href: '/admin/materiais', label: 'Materiais', icon: '📖', roles: ['super_admin', 'admin_general'] },
+      { href: '/admin/campanhas', label: 'Campanhas', icon: '🎯', roles: ['super_admin'] },
+      { href: '/admin/igrejas', label: 'Igrejas', icon: '🏛️', roles: ['super_admin'] },
+      { href: '/admin/pastores', label: 'Pastores', icon: '👤', roles: ['super_admin'] },
+      { href: '/admin/cidades', label: 'Cidades', icon: '📍', roles: ['super_admin'] },
+      { href: '/admin/materiais', label: 'Materiais', icon: '📖', roles: ['super_admin'] },
     ]
   },
   {
@@ -36,7 +36,7 @@ const navItems = [
   {
     section: 'Configurações',
     items: [
-      { href: '/admin/usuarios', label: 'Acessos', icon: '🔐', roles: ['super_admin', 'admin_general'] },
+      { href: '/admin/usuarios', label: 'Acessos', icon: '🔐', roles: ['super_admin'] },
     ]
   }
 ]
