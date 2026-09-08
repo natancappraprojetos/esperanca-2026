@@ -85,7 +85,9 @@ async function sendToOwnAnalytics(eventName: string, properties: EventProperties
 // Map our events to Meta standard events
 const META_EVENT_MAP: Partial<Record<TrackingEventName, string>> = {
   PageView: 'PageView',
+  LeadSubmitted: 'Lead',
   LeadCompleted: 'Lead',
+  MaterialViewed: 'ViewContent',
   MaterialDownloadStarted: 'InitiateCheckout',
   LeadFormStarted: 'AddToCart',
   DownloadCompleted: 'Purchase',
