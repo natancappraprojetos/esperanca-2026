@@ -12,8 +12,8 @@ export const metadata: Metadata = {
   authors: [{ name: 'Associação Gaúcha' }],
   creator: 'Associação Gaúcha',
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
+    icon: '/icon.png',
+    shortcut: '/icon.png',
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
