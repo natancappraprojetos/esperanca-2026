@@ -83,6 +83,23 @@ export default function CampaignsClient({ campaigns: initialCampaigns }: Campaig
     setIsModalOpen(true)
   }
 
+  async function handleDelete(id: string) {
+    if (!confirm('Tem certeza que deseja excluir esta campanha?')) return
+
+    try {
+      const res = await fetch(`/api/admin/campaigns/${id}`, {
+        method: 'DELETE'
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erro ao excluir campanha')
+
+      toast.success('Campanha excluída com sucesso!')
+      setCampaigns(campaigns.filter(c => c.id !== id))
+    } catch (error: any) {
+      toast.error(error.message)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <motion.div
@@ -166,13 +183,22 @@ export default function CampaignsClient({ campaigns: initialCampaigns }: Campaig
                       {camp.leads[0]?.count || 0}
                     </td>
                     <td>
-                      <button 
-                        onClick={() => handleEdit(camp)}
-                        className="text-small" 
-                        style={{ color: 'var(--red)' }}
-                      >
-                        Editar
-                      </button>
+                      <div className="flex gap-3">
+                        <button 
+                          onClick={() => handleEdit(camp)}
+                          className="text-small" 
+                          style={{ color: 'var(--gray-600)' }}
+                        >
+                          Editar
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(camp.id)}
+                          className="text-small" 
+                          style={{ color: 'var(--red)' }}
+                        >
+                          Excluir
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
