@@ -142,8 +142,23 @@ export function FunnelPage({
     const currentIndex = getStepIndex(currentStep)
     const nextIndex = getStepIndex(step)
     setDirection(nextIndex > currentIndex ? 1 : -1)
+    
+    const newData = { ...data, ...updatedData }
+    
+    // Altera a URL para permitir Conversões Personalizadas no Facebook Pixel baseadas na URL da igreja
+    if (step === 'church' || step === 'material' || step === 'form' || step === 'confirmation') {
+      const churchSlug = newData.church?.slug
+      if (churchSlug) {
+        // Usa history.pushState para mudar a URL sem recarregar a página ou disparar o Next.js router
+        const newUrl = `/igreja/${churchSlug}`
+        if (window.location.pathname !== newUrl) {
+          window.history.pushState(null, '', newUrl)
+        }
+      }
+    }
+
     if (updatedData) {
-      setData(prev => ({ ...prev, ...updatedData }))
+      setData(newData)
     }
     setCurrentStep(step)
     window.scrollTo({ top: 0, behavior: 'smooth' })
