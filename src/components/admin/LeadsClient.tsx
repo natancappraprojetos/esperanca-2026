@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { formatWhatsappDisplay } from '@/lib/utils/whatsapp'
@@ -27,15 +27,18 @@ export default function LeadsClient({
   const searchParams = useSearchParams()
   const [exporting, setExporting] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
   const totalPages = Math.ceil(total / limit)
   const isChurchAdmin = profile.role === 'church_admin'
 
   function setFilter(key: string, value: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (value) params.set(key, value)
-    else params.delete(key)
-    params.delete('page')
-    router.push(`/admin/leads?${params.toString()}`)
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (value) params.set(key, value)
+      else params.delete(key)
+      params.delete('page')
+      router.push(`/admin/leads?${params.toString()}`)
+    })
   }
 
   async function handleExportExcel() {
@@ -136,7 +139,8 @@ export default function LeadsClient({
           <select
             value={filters.church || ''}
             onChange={e => setFilter('church', e.target.value)}
-            className="form-input"
+            className={`form-input ${isPending ? 'opacity-50' : ''}`}
+            disabled={isPending}
             style={{ maxWidth: 220, padding: '0.5rem 0.75rem' }}
             aria-label="Filtrar por igreja"
           >
@@ -151,7 +155,8 @@ export default function LeadsClient({
           <select
             value={filters.city || ''}
             onChange={e => setFilter('city', e.target.value)}
-            className="form-input"
+            className={`form-input ${isPending ? 'opacity-50' : ''}`}
+            disabled={isPending}
             style={{ maxWidth: 180, padding: '0.5rem 0.75rem' }}
             aria-label="Filtrar por cidade"
           >
@@ -165,7 +170,8 @@ export default function LeadsClient({
         <select
           value={filters.campaign || 'all'}
           onChange={e => setFilter('campaign', e.target.value)}
-          className="form-input"
+          className={`form-input ${isPending ? 'opacity-50' : ''}`}
+          disabled={isPending}
           style={{ maxWidth: 260, padding: '0.5rem 0.75rem' }}
           aria-label="Filtrar por campanha"
         >
@@ -178,7 +184,8 @@ export default function LeadsClient({
         <select
           value={filters.reminder || ''}
           onChange={e => setFilter('reminder', e.target.value)}
-          className="form-input"
+          className={`form-input ${isPending ? 'opacity-50' : ''}`}
+          disabled={isPending}
           style={{ maxWidth: 200, padding: '0.5rem 0.75rem' }}
           aria-label="Filtrar por lembrete"
         >
@@ -194,7 +201,12 @@ export default function LeadsClient({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <div className="table-container">
+        <div className={`table-container ${isPending ? 'opacity-50 pointer-events-none' : ''} transition-opacity duration-200 relative`}>
+          {isPending && (
+            <div className="absolute inset-0 flex items-center justify-center z-10" style={{ background: 'rgba(255,255,255,0.3)' }}>
+              <div className="spinner" style={{ borderColor: 'var(--gray-300)', borderTopColor: 'var(--red)', width: '32px', height: '32px', borderWidth: '3px' }}></div>
+            </div>
+          )}
           <table className="table">
             <thead>
               <tr>

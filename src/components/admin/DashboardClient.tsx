@@ -31,9 +31,11 @@ const kpiConfig = [
 ]
 
 import { useRouter } from 'next/navigation'
+import { useTransition } from 'react'
 
 export default function DashboardClient({ profile, kpis, recentLeads, campaigns, selectedCampaignId }: DashboardClientProps) {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const firstName = profile.full_name?.split(' ')[0] || 'Admin'
   const isChurchAdmin = profile.role === 'church_admin'
   const isSuperAdmin = profile.role === 'super_admin'
@@ -83,13 +85,16 @@ export default function DashboardClient({ profile, kpis, recentLeads, campaigns,
             value={selectedCampaignId || 'all'}
             onChange={(e) => {
               const val = e.target.value
-              if (val) {
-                router.push(`/admin/dashboard?campaign=${val}`)
-              } else {
-                router.push('/admin/dashboard')
-              }
+              startTransition(() => {
+                if (val && val !== 'all') {
+                  router.push(`/admin/dashboard?campaign=${val}`)
+                } else {
+                  router.push('/admin/dashboard')
+                }
+              })
             }}
-            className="form-input bg-white"
+            disabled={isPending}
+            className={`form-input bg-white ${isPending ? 'opacity-50' : ''}`}
             style={{ maxWidth: 300, padding: '0.5rem 0.75rem' }}
           >
             <option value="all">Todas as Campanhas (Global)</option>
@@ -99,6 +104,9 @@ export default function DashboardClient({ profile, kpis, recentLeads, campaigns,
               </option>
             ))}
           </select>
+          {isPending && (
+            <div className="spinner" style={{ borderColor: 'var(--gray-300)', borderTopColor: 'var(--red)', width: '20px', height: '20px', borderWidth: '2px' }}></div>
+          )}
         </motion.div>
       )}
 
