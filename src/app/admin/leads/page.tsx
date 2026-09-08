@@ -103,10 +103,21 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
     .eq('status', 'active')
     .order('name')
 
-  const { data: campaigns } = await supabase
+  let campaignsQuery = supabase
     .from('campaigns')
     .select('id, name')
     .order('created_at', { ascending: false })
+
+  if (profile?.role === 'admin_general' && profile?.allowed_campaigns) {
+    const allowed = Array.isArray(profile.allowed_campaigns) ? profile.allowed_campaigns : []
+    if (allowed.length > 0) {
+      campaignsQuery = campaignsQuery.in('id', allowed)
+    } else {
+      campaignsQuery = campaignsQuery.eq('id', '00000000-0000-0000-0000-000000000000') 
+    }
+  }
+
+  const { data: campaigns } = await campaignsQuery
 
   return (
     <LeadsClient

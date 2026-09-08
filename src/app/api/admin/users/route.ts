@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { email, password, full_name, role, church_id } = body
+    const { email, password, full_name, role, church_id, allowed_campaigns } = body
 
     if (!email || !password || !full_name || !role) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -69,7 +69,8 @@ export async function POST(req: Request) {
         email,
         full_name,
         role,
-        status: 'active'
+        status: 'active',
+        allowed_campaigns: allowed_campaigns || []
       })
 
     if (profileError) {
@@ -96,7 +97,7 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, user: { id: newUserId, email, full_name, role } })
+    return NextResponse.json({ success: true, user: { id: newUserId, email, full_name, role, allowed_campaigns: allowed_campaigns || [] } })
 
   } catch (error: any) {
     console.error('Error creating user:', error)

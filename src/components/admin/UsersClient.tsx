@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { toast } from 'react-hot-toast'
 import { Plus, X, User as UserIcon } from 'lucide-react'
 
-export default function UsersClient({ initialUsers, churches }: { initialUsers: any[], churches: any[] }) {
+export default function UsersClient({ initialUsers, churches, campaigns, currentUserRole }: { initialUsers: any[], churches: any[], campaigns: any[], currentUserRole: string }) {
   const [users, setUsers] = useState(initialUsers)
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
@@ -14,11 +14,13 @@ export default function UsersClient({ initialUsers, churches }: { initialUsers: 
   const [isSaving, setIsSaving] = useState(false)
 
   const [form, setForm] = useState({
+    id: '',
     full_name: '',
     email: '',
     password: '',
     role: 'church_admin',
-    church_id: ''
+    church_id: '',
+    allowed_campaigns: [] as string[]
   })
 
   const filteredUsers = users
@@ -31,8 +33,12 @@ export default function UsersClient({ initialUsers, churches }: { initialUsers: 
     setIsSaving(true)
 
     try {
-      const res = await fetch('/api/admin/users', {
-        method: 'POST',
+      const isEdit = !!form.id
+      const url = isEdit ? `/api/admin/users/${form.id}` : '/api/admin/users'
+      const method = isEdit ? 'PUT' : 'POST'
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
       })
@@ -43,18 +49,24 @@ export default function UsersClient({ initialUsers, churches }: { initialUsers: 
         throw new Error(data.error || 'Erro ao criar usuário')
       }
 
-      toast.success('Usuário criado com sucesso!')
+      toast.success(isEdit ? 'Usuário atualizado com sucesso!' : 'Usuário criado com sucesso!')
       
       // Refresh local list
-      setUsers([{ ...data.user, status: 'active', created_at: new Date().toISOString() }, ...users])
+      if (isEdit) {
+        setUsers(users.map(u => u.id === form.id ? { ...u, full_name: form.full_name, role: form.role, allowed_campaigns: form.allowed_campaigns } : u))
+      } else {
+        setUsers([{ ...data.user, status: 'active', created_at: new Date().toISOString() }, ...users])
+      }
       
       setIsModalOpen(false)
       setForm({
+        id: '',
         full_name: '',
         email: '',
         password: '',
         role: 'church_admin',
-        church_id: ''
+        church_id: '',
+        allowed_campaigns: []
       })
 
     } catch (err: any) {
@@ -69,6 +81,32 @@ export default function UsersClient({ initialUsers, churches }: { initialUsers: 
     if (role === 'admin_general') return <span className="badge bg-blue-100 text-blue-800">Departamental</span>
     if (role === 'church_admin') return <span className="badge bg-green-100 text-green-800">Pastor</span>
     return <span className="badge bg-gray-100 text-gray-800">{role}</span>
+  }
+
+  function handleEdit(user: any) {
+    setForm({
+      id: user.id,
+      full_name: user.full_name,
+      email: user.email,
+      password: '',
+      role: user.role,
+      church_id: user.pastors?.[0]?.church_id || '',
+      allowed_campaigns: user.allowed_campaigns || []
+    })
+    setIsModalOpen(true)
+  }
+
+  function handleNew() {
+    setForm({
+      id: '',
+      full_name: '',
+      email: '',
+      password: '',
+      role: 'church_admin',
+      church_id: '',
+      allowed_campaigns: []
+    })
+    setIsModalOpen(true)
   }
 
   return (
@@ -86,7 +124,7 @@ export default function UsersClient({ initialUsers, churches }: { initialUsers: 
             Gerencie quem tem acesso ao painel administrativo.
           </p>
         </div>
-        <button className="btn btn-primary flex items-center gap-2" onClick={() => setIsModalOpen(true)}>
+        <button className="btn btn-primary flex items-center gap-2" onClick={handleNew}>
           <Plus size={16} /> Novo Usuário
         </button>
       </motion.div>
@@ -162,7 +200,17 @@ export default function UsersClient({ initialUsers, churches }: { initialUsers: 
                     <td style={{ color: 'var(--gray-600)' }}>{user.email}</td>
                     <td>{getRoleBadge(user.role)}</td>
                     <td>
-                      <span className="text-caption text-gray-400">Restrito</span>
+                      {currentUserRole === 'super_admin' ? (
+                        <button 
+                          onClick={() => handleEdit(user)}
+                          className="text-small"
+                          style={{ color: 'var(--red)' }}
+                        >
+                          Editar
+                        </button>
+                      ) : (
+                        <span className="text-caption text-gray-400">Restrito</span>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -188,7 +236,7 @@ export default function UsersClient({ initialUsers, churches }: { initialUsers: 
               <X size={20} />
             </button>
             <h2 className="text-heading-3 mb-6" style={{ fontFamily: 'var(--font-serif)' }}>
-              Novo Usuário
+              {form.id ? 'Editar Usuário' : 'Novo Usuário'}
             </h2>
 
             <form onSubmit={handleSave} className="flex flex-col gap-4">
@@ -207,23 +255,26 @@ export default function UsersClient({ initialUsers, churches }: { initialUsers: 
                 <input
                   type="email"
                   required
-                  className="form-input"
+                  disabled={!!form.id}
+                  className="form-input disabled:opacity-50"
                   value={form.email}
                   onChange={e => setForm({ ...form, email: e.target.value })}
                 />
               </div>
               <div>
-                <label className="form-label">Senha Inicial</label>
+                <label className="form-label">{form.id ? 'Nova Senha (opcional)' : 'Senha Inicial'}</label>
                 <input
                   type="text"
-                  required
+                  required={!form.id}
                   minLength={6}
                   className="form-input"
                   value={form.password}
                   onChange={e => setForm({ ...form, password: e.target.value })}
                   placeholder="Ex: Senha@123"
                 />
-                <p className="text-caption text-gray-500 mt-1">O usuário utilizará esta senha para entrar no painel.</p>
+                <p className="text-caption text-gray-500 mt-1">
+                  {form.id ? 'Deixe em branco para manter a senha atual.' : 'O usuário utilizará esta senha para entrar no painel.'}
+                </p>
               </div>
 
               <div>
@@ -255,12 +306,42 @@ export default function UsersClient({ initialUsers, churches }: { initialUsers: 
                 </div>
               )}
 
+              {form.role === 'admin_general' && (
+                <div className="mt-2">
+                  <label className="form-label">Campanhas Permitidas</label>
+                  <p className="text-caption text-gray-500 mb-3">Selecione as campanhas que este usuário poderá acessar e ver os dados. Se não marcar nenhuma, o acesso ficará restrito.</p>
+                  
+                  <div className="flex flex-col gap-2 max-h-48 overflow-y-auto p-3 border border-gray-200 rounded-lg">
+                    {campaigns.map(camp => (
+                      <label key={camp.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md cursor-pointer transition-colors border border-transparent hover:border-gray-200">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
+                          checked={form.allowed_campaigns.includes(camp.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setForm({ ...form, allowed_campaigns: [...form.allowed_campaigns, camp.id] })
+                            } else {
+                              setForm({ ...form, allowed_campaigns: form.allowed_campaigns.filter(id => id !== camp.id) })
+                            }
+                          }}
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-small font-medium text-gray-900">{camp.name}</span>
+                          <span className="text-caption text-gray-500">{camp.status === 'active' ? 'Ativa' : 'Inativa'}</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-100">
                 <button type="button" className="btn btn-outline" onClick={() => setIsModalOpen(false)}>
                   Cancelar
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={isSaving}>
-                  {isSaving ? 'Criando...' : 'Criar Acesso'}
+                  {isSaving ? 'Salvando...' : (form.id ? 'Salvar Alterações' : 'Criar Acesso')}
                 </button>
               </div>
             </form>

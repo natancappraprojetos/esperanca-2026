@@ -35,10 +35,18 @@ export default async function UsersPage() {
     .eq('status', 'active')
     .order('name')
 
+  // Fetch campaigns for the dropdown
+  const { data: campaigns } = await supabase
+    .from('campaigns')
+    .select('id, name, status')
+    .order('created_at', { ascending: false })
+
   return (
     <UsersClient
       initialUsers={users || []}
       churches={churches || []}
+      campaigns={campaigns || []}
+      currentUserRole={profile.role}
     />
   )
 }
