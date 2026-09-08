@@ -24,6 +24,12 @@ export default function CampaignsClient({ campaigns: initialCampaigns }: Campaig
     status: 'active'
   })
 
+  // State for viewing churches
+  const [isChurchesModalOpen, setIsChurchesModalOpen] = useState(false)
+  const [selectedCampaign, setSelectedCampaign] = useState<any>(null)
+  const [campaignChurches, setCampaignChurches] = useState<any[]>([])
+  const [isLoadingChurches, setIsLoadingChurches] = useState(false)
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setIsSaving(true)
@@ -97,6 +103,27 @@ export default function CampaignsClient({ campaigns: initialCampaigns }: Campaig
       setCampaigns(campaigns.filter(c => c.id !== id))
     } catch (error: any) {
       toast.error(error.message)
+    }
+  }
+
+  async function handleViewChurches(camp: any) {
+    setSelectedCampaign(camp)
+    setIsChurchesModalOpen(true)
+    setIsLoadingChurches(true)
+    setCampaignChurches([])
+
+    try {
+      const res = await fetch(`/api/admin/campaigns/${camp.id}/churches`)
+      const data = await res.json()
+      if (res.ok) {
+        setCampaignChurches(data.churches || [])
+      } else {
+        toast.error(data.error || 'Erro ao carregar igrejas')
+      }
+    } catch (err: any) {
+      toast.error('Erro de conexão ao carregar igrejas')
+    } finally {
+      setIsLoadingChurches(false)
     }
   }
 
@@ -184,6 +211,13 @@ export default function CampaignsClient({ campaigns: initialCampaigns }: Campaig
                     </td>
                     <td>
                       <div className="flex gap-3">
+                        <button 
+                          onClick={() => handleViewChurches(camp)}
+                          className="text-small" 
+                          style={{ color: 'var(--gray-600)' }}
+                        >
+                          Ver Igrejas
+                        </button>
                         <button 
                           onClick={() => handleEdit(camp)}
                           className="text-small" 
@@ -296,6 +330,68 @@ export default function CampaignsClient({ campaigns: initialCampaigns }: Campaig
                 </button>
               </div>
             </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Modal Ver Igrejas */}
+      {isChurchesModalOpen && selectedCampaign && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="card max-w-2xl w-full relative"
+            style={{ maxHeight: '90vh', overflowY: 'auto' }}
+          >
+            <button
+              onClick={() => setIsChurchesModalOpen(false)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+            >
+              <X size={20} />
+            </button>
+            <h2 className="text-heading-3 mb-2" style={{ fontFamily: 'var(--font-serif)' }}>
+              Igrejas Vinculadas
+            </h2>
+            <p className="text-small text-gray-500 mb-6">
+              Campanha: {selectedCampaign.name}
+            </p>
+
+            {isLoadingChurches ? (
+              <div className="flex justify-center p-8">
+                <div className="spinner" style={{ borderColor: 'var(--gray-200)', borderTopColor: 'var(--red)', width: '32px', height: '32px', borderWidth: '3px' }}></div>
+              </div>
+            ) : campaignChurches.length === 0 ? (
+              <div className="text-center p-8 border border-dashed border-gray-200 rounded-xl">
+                <p className="text-gray-500">Nenhuma igreja vinculada a esta campanha no momento.</p>
+              </div>
+            ) : (
+              <div className="max-h-[60vh] overflow-y-auto">
+                <table className="table w-full">
+                  <thead>
+                    <tr>
+                      <th className="text-left text-xs uppercase text-gray-500 font-semibold py-2 border-b">Igreja</th>
+                      <th className="text-left text-xs uppercase text-gray-500 font-semibold py-2 border-b">Bairro</th>
+                      <th className="text-left text-xs uppercase text-gray-500 font-semibold py-2 border-b">Cidade/UF</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {campaignChurches.map((c: any) => (
+                      <tr key={c.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50">
+                        <td className="py-3 font-medium text-gray-900">{c.name}</td>
+                        <td className="py-3 text-gray-600">{c.address_neighborhood || '-'}</td>
+                        <td className="py-3 text-gray-600">{c.cities?.name} - {c.cities?.state_id}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            <div className="mt-6 flex justify-end pt-4 border-t border-gray-100">
+              <button className="btn btn-outline" onClick={() => setIsChurchesModalOpen(false)}>
+                Fechar
+              </button>
+            </div>
           </motion.div>
         </div>
       )}
