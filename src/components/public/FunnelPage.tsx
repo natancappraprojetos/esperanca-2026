@@ -83,7 +83,7 @@ export function FunnelPage({
   }
 
   const [currentStep, setCurrentStep] = useState<FunnelStep>(
-    initialChurch ? 'neighborhood' : initialCity ? 'neighborhood' : 'hero'
+    initialChurch ? 'church' : initialCity ? 'neighborhood' : 'hero'
   )
   const [direction, setDirection] = useState(1) // 1 = forward, -1 = backward
   
@@ -309,6 +309,7 @@ export function FunnelPage({
               data={data}
               campaign={campaign}
               onContinue={getStepIndex('confirmation') < stepOrder.length - 1 ? () => goToNext() : undefined}
+              onChangeChurch={(newChurch) => setData(prev => ({ ...prev, church: newChurch }))}
             />
           )}
         </motion.div>

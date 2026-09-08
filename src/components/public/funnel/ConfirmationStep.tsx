@@ -3,18 +3,26 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { trackEvent } from '@/lib/tracking/events'
-import type { Campaign } from '@/types/database'
+import { toast } from 'react-hot-toast'
+import { MapPin, Loader } from 'lucide-react'
+import type { Campaign, Church } from '@/types/database'
 import type { FunnelData } from '../FunnelPage'
 
 interface ConfirmationStepProps {
   data: FunnelData
   campaign: Campaign
   onContinue?: () => void
+  onChangeChurch?: (church: Church) => void
 }
 
-export default function ConfirmationStep({ data, campaign, onContinue }: ConfirmationStepProps) {
+export default function ConfirmationStep({ data, campaign, onContinue, onChangeChurch }: ConfirmationStepProps) {
   const [downloading, setDownloading] = useState(false)
   const [downloaded, setDownloaded] = useState(false)
+  
+  // States para igrejas alternativas
+  const [otherChurches, setOtherChurches] = useState<Church[]>([])
+  const [loadingChurches, setLoadingChurches] = useState(false)
+  const [changingChurch, setChangingChurch] = useState<string | null>(null)
 
   const church = data.church
   const schedules = Array.isArray(church?.schedules) 
@@ -43,8 +51,72 @@ export default function ConfirmationStep({ data, campaign, onContinue }: Confirm
       handleDownload()
     }, 1000)
 
+    // Load other churches in the same city
+    if (data.city?.id && church?.id) {
+      loadOtherChurches()
+    }
+
     return () => clearTimeout(timer)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function loadOtherChurches() {
+    try {
+      setLoadingChurches(true)
+      const res = await fetch(`/api/events?city_id=${data.city?.id}&campaign_id=${campaign.id}`)
+      if (res.ok) {
+        const events = await res.json()
+        const otherEvents = events
+          .filter((e: any) => e.church.id !== church?.id)
+          .slice(0, 4) // Show up to 4
+        setOtherChurches(otherEvents.map((e: any) => e.church))
+      }
+    } catch (err) {
+      console.error('Error fetching other churches', err)
+    } finally {
+      setLoadingChurches(false)
+    }
+  }
+
+  async function handleChurchChange(newChurch: Church) {
+    const confirmChange = window.confirm(`Deseja alterar o local do seu evento para ${newChurch.name}?`)
+    if (!confirmChange) return
+
+    setChangingChurch(newChurch.id)
+    try {
+      const res = await fetch('/api/leads/update-church', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lead_id: data.leadId,
+          church_id: newChurch.id,
+          session_token: data.sessionToken
+        })
+      })
+
+      if (!res.ok) {
+        throw new Error('Falha ao atualizar a igreja')
+      }
+
+      toast.success('Local alterado com sucesso!')
+      
+      // Update URL para conversões personalizadas
+      if (newChurch.slug) {
+        const newUrl = `/igreja/${newChurch.slug}`
+        if (window.location.pathname !== newUrl) {
+          window.history.pushState(null, '', newUrl)
+        }
+      }
+
+      // Update local state and trigger re-render of confirmation with new church
+      if (onChangeChurch) {
+        onChangeChurch(newChurch)
+      }
+    } catch (err) {
+      toast.error('Erro ao alterar local. Tente novamente.')
+    } finally {
+      setChangingChurch(null)
+    }
+  }
 
   async function handleDownload() {
     if (!data.material?.file_url) return
@@ -209,6 +281,50 @@ export default function ConfirmationStep({ data, campaign, onContinue }: Confirm
           </button>
         )}
       </div>
+
+      {/* Igrejas Alternativas */}
+      {otherChurches.length > 0 && (
+        <div className="w-full mt-12 pt-8 border-t border-gray-100">
+          <h3 className="text-xl md:text-2xl text-center text-gray-900 mb-6 font-serif tracking-tight">
+            Veja outros locais que também terão o evento em {data.city?.name}
+          </h3>
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {otherChurches.map((otherChurch) => (
+              <button
+                key={otherChurch.id}
+                onClick={() => handleChurchChange(otherChurch)}
+                disabled={changingChurch !== null}
+                className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:border-gray-300 hover:shadow-md transition-all text-left group relative overflow-hidden"
+              >
+                <div className="w-full sm:w-24 h-32 sm:h-24 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+                  <img 
+                    src={otherChurch.image_desktop_url || '/placeholder-banner.jpg'} 
+                    alt={otherChurch.name}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                </div>
+                <div className="flex-1 min-w-0 py-1">
+                  <h4 className="font-semibold text-gray-900 mb-1 leading-tight">{otherChurch.name}</h4>
+                  <p className="text-sm text-gray-500 flex items-start gap-1 mb-3">
+                    <MapPin size={14} className="mt-0.5 flex-shrink-0" />
+                    <span className="truncate block">
+                      {otherChurch.address_street}{otherChurch.address_number ? `, ${otherChurch.address_number}` : ''}
+                    </span>
+                  </p>
+                  <span className="text-xs font-medium text-green-700 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+                    Trocar para este local
+                  </span>
+                </div>
+                {changingChurch === otherChurch.id && (
+                  <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+                    <Loader className="animate-spin text-green-600" />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
