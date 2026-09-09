@@ -55,20 +55,10 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
     }
   }
 
-  // Determine selected campaign (default to the active one unless 'all' is passed)
+  // Determine selected campaign (default to 'all')
   let selectedCampaignId = sp.campaign
-  if (selectedCampaignId === 'all') {
+  if (selectedCampaignId === 'all' || !selectedCampaignId) {
     selectedCampaignId = undefined // 'all' means global view
-  } else if (!selectedCampaignId) {
-    const { data: activeCampaign } = await supabase
-      .from('campaigns')
-      .select('id')
-      .eq('status', 'active')
-      .limit(1)
-      .maybeSingle()
-    if (activeCampaign) {
-      selectedCampaignId = activeCampaign.id
-    }
   }
 
   // Filter params
@@ -126,7 +116,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
       page={page}
       limit={limit}
       profile={profile!}
-      filters={{ church: sp.church, city: sp.city, campaign: selectedCampaignId || (sp.campaign === 'all' ? 'all' : undefined), reminder: sp.reminder }}
+      filters={{ church: sp.church, city: sp.city, campaign: selectedCampaignId || 'all', reminder: sp.reminder }}
       filterOptions={{ churches: churches || [], cities: cities || [], campaigns: campaigns || [] }}
     />
   )

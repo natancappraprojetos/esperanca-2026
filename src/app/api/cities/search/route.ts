@@ -21,8 +21,7 @@ export async function GET(request: NextRequest) {
     .limit(8)
 
   // If campaign_id provided, only return cities linked to this campaign
-  if (campaignId) {
-    const { data: campaignCities } = await supabase
+  if (false) { = await supabase
       .from('campaign_cities')
       .select('city_id')
       .eq('campaign_id', campaignId)

@@ -41,14 +41,14 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const { data: campaigns } = await campaignsQuery
 
-  // Determine selected campaign (default to the active one unless 'all' is passed)
+  // Determine selected campaign (default to 'all')
   let selectedCampaignId = sp.campaign
-  if (selectedCampaignId === 'all') {
+  if (selectedCampaignId === 'all' || !selectedCampaignId) {
     selectedCampaignId = undefined // 'all' means global view
-  } else if (!selectedCampaignId && campaigns && campaigns.length > 0) {
-    const activeCampaign = campaigns.find(c => c.status === 'active')
-    selectedCampaignId = activeCampaign ? activeCampaign.id : campaigns[0].id
   }
+
+  // The launch date to ignore test leads before this date
+  const LAUNCH_DATE = '2026-09-09T00:00:00-03:00'
 
   // Fetch KPI data based on role
   const now = new Date()
@@ -56,7 +56,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
 
-  let leadsQuery = supabase.from('leads').select('id, created_at, church_id, city_id', { count: 'exact' })
+  let leadsQuery = supabase.from('leads').select('id, created_at, church_id, city_id', { count: 'exact' }).gte('created_at', LAUNCH_DATE)
   
   // Church admin: only see their church's leads
   if (profile?.role === 'church_admin') {
@@ -77,18 +77,15 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const { count: totalLeads } = await leadsQuery
 
-  // Today's leads
-  let todayQuery = supabase.from('leads').select('id', { count: 'exact', head: true }).gte('created_at', today)
+  let todayQuery = supabase.from('leads').select('id', { count: 'exact', head: true }).gte('created_at', today > LAUNCH_DATE ? today : LAUNCH_DATE)
   if (selectedCampaignId) todayQuery = todayQuery.eq('campaign_id', selectedCampaignId)
   const { count: todayLeads } = await todayQuery
 
-  // Last 7 days
-  let weekQuery = supabase.from('leads').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo)
+  let weekQuery = supabase.from('leads').select('id', { count: 'exact', head: true }).gte('created_at', weekAgo > LAUNCH_DATE ? weekAgo : LAUNCH_DATE)
   if (selectedCampaignId) weekQuery = weekQuery.eq('campaign_id', selectedCampaignId)
   const { count: weekLeads } = await weekQuery
 
-  // Month leads
-  let monthQuery = supabase.from('leads').select('id', { count: 'exact', head: true }).gte('created_at', monthStart)
+  let monthQuery = supabase.from('leads').select('id', { count: 'exact', head: true }).gte('created_at', monthStart > LAUNCH_DATE ? monthStart : LAUNCH_DATE)
   if (selectedCampaignId) monthQuery = monthQuery.eq('campaign_id', selectedCampaignId)
   const { count: monthLeads } = await monthQuery
 
@@ -98,9 +95,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const { count: totalDownloads } = await supabase
     .from('material_downloads')
     .select('id', { count: 'exact', head: true })
+    .gte('created_at', LAUNCH_DATE)
 
   // Total opt-ins for reminders
-  let remindersQuery = supabase.from('lead_consents').select('id', { count: 'exact', head: true }).eq('consent_reminder_whatsapp', true)
+  let remindersQuery = supabase.from('lead_consents').select('id', { count: 'exact', head: true }).eq('consent_reminder_whatsapp', true).gte('consent_data_at', LAUNCH_DATE)
   // Consents don't have campaign_id directly, they belong to leads. We'd have to join leads.
   // We'll leave it global for simplicity right now unless we want to do a subquery.
   const { count: totalReminders } = await remindersQuery
@@ -151,7 +149,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       kpis={kpis}
       recentLeads={recentLeads || []}
       campaigns={campaigns || []}
-      selectedCampaignId={selectedCampaignId || (sp.campaign === 'all' ? 'all' : '')}
+      selectedCampaignId={selectedCampaignId || 'all'}
     />
   )
 }
