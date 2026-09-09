@@ -169,6 +169,34 @@ export default function ConfirmationStep({ data, campaign, onContinue, onChangeC
     }
   }
 
+  async function handleSaveBanner(bannerUrl: string, churchName: string) {
+    if (!bannerUrl) return
+
+    trackEvent('InviteSaved', {
+      campaign_id: campaign.id,
+      session_token: data.sessionToken,
+    })
+
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    if (isMobile && navigator.share) {
+      try {
+        const res = await fetch(bannerUrl)
+        const blob = await res.blob()
+        const file = new File([blob], 'convite-semana-esperanca.jpg', { type: blob.type })
+        await navigator.share({ files: [file], title: `Convite — ${churchName}` })
+        return
+      } catch { /* fall through */ }
+    }
+    
+    const link = document.createElement('a')
+    link.href = bannerUrl
+    link.download = 'convite-semana-esperanca.jpg'
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   const firstName = data.leadName?.split(' ')[0] || 'você'
 
   return (
@@ -287,38 +315,74 @@ export default function ConfirmationStep({ data, campaign, onContinue, onChangeC
           <h3 className="text-xl md:text-2xl text-center text-gray-900 mb-6 font-serif tracking-tight">
             Nós também temos culto nestes locais em {data.city?.name}
           </h3>
-          <div className="w-full flex flex-col gap-6">
+          <div className="w-full flex flex-col gap-10">
             {otherChurches.map((otherChurch: any) => {
               const bannerUrl = otherChurch.banner?.image_desktop_url || otherChurch.banner?.image_mobile_url
               return (
-                <button
-                  key={otherChurch.id}
-                  onClick={() => handleChurchChange(otherChurch)}
-                  disabled={changingChurch !== null}
-                  className="relative w-full rounded-[var(--radius-xl)] overflow-hidden shadow-md hover:shadow-xl transition-all group text-left border-2 border-transparent hover:border-red-500 bg-gray-100"
-                >
-                  {bannerUrl ? (
-                    <img 
-                      src={bannerUrl} 
-                      alt={otherChurch.name}
-                      className="w-full h-auto object-contain transition-opacity group-hover:opacity-90"
-                    />
-                  ) : (
-                    <div className="w-full py-16 bg-gray-900 flex flex-col items-center justify-center text-center px-4">
-                      <p className="text-overline text-champagne mb-2">Semana da Esperança 2026</p>
-                      <h4 className="font-serif text-2xl text-white mb-2">{otherChurch.name}</h4>
-                      <p className="text-sm text-gray-400">
-                        {otherChurch.address_street}{otherChurch.address_number ? `, ${otherChurch.address_number}` : ''}
-                      </p>
+                <div key={otherChurch.id} className="flex flex-col gap-3">
+                  <div className="church-banner relative" style={{ background: 'var(--gray-100)', minHeight: 240, borderRadius: 'var(--radius-xl)' }}>
+                    <div 
+                      className="relative min-h-[300px] w-full bg-gray-100 rounded-[var(--radius-xl)] overflow-hidden flex items-center justify-center border-2 border-transparent hover:border-red-500 transition-all cursor-pointer group"
+                      onClick={() => handleChurchChange(otherChurch)}
+                    >
+                      {bannerUrl ? (
+                        <picture>
+                          {otherChurch.banner?.image_mobile_url && (
+                            <source media="(max-width: 768px)" srcSet={otherChurch.banner?.image_mobile_url} />
+                          )}
+                          <img 
+                            src={bannerUrl} 
+                            alt={otherChurch.name}
+                            className="w-full h-auto object-contain mx-auto max-h-[65vh] transition-opacity group-hover:opacity-90"
+                            style={{ borderRadius: 'var(--radius-xl)' }}
+                          />
+                        </picture>
+                      ) : (
+                        <div className="w-full py-16 bg-gray-900 flex flex-col items-center justify-center text-center px-4">
+                          <p className="text-overline text-champagne mb-2">Semana da Esperança 2026</p>
+                          <h4 className="font-serif text-2xl text-white mb-2">{otherChurch.name}</h4>
+                          <p className="text-sm text-gray-400">
+                            {otherChurch.address_street}{otherChurch.address_number ? `, ${otherChurch.address_number}` : ''}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {changingChurch === otherChurch.id && (
+                        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col gap-3 items-center justify-center z-30">
+                          <Loader className="animate-spin text-red-600 w-8 h-8" />
+                          <span className="font-medium text-gray-900">Trocando local...</span>
+                        </div>
+                      )}
+
+                      {/* Download Button */}
+                      {bannerUrl && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSaveBanner(bannerUrl, otherChurch.name);
+                          }}
+                          className="absolute top-4 right-4 bg-white/95 backdrop-blur shadow-xl px-4 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all text-gray-900 flex items-center gap-2 text-sm font-semibold border border-gray-100 z-20"
+                          title="Baixar convite"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 14l-5-5 1.4-1.4L9 11.2V2h2v9.2l2.6-2.6L15 9l-5 5z" fill="currentColor"/>
+                            <path d="M3 16h14v2H3z" fill="currentColor"/>
+                          </svg>
+                          Baixe seu convite
+                        </button>
+                      )}
                     </div>
-                  )}
-                  {changingChurch === otherChurch.id && (
-                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col gap-3 items-center justify-center z-10">
-                      <Loader className="animate-spin text-red-600 w-8 h-8" />
-                      <span className="font-medium text-gray-900">Trocando local...</span>
-                    </div>
-                  )}
-                </button>
+                  </div>
+                  
+                  <button 
+                    onClick={() => handleChurchChange(otherChurch)}
+                    disabled={changingChurch !== null}
+                    className="btn w-full font-medium py-3 rounded-xl hover:bg-gray-100 transition-colors border border-gray-200"
+                    style={{ color: 'var(--gray-900)' }}
+                  >
+                    Trocar local para {otherChurch.name}
+                  </button>
+                </div>
               )
             })}
           </div>
