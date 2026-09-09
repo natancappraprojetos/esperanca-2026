@@ -311,7 +311,7 @@ export default function ConfirmationStep({ data, campaign, onContinue, onChangeC
 
       {/* Igrejas Alternativas */}
       {otherChurches.length > 0 && (
-        <div className="w-full mt-12 pt-8 border-t border-gray-100">
+        <div className="w-full max-w-lg mx-auto px-6 mt-4 pb-12 pt-8 border-t border-gray-100">
           <h3 className="text-xl md:text-2xl text-center text-gray-900 mb-6 font-serif tracking-tight">
             Nós também temos culto nestes locais em {data.city?.name}
           </h3>
