@@ -62,13 +62,12 @@ export default function ConfirmationStep({ data, campaign, onContinue, onChangeC
   async function loadOtherChurches() {
     try {
       setLoadingChurches(true)
-      const res = await fetch(`/api/events?city_id=${data.city?.id}&campaign_id=${campaign.id}`)
+      const res = await fetch(`/api/churches/city?city_id=${data.city?.id}&campaign_id=${campaign.id}`)
       if (res.ok) {
-        const events = await res.json()
-        const otherEvents = events
-          .filter((e: any) => e.church.id !== church?.id)
-          .slice(0, 4) // Show up to 4
-        setOtherChurches(otherEvents.map((e: any) => e.church))
+        const json = await res.json()
+        const others = (json.churches || [])
+          .filter((c: any) => c.id !== church?.id)
+        setOtherChurches(others)
       }
     } catch (err) {
       console.error('Error fetching other churches', err)
@@ -286,42 +285,42 @@ export default function ConfirmationStep({ data, campaign, onContinue, onChangeC
       {otherChurches.length > 0 && (
         <div className="w-full mt-12 pt-8 border-t border-gray-100">
           <h3 className="text-xl md:text-2xl text-center text-gray-900 mb-6 font-serif tracking-tight">
-            Veja outros locais que também terão o evento em {data.city?.name}
+            Nós também temos culto nestes locais em {data.city?.name}
           </h3>
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {otherChurches.map((otherChurch) => (
-              <button
-                key={otherChurch.id}
-                onClick={() => handleChurchChange(otherChurch)}
-                disabled={changingChurch !== null}
-                className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:border-gray-300 hover:shadow-md transition-all text-left group relative overflow-hidden"
-              >
-                <div className="w-full sm:w-24 h-32 sm:h-24 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
-                  <img 
-                    src={otherChurch.image_desktop_url || '/placeholder-banner.jpg'} 
-                    alt={otherChurch.name}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                  />
-                </div>
-                <div className="flex-1 min-w-0 py-1">
-                  <h4 className="font-semibold text-gray-900 mb-1 leading-tight">{otherChurch.name}</h4>
-                  <p className="text-sm text-gray-500 flex items-start gap-1 mb-3">
-                    <MapPin size={14} className="mt-0.5 flex-shrink-0" />
-                    <span className="truncate block">
-                      {otherChurch.address_street}{otherChurch.address_number ? `, ${otherChurch.address_number}` : ''}
-                    </span>
-                  </p>
-                  <span className="text-xs font-medium text-green-700 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
-                    Trocar para este local
-                  </span>
-                </div>
-                {changingChurch === otherChurch.id && (
-                  <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
-                    <Loader className="animate-spin text-green-600" />
-                  </div>
-                )}
-              </button>
-            ))}
+          <div className="w-full flex flex-col gap-6">
+            {otherChurches.map((otherChurch: any) => {
+              const bannerUrl = otherChurch.banner?.image_desktop_url || otherChurch.banner?.image_mobile_url
+              return (
+                <button
+                  key={otherChurch.id}
+                  onClick={() => handleChurchChange(otherChurch)}
+                  disabled={changingChurch !== null}
+                  className="relative w-full rounded-[var(--radius-xl)] overflow-hidden shadow-md hover:shadow-xl transition-all group text-left border-2 border-transparent hover:border-red-500 bg-gray-100"
+                >
+                  {bannerUrl ? (
+                    <img 
+                      src={bannerUrl} 
+                      alt={otherChurch.name}
+                      className="w-full h-auto object-contain transition-opacity group-hover:opacity-90"
+                    />
+                  ) : (
+                    <div className="w-full py-16 bg-gray-900 flex flex-col items-center justify-center text-center px-4">
+                      <p className="text-overline text-champagne mb-2">Semana da Esperança 2026</p>
+                      <h4 className="font-serif text-2xl text-white mb-2">{otherChurch.name}</h4>
+                      <p className="text-sm text-gray-400">
+                        {otherChurch.address_street}{otherChurch.address_number ? `, ${otherChurch.address_number}` : ''}
+                      </p>
+                    </div>
+                  )}
+                  {changingChurch === otherChurch.id && (
+                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col gap-3 items-center justify-center z-10">
+                      <Loader className="animate-spin text-red-600 w-8 h-8" />
+                      <span className="font-medium text-gray-900">Trocando local...</span>
+                    </div>
+                  )}
+                </button>
+              )
+            })}
           </div>
         </div>
       )}

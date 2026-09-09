@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('churches')
-    .select('id, name, slug, address_street, address_neighborhood, city_id, latitude, longitude')
+    .select('id, name, slug, address_street, address_neighborhood, city_id, latitude, longitude, banners(image_mobile_url, image_desktop_url, campaign_id)')
     .eq('city_id', cityId)
     .eq('status', 'active')
     .order('name')
@@ -41,5 +41,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ churches: [] })
   }
 
-  return NextResponse.json({ churches: churches || [] })
+  const mappedChurches = (churches || []).map(c => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const banner = (c.banners as any[])?.find((b: any) => !campaignId || b.campaign_id === campaignId)
+    return {
+      ...c,
+      banner: banner || null,
+      banners: undefined
+    }
+  })
+
+  return NextResponse.json({ churches: mappedChurches })
 }

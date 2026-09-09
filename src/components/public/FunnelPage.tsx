@@ -286,7 +286,6 @@ export function FunnelPage({
               church={data.church!}
               campaign={campaign}
               onContinue={() => goToNext()}
-              onChangeChurch={(church) => setData(prev => ({ ...prev, church }))}
               data={data}
             />
           )}

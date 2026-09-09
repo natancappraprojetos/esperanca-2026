@@ -12,17 +12,15 @@ interface ChurchStepProps {
   church: Church | null
   campaign: Campaign
   onContinue: () => void
-  onChangeChurch?: (church: Church) => void
   data: FunnelData
 }
 
-export default function ChurchStep({ church, campaign, onContinue, onChangeChurch, data }: ChurchStepProps) {
+export default function ChurchStep({ church, campaign, onContinue, data }: ChurchStepProps) {
   const [banner, setBanner] = useState<Banner | null>(null)
   const [sharing, setSharing] = useState(false)
   const [saved, setSaved] = useState(false)
   const [bannerLoading, setBannerLoading] = useState(true)
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [otherChurches, setOtherChurches] = useState<Church[]>([])
 
   useEffect(() => {
     if (!church) return
@@ -56,17 +54,7 @@ export default function ChurchStep({ church, campaign, onContinue, onChangeChurc
       .catch(() => {
         setBannerLoading(false)
       })
-
-    // Load other churches in the city
-    fetch(`/api/churches/city?city_id=${church.city_id}&campaign_id=${campaign.id}`)
-      .then(r => r.json())
-      .then(j => {
-        if (j.churches) {
-          setOtherChurches(j.churches.filter((c: any) => c.id !== church.id))
-        }
-      })
-      .catch(() => {})
-  }, [church.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!church) {
     return (
@@ -264,33 +252,9 @@ export default function ChurchStep({ church, campaign, onContinue, onChangeChurc
           )}
         </div>
 
-        {/* Other Options */}
-        {otherChurches.length > 0 && (
-          <div className="flex flex-col gap-3 mt-4">
-            <p className="text-small" style={{ color: 'var(--gray-500)', textAlign: 'center' }}>
-              Nós também temos culto nestes locais em {church.city_id ? 'sua cidade' : 'sua região'}:
-            </p>
-            <div className="grid gap-3">
-              {otherChurches.map(other => (
-                <button
-                  key={other.id}
-                  onClick={() => onChangeChurch?.(other)}
-                  className="card-soft p-4 flex items-center justify-between text-left hover:border-red-200 hover:bg-red-50/50 transition-all border border-transparent"
-                >
-                  <div className="flex flex-col">
-                    <span style={{ fontWeight: 600, color: 'var(--gray-900)' }}>{other.name}</span>
-                    {other.address_neighborhood && (
-                      <span className="text-caption" style={{ color: 'var(--gray-500)' }}>Bairro {other.address_neighborhood}</span>
-                    )}
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center flex-shrink-0 text-red-500">
-                    →
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+
+
+
 
         {/* Continue CTA */}
         <div
