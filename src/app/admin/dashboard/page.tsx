@@ -95,7 +95,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const { count: totalDownloads } = await supabase
     .from('material_downloads')
     .select('id', { count: 'exact', head: true })
-    .gte('created_at', LAUNCH_DATE)
+    .gte('downloaded_at', LAUNCH_DATE)
 
   // Total opt-ins for reminders
   let remindersQuery = supabase.from('lead_consents').select('id', { count: 'exact', head: true }).eq('consent_reminder_whatsapp', true).gte('consent_data_at', LAUNCH_DATE)

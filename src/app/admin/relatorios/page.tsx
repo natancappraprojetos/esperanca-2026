@@ -5,7 +5,12 @@ import { subDays, format } from 'date-fns'
 
 export const metadata: Metadata = { title: 'Relatórios | Admin' }
 
-export default async function ReportsPage() {
+export default async function ReportsPage({
+  searchParams
+}: {
+  searchParams: Promise<{ period?: string }>
+}) {
+  const sp = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -28,7 +33,22 @@ export default async function ReportsPage() {
     myChurchId = pastor?.church_id
   }
 
-  // 1. Leads Over Time (Last 30 days)
+  // Determine start date from period
+  const period = sp.period || '30d'
+  let startDate = ''
+  const now = new Date()
+  
+  if (period === 'today') {
+    startDate = format(now, 'yyyy-MM-dd') + 'T00:00:00.000Z'
+  } else if (period === 'yesterday') {
+    startDate = format(subDays(now, 1), 'yyyy-MM-dd') + 'T00:00:00.000Z'
+  } else if (period === '7d') {
+    startDate = subDays(now, 7).toISOString()
+  } else if (period === '30d') {
+    startDate = subDays(now, 30).toISOString()
+  }
+
+  // 1. Leads Over Time (Last 30 days) - Keep this chart fixed to 30 days for visual consistency
   const thirtyDaysAgo = subDays(new Date(), 30).toISOString()
   let leadsQuery = supabase
     .from('leads')
@@ -61,6 +81,14 @@ export default async function ReportsPage() {
   // 2. Funnel Conversion Data
   // We approximate the funnel by checking total events vs leads
   let eventsQuery = supabase.from('funnel_events').select('event_name')
+  if (startDate && period !== 'all') {
+    if (period === 'yesterday') {
+      const endOfYesterday = format(subDays(now, 1), 'yyyy-MM-dd') + 'T23:59:59.999Z'
+      eventsQuery = eventsQuery.gte('created_at', startDate).lte('created_at', endOfYesterday)
+    } else {
+      eventsQuery = eventsQuery.gte('created_at', startDate)
+    }
+  }
   if (myChurchId) {
     eventsQuery = eventsQuery.eq('church_id', myChurchId)
   }
@@ -71,12 +99,21 @@ export default async function ReportsPage() {
     return acc
   }, {})
 
-  // 3. Top Churches (Only for super_admin/admin)
-  let topChurchesData: any[] = []
+  // 3. Churches (Only for super_admin/admin)
+  let allChurchesData: any[] = []
   if (!isChurchAdmin) {
-    const { data: churchesLeads } = await supabase
-      .from('leads')
-      .select('church_id, churches(name)')
+    let churchesLeadsQuery = supabase.from('leads').select('church_id, churches(name)')
+    
+    if (startDate && period !== 'all') {
+      if (period === 'yesterday') {
+        const endOfYesterday = format(subDays(now, 1), 'yyyy-MM-dd') + 'T23:59:59.999Z'
+        churchesLeadsQuery = churchesLeadsQuery.gte('created_at', startDate).lte('created_at', endOfYesterday)
+      } else {
+        churchesLeadsQuery = churchesLeadsQuery.gte('created_at', startDate)
+      }
+    }
+
+    const { data: churchesLeads } = await churchesLeadsQuery
       
     const churchCounts = (churchesLeads || []).reduce((acc: any, item) => {
       const name = item.churches?.name || 'Desconhecida'
@@ -84,18 +121,18 @@ export default async function ReportsPage() {
       return acc
     }, {})
 
-    topChurchesData = Object.entries(churchCounts)
+    allChurchesData = Object.entries(churchCounts)
       .map(([name, leads]) => ({ name, leads }))
       .sort((a: any, b: any) => b.leads - a.leads)
-      .slice(0, 5)
   }
 
   return (
     <ReportsClient 
       leadsChartData={leadsChartData}
       eventCounts={eventCounts}
-      topChurchesData={topChurchesData}
+      allChurchesData={allChurchesData}
       isChurchAdmin={isChurchAdmin}
+      period={period}
     />
   )
 }

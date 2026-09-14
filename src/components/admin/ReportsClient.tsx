@@ -1,21 +1,32 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Legend, Cell
+  BarChart, Bar, Cell
 } from 'recharts'
 
 interface ReportsClientProps {
   leadsChartData: any[]
   eventCounts: Record<string, number>
-  topChurchesData: any[]
+  allChurchesData: any[]
   isChurchAdmin: boolean
+  period: string
 }
 
 export default function ReportsClient({ 
-  leadsChartData, eventCounts, topChurchesData, isChurchAdmin 
+  leadsChartData, eventCounts, allChurchesData, isChurchAdmin, period 
 }: ReportsClientProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('period', e.target.value)
+    router.push(`${pathname}?${params.toString()}`)
+  }
 
   // Prepare Funnel Data
   const funnelData = [
@@ -25,22 +36,42 @@ export default function ReportsClient({
     { name: 'Leads Gerados', value: eventCounts['LeadCompleted'] || 0, fill: 'var(--red)' },
   ]
 
+  const top5Churches = allChurchesData.slice(0, 5)
+
   return (
     <div className="flex flex-col gap-8">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col md:flex-row md:items-center justify-between gap-4"
       >
-        <h1 
-          className="text-heading-2"
-          style={{ fontFamily: 'var(--font-serif)', color: 'var(--gray-900)' }}
-        >
-          Relatórios & Métricas
-        </h1>
-        <p className="text-small" style={{ color: 'var(--gray-500)' }}>
-          Acompanhe o desempenho do funil de captação
-        </p>
+        <div>
+          <h1 
+            className="text-heading-2"
+            style={{ fontFamily: 'var(--font-serif)', color: 'var(--gray-900)' }}
+          >
+            Relatórios & Métricas
+          </h1>
+          <p className="text-small" style={{ color: 'var(--gray-500)' }}>
+            Acompanhe o desempenho do funil de captação
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Período:</label>
+          <select 
+            className="form-input bg-white w-auto"
+            value={period}
+            onChange={handlePeriodChange}
+          >
+            <option value="today">Hoje</option>
+            <option value="yesterday">Ontem</option>
+            <option value="7d">Últimos 7 dias</option>
+            <option value="30d">Últimos 30 dias</option>
+            <option value="all">Todo o período</option>
+          </select>
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -52,7 +83,7 @@ export default function ReportsClient({
           className="card-soft p-6 flex flex-col gap-4 lg:col-span-2"
         >
           <h2 className="text-heading-3" style={{ color: 'var(--gray-900)' }}>
-            Leads nos últimos 30 dias
+            Evolução de Leads (Últimos 30 dias)
           </h2>
           <div style={{ height: 300, width: '100%' }}>
             <ResponsiveContainer>
@@ -144,7 +175,7 @@ export default function ReportsClient({
             </h2>
             <div style={{ height: 300, width: '100%' }}>
               <ResponsiveContainer>
-                <BarChart data={topChurchesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <BarChart data={top5Churches} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--gray-200)" />
                   <XAxis 
                     dataKey="name" 
@@ -167,6 +198,43 @@ export default function ReportsClient({
                 </BarChart>
               </ResponsiveContainer>
             </div>
+          </motion.div>
+        )}
+
+        {/* All Churches List */}
+        {!isChurchAdmin && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="card-soft p-6 flex flex-col gap-4 lg:col-span-2"
+          >
+            <h2 className="text-heading-3" style={{ color: 'var(--gray-900)' }}>
+              Todas as Igrejas (Leads Gerados)
+            </h2>
+            
+            {allChurchesData.length === 0 ? (
+              <p className="text-gray-500 py-4">Nenhuma igreja gerou leads neste período.</p>
+            ) : (
+              <div className="overflow-x-auto mt-2 max-h-[400px] overflow-y-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead className="sticky top-0 bg-white">
+                    <tr className="border-b border-gray-200">
+                      <th className="pb-3 text-sm font-semibold text-gray-700">Igreja</th>
+                      <th className="pb-3 text-sm font-semibold text-gray-700 text-right w-32">Total de Leads</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allChurchesData.map((church, idx) => (
+                      <tr key={idx} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                        <td className="py-3 text-sm text-gray-800 font-medium">{church.name}</td>
+                        <td className="py-3 text-sm text-gray-600 text-right font-semibold">{church.leads}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </motion.div>
         )}
       </div>
