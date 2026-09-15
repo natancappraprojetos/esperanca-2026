@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell, LabelList
+  BarChart, Bar, Cell, LabelList, Legend
 } from 'recharts'
 
 interface ReportsClientProps {
@@ -186,6 +186,7 @@ export default function ReportsClient({
                     tickFormatter={(value) => value.replace('IASD ', '')}
                     width={150}
                   />
+                  <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', color: 'var(--gray-600)' }} />
                   <Tooltip 
                     cursor={{ fill: 'var(--gray-100)' }}
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}

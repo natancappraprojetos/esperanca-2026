@@ -37,6 +37,7 @@ export default async function ReportsPage({
   const period = sp.period || '30d'
   let startDate = ''
   const now = new Date()
+  now.setHours(now.getHours() - 3) // Adjust to UTC-3 (Brazil)
   
   if (period === 'today') {
     startDate = format(now, 'yyyy-MM-dd') + 'T00:00:00.000Z'
@@ -79,25 +80,51 @@ export default async function ReportsPage({
   })
 
   // 2. Funnel Conversion Data
-  // We approximate the funnel by checking total events vs leads
-  let eventsQuery = supabase.from('funnel_events').select('event_name')
+  // Fetch exact counts for each event type to bypass the 1000 rows limit
+  const fetchEventCount = async (eventName: string) => {
+    let q = supabase.from('funnel_events').select('id', { count: 'exact', head: true }).eq('event_name', eventName)
+    if (startDate && period !== 'all') {
+      if (period === 'yesterday') {
+        const endOfYesterday = format(subDays(now, 1), 'yyyy-MM-dd') + 'T23:59:59.999Z'
+        q = q.gte('occurred_at', startDate).lte('occurred_at', endOfYesterday)
+      } else {
+        q = q.gte('occurred_at', startDate)
+      }
+    }
+    if (myChurchId) {
+      q = q.eq('church_id', myChurchId)
+    }
+    const { count } = await q
+    return count || 0
+  }
+
+  // Fetch PDF downloads from material_downloads to match dashboard accuracy
+  let pdfDownloadsQuery = supabase.from('material_downloads').select('id', { count: 'exact', head: true })
   if (startDate && period !== 'all') {
     if (period === 'yesterday') {
       const endOfYesterday = format(subDays(now, 1), 'yyyy-MM-dd') + 'T23:59:59.999Z'
-      eventsQuery = eventsQuery.gte('occurred_at', startDate).lte('occurred_at', endOfYesterday)
+      pdfDownloadsQuery = pdfDownloadsQuery.gte('downloaded_at', startDate).lte('downloaded_at', endOfYesterday)
     } else {
-      eventsQuery = eventsQuery.gte('occurred_at', startDate)
+      pdfDownloadsQuery = pdfDownloadsQuery.gte('downloaded_at', startDate)
     }
   }
   if (myChurchId) {
-    eventsQuery = eventsQuery.eq('church_id', myChurchId)
+    pdfDownloadsQuery = pdfDownloadsQuery.eq('church_id', myChurchId)
   }
-  
-  const { data: events } = await eventsQuery
-  const eventCounts = (events || []).reduce((acc: any, event) => {
-    acc[event.event_name] = (acc[event.event_name] || 0) + 1
-    return acc
-  }, {})
+
+  const [pageViews, leadCompleted, bannerDownloads, pdfDownloadsRes] = await Promise.all([
+    fetchEventCount('PageView'),
+    fetchEventCount('LeadCompleted'),
+    fetchEventCount('InviteSaved'),
+    pdfDownloadsQuery
+  ])
+
+  const eventCounts = {
+    'PageView': pageViews,
+    'LeadCompleted': leadCompleted,
+    'InviteSaved': bannerDownloads,
+    'DownloadCompleted': pdfDownloadsRes.count || 0
+  }
 
   // 3. Churches (Only for super_admin/admin)
   let allChurchesData: any[] = []

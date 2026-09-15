@@ -52,6 +52,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   // Fetch KPI data based on role
   const now = new Date()
+  now.setHours(now.getHours() - 3) // Adjust to UTC-3 (Brazil)
   const today = now.toISOString().split('T')[0]
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
@@ -96,7 +97,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     .gte('downloaded_at', LAUNCH_DATE)
 
   // Banner Downloads (InviteSaved in funnel_events)
-  let bannerDownloadsQuery = supabase.from('funnel_events').select('id', { count: 'exact', head: true }).eq('event_name', 'InviteSaved').gte('created_at', LAUNCH_DATE)
+  let bannerDownloadsQuery = supabase.from('funnel_events').select('id', { count: 'exact', head: true }).eq('event_name', 'InviteSaved').gte('occurred_at', LAUNCH_DATE)
   if (selectedCampaignId) bannerDownloadsQuery = bannerDownloadsQuery.eq('campaign_id', selectedCampaignId)
   if (profile?.role === 'church_admin') {
     const { data: pastor } = await supabase.from('pastors').select('church_id').eq('user_id', user!.id).single()
