@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { FunnelPage } from '@/components/public/FunnelPage'
+import { FunnelPageES } from '@/components/public/FunnelPageES'
 import { generateSessionToken } from '@/lib/utils/whatsapp'
 
 export const revalidate = 300
@@ -107,6 +108,24 @@ export default async function ChurchPage({ params, searchParams }: ChurchPagePro
     utm_campaign: sp.utm_campaign || null,
     utm_content: sp.utm_content || null,
     utm_term: sp.utm_term || null,
+  }
+
+  // Detect Spanish funnel based on slug ending with -espanhol
+  const isSpanishFunnel = slug.endsWith('-espanhol')
+
+  if (isSpanishFunnel) {
+    return (
+      <FunnelPageES
+        campaign={campaign}
+        material={material}
+        initialCity={church.cities as any}
+        initialChurch={church}
+        utmParams={utmParams}
+        sessionToken={sessionToken}
+        globalPixels={globalPixels || []}
+        churchPixels={churchPixels || []}
+      />
+    )
   }
 
   return (
