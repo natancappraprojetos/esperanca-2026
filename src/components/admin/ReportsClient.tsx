@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell
+  BarChart, Bar, Cell, LabelList
 } from 'recharts'
 
 interface ReportsClientProps {
@@ -169,13 +169,14 @@ export default function ReportsClient({
             className="card-soft p-6 flex flex-col gap-4 lg:col-span-2"
           >
             <h2 className="text-heading-3" style={{ color: 'var(--gray-900)' }}>
-              Igrejas (Leads)
+              Igrejas
             </h2>
-            <div style={{ height: Math.max(300, allChurchesData.length * 45), width: '100%', overflowY: 'auto' }}>
+            <div style={{ height: Math.max(300, allChurchesData.length * 60), width: '100%', overflowY: 'auto', overflowX: 'hidden' }}>
               <ResponsiveContainer>
-                <BarChart data={allChurchesData} layout="vertical" margin={{ top: 10, right: 30, left: 30, bottom: 0 }}>
+                <BarChart data={allChurchesData} layout="vertical" margin={{ top: 10, right: 40, left: 30, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--gray-200)" />
-                  <XAxis type="number" hide />
+                  <XAxis type="number" xAxisId="leads" hide />
+                  <XAxis type="number" xAxisId="pageViews" hide />
                   <YAxis 
                     dataKey="name" 
                     type="category" 
@@ -189,7 +190,12 @@ export default function ReportsClient({
                     cursor={{ fill: 'var(--gray-100)' }}
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   />
-                  <Bar dataKey="leads" name="Leads" fill="var(--gray-800)" radius={[0, 4, 4, 0]} barSize={24} />
+                  <Bar dataKey="leads" name="Leads" xAxisId="leads" fill="var(--gray-800)" radius={[0, 4, 4, 0]} barSize={16}>
+                     <LabelList dataKey="leads" position="right" fill="var(--gray-700)" fontSize={11} fontWeight={600} />
+                  </Bar>
+                  <Bar dataKey="pageViews" name="Acessos ao site" xAxisId="pageViews" fill="var(--gray-400)" radius={[0, 4, 4, 0]} barSize={16}>
+                     <LabelList dataKey="pageViews" position="right" fill="var(--gray-500)" fontSize={11} />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -205,17 +211,18 @@ export default function ReportsClient({
             className="card-soft p-6 flex flex-col gap-4 lg:col-span-2"
           >
             <h2 className="text-heading-3" style={{ color: 'var(--gray-900)' }}>
-              Todas as Igrejas (Leads Gerados)
+              Todas as Igrejas
             </h2>
             
             {allChurchesData.length === 0 ? (
-              <p className="text-gray-500 py-4">Nenhuma igreja gerou leads neste período.</p>
+              <p className="text-gray-500 py-4">Nenhuma igreja encontrada neste período.</p>
             ) : (
               <div className="overflow-x-auto mt-2 max-h-[400px] overflow-y-auto">
                 <table className="w-full text-left border-collapse">
                   <thead className="sticky top-0 bg-white">
                     <tr className="border-b border-gray-200">
                       <th className="pb-3 text-sm font-semibold text-gray-700">Igreja</th>
+                      <th className="pb-3 text-sm font-semibold text-gray-700 text-right w-32">Acessos ao site</th>
                       <th className="pb-3 text-sm font-semibold text-gray-700 text-right w-32">Total de Leads</th>
                     </tr>
                   </thead>
@@ -223,6 +230,7 @@ export default function ReportsClient({
                     {allChurchesData.map((church, idx) => (
                       <tr key={idx} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                         <td className="py-3 text-sm text-gray-800 font-medium">{church.name}</td>
+                        <td className="py-3 text-sm text-gray-600 text-right">{church.pageViews || 0}</td>
                         <td className="py-3 text-sm text-gray-600 text-right font-semibold">{church.leads}</td>
                       </tr>
                     ))}

@@ -84,9 +84,9 @@ export default async function ReportsPage({
   if (startDate && period !== 'all') {
     if (period === 'yesterday') {
       const endOfYesterday = format(subDays(now, 1), 'yyyy-MM-dd') + 'T23:59:59.999Z'
-      eventsQuery = eventsQuery.gte('created_at', startDate).lte('created_at', endOfYesterday)
+      eventsQuery = eventsQuery.gte('occurred_at', startDate).lte('occurred_at', endOfYesterday)
     } else {
-      eventsQuery = eventsQuery.gte('created_at', startDate)
+      eventsQuery = eventsQuery.gte('occurred_at', startDate)
     }
   }
   if (myChurchId) {
@@ -103,27 +103,42 @@ export default async function ReportsPage({
   let allChurchesData: any[] = []
   if (!isChurchAdmin) {
     let churchesLeadsQuery = supabase.from('leads').select('church_id, churches(name)')
+    let pageViewsQuery = supabase.from('funnel_events').select('church_id, churches(name)').eq('event_name', 'PageView').not('church_id', 'is', null)
     
     if (startDate && period !== 'all') {
       if (period === 'yesterday') {
         const endOfYesterday = format(subDays(now, 1), 'yyyy-MM-dd') + 'T23:59:59.999Z'
         churchesLeadsQuery = churchesLeadsQuery.gte('created_at', startDate).lte('created_at', endOfYesterday)
+        pageViewsQuery = pageViewsQuery.gte('occurred_at', startDate).lte('occurred_at', endOfYesterday)
       } else {
         churchesLeadsQuery = churchesLeadsQuery.gte('created_at', startDate)
+        pageViewsQuery = pageViewsQuery.gte('occurred_at', startDate)
       }
     }
 
-    const { data: churchesLeads } = await churchesLeadsQuery
+    const [{ data: churchesLeads }, { data: pageViewsData }] = await Promise.all([
+      churchesLeadsQuery,
+      pageViewsQuery
+    ])
       
+    // Count leads
     const churchCounts = (churchesLeads || []).reduce((acc: any, item) => {
       const name = item.churches?.name || 'Desconhecida'
-      acc[name] = (acc[name] || 0) + 1
+      if (!acc[name]) acc[name] = { name, leads: 0, pageViews: 0 }
+      acc[name].leads += 1
       return acc
     }, {})
 
-    allChurchesData = Object.entries(churchCounts)
-      .map(([name, leads]) => ({ name, leads }))
-      .sort((a: any, b: any) => b.leads - a.leads)
+    // Count page views
+    ;(pageViewsData || []).reduce((acc: any, item) => {
+      const name = item.churches?.name || 'Desconhecida'
+      if (!acc[name]) acc[name] = { name, leads: 0, pageViews: 0 }
+      acc[name].pageViews += 1
+      return acc
+    }, churchCounts)
+
+    allChurchesData = Object.values(churchCounts)
+      .sort((a: any, b: any) => b.leads - a.leads || b.pageViews - a.pageViews)
   }
 
   return (
