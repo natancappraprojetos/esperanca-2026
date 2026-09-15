@@ -30,13 +30,11 @@ export default function ReportsClient({
 
   // Prepare Funnel Data
   const funnelData = [
-    { name: 'Acessos', value: eventCounts['PageView'] || 0, fill: 'var(--gray-300)' },
-    { name: 'Igrejas Encontradas', value: eventCounts['ChurchMatched'] || 0, fill: 'var(--gray-400)' },
-    { name: 'Início Form', value: eventCounts['LeadFormStarted'] || 0, fill: 'var(--gray-600)' },
-    { name: 'Leads Gerados', value: eventCounts['LeadCompleted'] || 0, fill: 'var(--red)' },
+    { name: 'Acessos ao site', value: eventCounts['PageView'] || 0, fill: 'var(--gray-300)' },
+    { name: 'Leads Gerados', value: eventCounts['LeadCompleted'] || 0, fill: 'var(--gray-400)' },
+    { name: 'Downloads do Banner', value: eventCounts['InviteSaved'] || 0, fill: 'var(--gray-600)' },
+    { name: 'Downloads do PDF', value: eventCounts['DownloadCompleted'] || 0, fill: 'var(--red)' },
   ]
-
-  const top5Churches = allChurchesData.slice(0, 5)
 
   return (
     <div className="flex flex-col gap-8">
@@ -168,33 +166,30 @@ export default function ReportsClient({
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="card-soft p-6 flex flex-col gap-4"
+            className="card-soft p-6 flex flex-col gap-4 lg:col-span-2"
           >
             <h2 className="text-heading-3" style={{ color: 'var(--gray-900)' }}>
-              Top 5 Igrejas (Leads)
+              Igrejas (Leads)
             </h2>
-            <div style={{ height: 300, width: '100%' }}>
+            <div style={{ height: Math.max(300, allChurchesData.length * 45), width: '100%', overflowY: 'auto' }}>
               <ResponsiveContainer>
-                <BarChart data={top5Churches} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--gray-200)" />
-                  <XAxis 
+                <BarChart data={allChurchesData} layout="vertical" margin={{ top: 10, right: 30, left: 30, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--gray-200)" />
+                  <XAxis type="number" hide />
+                  <YAxis 
                     dataKey="name" 
+                    type="category" 
                     axisLine={false} 
                     tickLine={false} 
                     tick={{ fill: 'var(--gray-500)', fontSize: 11 }}
                     tickFormatter={(value) => value.replace('IASD ', '')}
-                    dy={10}
-                  />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: 'var(--gray-500)', fontSize: 12 }}
+                    width={150}
                   />
                   <Tooltip 
                     cursor={{ fill: 'var(--gray-100)' }}
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                   />
-                  <Bar dataKey="leads" name="Leads" fill="var(--gray-800)" radius={[4, 4, 0, 0]} barSize={40} />
+                  <Bar dataKey="leads" name="Leads" fill="var(--gray-800)" radius={[0, 4, 4, 0]} barSize={24} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

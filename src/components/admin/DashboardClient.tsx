@@ -12,7 +12,8 @@ interface DashboardClientProps {
     todayLeads: number
     weekLeads: number
     monthLeads: number
-    totalDownloads: number
+    pdfDownloads: number
+    bannerDownloads: number
     totalReminders: number
     totalChurches: number
   }
@@ -26,7 +27,8 @@ const kpiConfig = [
   { key: 'todayLeads', label: 'Hoje', color: 'var(--green)', emoji: '📅' },
   { key: 'weekLeads', label: 'Últimos 7 dias', color: 'var(--gray-700)', emoji: '📆' },
   { key: 'monthLeads', label: 'Este mês', color: 'var(--gray-700)', emoji: '🗓️' },
-  { key: 'totalDownloads', label: 'Downloads', color: 'var(--green)', emoji: '📥' },
+  { key: 'pdfDownloads', label: 'Downloads do PDF', color: 'var(--green)', emoji: '📖' },
+  { key: 'bannerDownloads', label: 'Downloads do Banner', color: 'var(--green)', emoji: '🖼️' },
   { key: 'totalReminders', label: 'Lembretes WhatsApp', color: '#25D366', emoji: '🔔' },
 ]
 

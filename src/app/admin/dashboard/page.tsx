@@ -89,13 +89,20 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   if (selectedCampaignId) monthQuery = monthQuery.eq('campaign_id', selectedCampaignId)
   const { count: monthLeads } = await monthQuery
 
-  // Total downloads
-  // Downloads don't have campaign_id directly without a join, but let's assume they are global or we don't filter them here since we might need to join digital_materials.
-  // Actually, material_downloads has material_id, which belongs to a campaign. But let's leave it as global for now.
-  const { count: totalDownloads } = await supabase
+  // PDF Downloads (material_downloads)
+  const { count: pdfDownloads } = await supabase
     .from('material_downloads')
     .select('id', { count: 'exact', head: true })
     .gte('downloaded_at', LAUNCH_DATE)
+
+  // Banner Downloads (InviteSaved in funnel_events)
+  let bannerDownloadsQuery = supabase.from('funnel_events').select('id', { count: 'exact', head: true }).eq('event_name', 'InviteSaved').gte('created_at', LAUNCH_DATE)
+  if (selectedCampaignId) bannerDownloadsQuery = bannerDownloadsQuery.eq('campaign_id', selectedCampaignId)
+  if (profile?.role === 'church_admin') {
+    const { data: pastor } = await supabase.from('pastors').select('church_id').eq('user_id', user!.id).single()
+    if (pastor?.church_id) bannerDownloadsQuery = bannerDownloadsQuery.eq('church_id', pastor.church_id)
+  }
+  const { count: bannerDownloads } = await bannerDownloadsQuery
 
   // Total opt-ins for reminders
   let remindersQuery = supabase.from('lead_consents').select('id', { count: 'exact', head: true }).eq('consent_reminder_whatsapp', true).gte('consent_data_at', LAUNCH_DATE)
@@ -138,7 +145,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     todayLeads: todayLeads || 0,
     weekLeads: weekLeads || 0,
     monthLeads: monthLeads || 0,
-    totalDownloads: totalDownloads || 0,
+    pdfDownloads: pdfDownloads || 0,
+    bannerDownloads: bannerDownloads || 0,
     totalReminders: totalReminders || 0,
     totalChurches,
   }
