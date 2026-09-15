@@ -6,7 +6,7 @@ import Image from 'next/image'
 import HeroStep from '@/components/public/funnel/HeroStep'
 import CityStep from '@/components/public/funnel/CityStep'
 import NeighborhoodStep from '@/components/public/funnel/NeighborhoodStep'
-import ChurchStep from '@/components/public/funnel/ChurchStep'
+import ChurchStepES from '@/components/public/funnel/ChurchStepES'
 import MaterialStep from '@/components/public/funnel/MaterialStep'
 import LeadFormStepES from '@/components/public/funnel/LeadFormStepES'
 import ConfirmationStepES from '@/components/public/funnel/ConfirmationStepES'
@@ -223,7 +223,7 @@ export function FunnelPageES({
             />
           )}
           {currentStep === 'church' && (
-            <ChurchStep
+            <ChurchStepES
               church={data.church!}
               campaign={campaign}
               onContinue={() => goToNext()}
